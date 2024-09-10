@@ -1,6 +1,9 @@
 {% extends 'main.html' %}
 {% block content %}
-<h1>{{ recipe.title }}</h1>
+<h1>
+    {{ recipe.title }}
+    <a href="{% url 'edit_recipe' recipe.title %}"><button id="edit_recipe_button" type="button">Edit recipe</button></a>
+</h1>
 {% if recipe.url != "" %}
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
     <br><br>
