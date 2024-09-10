@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    # 'rest_framework',
+    'ingredient_parser',
     'food_db_app',
 ]
 
