@@ -134,10 +134,20 @@ def add_recipe(request):
     # If this is a GET (or any other method) create the default form.
     else:
         create_recipe_form = CreateRecipeForm(initial={'title': 'My cool new recipe!'})
+        existing_foods = [food.name for food in Food.objects.all()]
+        existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
 
     context = {
         'mode': 'add',
         'create_recipe_form': create_recipe_form,
+        'ingredient_list': [
+            {'food': '', 'unit_of_measurement': '', 'quantity': None, 'ingredient_category': ''},
+        ],
+        'step_list': [
+            {'description': ''},
+        ],
+        'food_list': existing_foods,
+        'unit_list': existing_units,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -259,13 +269,51 @@ def edit_recipe(request, title):
             return redirect('recipe_detail', title=create_recipe_form.cleaned_data['title'])
 
 
-    # If this is a GET (or any other method) create the default form.
+    # If this is a GET (or any other method), populate the form with the recipe's existing info.
     else:
-        create_recipe_form = CreateRecipeForm(initial={'title': 'My cool new recipe!'})
+        related_tags = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]
+        related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category')
+        related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
+
+        existing_foods = [food.name for food in Food.objects.all()]
+        existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
+        
+        create_recipe_form = CreateRecipeForm(
+            initial=recipe_instance.__dict__,
+            extra_ingreds=len(related_ingredients) - 1,
+            extra_steps=len(related_steps) - 1,
+        )
+        create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context
+        create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min) + " - " + str(recipe_instance.servings_max)
+
+        # Prepping ingredients and steps as dictionaries to be passed to the template, rather than setting inital fields,
+        # because the template cannot dyanmically access dictionary keys (i.e. cannot do this: create_recipe_form['ingred_' + number + '_food'].value)
+        ingredient_list = []
+        for i, ingredient in enumerate(related_ingredients):
+            ingredient_data = {}
+            for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']:
+                # create_recipe_form.fields[f'ingred_{i}_{field}'].initial = getattr(ingredient, field)  # what you would set if using initial values
+                ingredient_data[field] = getattr(ingredient, field)
+            ingredient_list.append(ingredient_data)
+
+        step_list = []
+        for i, step in enumerate(related_steps):
+            step_data = {}
+            for field in ['description']:
+                # create_recipe_form.fields[f'step_{i}_{field}'].initial = getattr(step, field)
+                step_data[field] = getattr(step, field)
+            step_list.append(step_data)
+        
+
 
     context = {
         'mode': 'edit',
         'create_recipe_form': create_recipe_form,
+        'checked_tags': related_tags,
+        'ingredient_list': ingredient_list,
+        'step_list': step_list,
+        'food_list': existing_foods,
+        'unit_list': existing_units,
     }
 
     return render(request, 'add_edit_recipe.html', context)
