@@ -3,8 +3,7 @@
 {% block content %}
 <script type="text/javascript">
     var element_id = "add-tag-form";
-</script>    
-<script src="{% static 'js/show_on_click.js' %}"></script>
+</script>
 <h1>{% if mode == 'add' %}Add a recipe{% else %}Edit recipe: {{create_recipe_form.title.value}}{% endif %}</h1>
 <!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
 <form name="add_recipe" id="add_recipe_container" method="post" action="">
@@ -28,7 +27,7 @@
             <td class="plus_icon">
                 <div>
                     <a style="cursor: pointer;" onmouseover="" id="add_id_tags">
-                        <img class="tags_row" onclick="showOnClick()" src="http://localhost:8000/static/admin/img/icon-addlink.svg" width="20" height="20" alt="Add Another"/>
+                        <img class="tags_row" onclick="showTagFormOnClick()" src="http://localhost:8000/static/admin/img/icon-addlink.svg" width="20" height="20" alt="Add Another"/>
                     </a>
                 </div>
             </td>
@@ -47,7 +46,7 @@
                 </tr>
             </table>
         <!-- Using formnovalidate on this input means the in-browser form validation doesn't run on the form only for this button. The other button triggers browser-side validation -->
-        <input type="submit" name="submittag" onclick="hideOnClick()" value="Add tag" formnovalidate="formnovalidate">
+        <input type="submit" name="submittag" onclick="hideTagFormOnClick()" value="Add tag" formnovalidate="formnovalidate">
         <hr>
     </div>
     <table>
@@ -76,40 +75,49 @@
             <td>{{create_recipe_form.notes}}</td>
         </tr>
     </table>
-    <h2>Ingredients</h2>
-    {{create_recipe_form.extra_ingred_count}}
-    <table id="ingred-table" class="form-table">
-        <tr>
-            <th width="5%">Quantity</th>
-            <th width="20%">Unit</th>
-            <th width="35%">Food</th>
-            <th width="20%">Category</th>
-            <th width="20%">Notes</th>
-        </tr>
-        {% for ingred in ingredient_list %}
-        <tr>
-            <div class="ingred-form">
-                <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" required id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" required id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
-                    <datalist id="list__unit-list">
-                        {% for unit in unit_list %}
-                        <option value="{{ unit }}">
-                        {% endfor %}
-                    </datalist>
-                </td>
-                <td width="35%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" required id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
-                    <datalist id="list__food-list">
-                        {% for food in food_list %}
-                        <option value="{{ food }}">
-                        {% endfor %}
-                    </datalist>
-                </td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
-            </div>
-        </tr>
-        {% endfor %}
-    </table>
+    
+    <h2>
+        Ingredients
+        <button id="show_ingred_parse_button" class="header_button" type="button" onclick="showIngredientParserOnClick()">Parse ingredients from text</button>
+    </h2>
+    <div id="ingred-form">
+        {{create_recipe_form.extra_ingred_count}}
+        <table id="ingred-table" class="form-table">
+            <tr>
+                <th width="5%">Quantity</th>
+                <th width="20%">Unit</th>
+                <th width="35%">Food</th>
+                <th width="20%">Category</th>
+                <th width="20%">Notes</th>
+            </tr>
+            {% for ingred in ingredient_list %}
+            <tr>
+                <div class="ingred-form">
+                    <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" required id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
+                    <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" required id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
+                        <datalist id="list__unit-list">
+                            {% for unit in unit_list %}
+                            <option value="{{ unit }}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td width="35%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" required id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
+                        <datalist id="list__food-list">
+                            {% for food in food_list %}
+                            <option value="{{ food }}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
+                    <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="ingred-parser" class="hide">
+        <input id="ingred-parser-textbox" type="text">
+        <button id="ingred-parser-button" type="button" onclick="hideIngredientParserOnClick()">Parse ingredients</button>
+    </div>
 
     <button class="form_mod_button" id="add-ingred-form" type="button">Add ingredient</button>
     <button class="form_mod_button" id="delete-ingred-form" type="button">Remove ingredient</button>
@@ -130,6 +138,8 @@
 
     <button class="form_mod_button" id="add-step-form" type="button">Add another step</button>
     <button class="form_mod_button" id="delete-step-form" type="button">Remove last step</button>
+
+    <script src="{% static 'js/show_on_click.js' %}"></script>
     <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 
     <br><br>

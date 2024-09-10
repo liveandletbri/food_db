@@ -78,7 +78,7 @@ button.form_mod_button {
     margin-bottom: 15px;
 }
 
-#edit_recipe_button {
+.header_button {
     font-size: 0.6rem;
     vertical-align: middle;
     margin-left: 10px;

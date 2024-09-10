@@ -3,7 +3,7 @@
 {% block content %}
 <h1>
     {{ recipe.title }}
-    <a href="{% url 'edit_recipe' recipe.title %}"><button id="edit_recipe_button" type="button">Edit recipe</button></a>
+    <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
 </h1>
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
 <script src="{% static 'js/multiply_ingredients.js' %}"></script>
