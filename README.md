@@ -10,7 +10,7 @@ Confirm the service is working by entering the container: `docker exec -it food-
 
 To debug, stop the container that was set up by Docker compose (`foob-db-django`). Run a new one, overriding the entrypoint, like this, then run the Python command inside the image.
 ```
-cd ~/food_db
+cd food_db/food_db
 docker build -t food-db-image -f django.Dockerfile .
 docker run --rm -it -p 8000:8000 --name food-db-debug -v ./food_db/db_data:/app/db_data -v ./food_db/food_db_app:/app/food_db_app -v ./food_db/static:/app/static --entrypoint bash food-db-image
 
@@ -22,6 +22,12 @@ python manage.py makemigrations --noinput &&
 
 Finally, press `C` and enter when prompted by pdb to continue execution.
 
+You can debug the ingredient parser similarly:
+```
+cd food_db/ingredient_parser
+docker build -t ingred-parse-image -f ingred.Dockerfile .
+docker run --rm -it -p 5000:5000 --name ingred-parse-debug --entrypoint bash ingred-parse-image
+```
 #### Django
 Set up a super user by running `python manage.py createsuperuser`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
 
