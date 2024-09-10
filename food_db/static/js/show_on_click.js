@@ -13,12 +13,12 @@ function showIngredientParserOnClick(){
 }
 async function hideIngredientParserOnClick(){
     let response = await fetch(`http://localhost:5000/parse`, {
-        method: "GET",
-        data: ingredParserTextbox.value,
+        method: "POST",
+        body: ingredParserTextbox.value,
     })
     .then(function(response) {
         // The response is a Response instance.
-        return response.json();
+        return response.json()
     })
 
     console.log(response)

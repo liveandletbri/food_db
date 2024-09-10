@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from ingredient_parser import parse_ingredient
 
 app = Flask(__name__);
@@ -41,7 +41,10 @@ def get_users():
     #     purpose=None,
     #     sentence='3 pounds pork shoulder, cut into 2-inch chunks'
     # )
-    return json.dumps(results)
+    response = jsonify(results)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    print(results)
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
