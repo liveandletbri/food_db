@@ -1,0 +1,18 @@
+version: '3'
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.sqlite
+    container_name: food-db-django
+    restart: always
+    volumes:
+      - ./food_db/db_data:/app/db_data
+      - ./food_db/food_db_app:/app/food_db_app
+      - ./food_db/static:/app/static
+    ports:
+      - "8000:8000"
+    # healthcheck:
+    #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
+    #   timeout: 20s
+    #   retries: 10

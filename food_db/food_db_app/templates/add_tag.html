@@ -1,0 +1,8 @@
+{% extends 'main.html' %}
+{% block content %}
+    <form method="post" action="add_tag"></form>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save">
+    </form>
+{% endblock content %}

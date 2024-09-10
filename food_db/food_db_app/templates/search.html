@@ -1,0 +1,29 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<form class="left_side_of_page" id="search_form" method="get">
+    <div>
+        <label>{{ text_search.form.title.label }}:</label>
+        {{ text_search.form.title }}
+        <br>
+        <label>{{ text_search.form.ingredient.label }}:</label>
+        {{ text_search.form.ingredient }}
+        <br>
+        <label>{{ text_search.form.tag.label }}:</label>
+        {{ text_search.form.tag }}
+    
+    <!-- <input id="search_button" type="submit" /> -->
+    </div>
+</form>
+<div id="search_results">
+    {% with result_count=text_search.qs|length %}
+    <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
+    {% endwith %}
+    {% for recipe in text_search.qs %}
+        <a class="left_side_of_page" href="{% url 'recipe_detail' recipe.title %}">{{ recipe.title }}</a><br />
+    {% endfor %}
+</div>
+<script src="{% static 'js/search.js' %}"></script>
+
+{% endblock content %}

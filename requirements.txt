@@ -1,0 +1,2 @@
+django==5.1
+django-filter==24.3

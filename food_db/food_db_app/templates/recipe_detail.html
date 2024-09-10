@@ -1,0 +1,75 @@
+{% extends 'main.html' %}
+{% block content %}
+<h1>{{ recipe.title }}</h1>
+{% if recipe.url != "" %}
+    <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
+    <br><br>
+{% endif %}
+{% if recipe.tags.all %}
+    <hr>
+    {% for tag in recipe.tags.all %}
+        <span class="tag_display_label">{{ tag }}</span>
+    {% endfor %}
+    <hr>
+{% endif %}
+<table>
+    <tr>
+        <td>Prep time:</td>
+        <td>{{ recipe.duration_minutes }} minutes</td>
+    </tr>
+    <tr>
+        <td>Servings:</td>
+        <td>{{ recipe.servings_min }} - {{ recipe.servings_max }}</td>
+    </tr>
+    {% if recipe.calories %}
+    <tr>
+        <td>Calories per serving:</td>
+        <td>{{ recipe.calories_per_serving }}</td>
+    </tr>
+    {% endif %}
+    {% if recipe.notes %}
+    <tr>
+        <td>Notes:</td>
+        <td>{{ recipe.notes }}</td>
+    </tr>
+    {% endif %}
+</table>
+
+<h2>Ingredients</h2>
+<table>
+    <thead><tr>
+        {% if ingredients_have_categories %}<th>Category</th>{% endif %}
+        <th>Ingredient</th>
+        <th>Quantity</th>
+    </tr></thead>
+    {% for category in ingredient_categories %}
+        {% for cat, ingredient_list in ingredients.items %}
+            {% if cat == category %}
+                {% for ingredient in ingredient_list %}
+                    <tr>
+                        {% if ingredients_have_categories %}
+                            {% if forloop.first %}
+                                <td>{{ ingredient.ingredient_category }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif%}
+                        {% endif %}
+                        <td>{{ ingredient.food }}</td>
+                        <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</table>
+
+<h2>Steps</h2>
+<table>
+    {% for step in steps %}
+        <tr>
+            <td class="step_number">{{ step.order_number }}.</td>
+            <td>{{ step.description }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock content %}

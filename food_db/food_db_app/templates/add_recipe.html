@@ -1,0 +1,119 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<script type="text/javascript">
+    var element_id = "add-tag-form";
+</script>    
+<script src="{% static 'js/show_on_click.js' %}"></script>
+<h1>Add a recipe</h1>
+<!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
+<form name="add_recipe" id="add_recipe_container" method="post" action="">
+    {% csrf_token %}
+    <table id="tags_table">
+        <tr id="tags_row">
+            <td id="id_tags-label">{{create_recipe_form.tags.label}}</td>
+            <td class="tags_row" id="tags_cell">
+                <label class="tags_row"><ul>
+                    {% for value, text in create_recipe_form.tags.field.choices %}
+                    
+                        <div class="ui slider checkbox tag_check">
+                            <input id="id_tags_{{ forloop.counter0 }}" name="{{ form.tags.name }}" type="checkbox" value="{{ value }}"{% if value in checked_providers %} checked="checked"{% endif %}>
+                            {{ text }}
+                        </div>
+                        <!-- {% if forloop.counter|divisibleby:2 %}</ul><ul>{% endif %} -->
+                    {% endfor %}
+                </ul></label>
+                <!-- {{create_recipe_form.tags}} -->
+            </td>
+            <td class="plus_icon">
+                <div>
+                    <a style="cursor: pointer;" onmouseover="" id="add_id_tags">
+                        <img class="tags_row" onclick="showOnClick()" src="http://localhost:8000/static/admin/img/icon-addlink.svg" width="20" height="20" alt="Add Another"/>
+                    </a>
+                </div>
+            </td>
+            <td class="tags_row">
+                <p>Note: creating a new tag refreshes the page!<br>Don't go and fill your whole recipe out just yet 😅</p>
+            </td>
+        </tr>
+    </table>
+    <div id="add-tag-form" class="hide">
+        <hr>
+        <h2>Add a tag</h2>
+            <table>
+                <tr class="spaceUnder">
+                    <td>Tag</td>
+                    <td>{{create_recipe_form.new_tag}}</td>
+                </tr>
+            </table>
+        <!-- Using formnovalidate on this input means the in-browser form validation doesn't run on the form only for this button. The other button triggers browser-side validation -->
+        <input type="submit" name="submittag" onclick="hideOnClick()" value="Add tag" formnovalidate="formnovalidate">
+        <hr>
+    </div>
+    <table>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.title.label}}</td>
+            <td>{{create_recipe_form.title}}</td>
+        </tr>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.url.label}}</td>
+            <td>{{create_recipe_form.url}}</td>
+        </tr>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.duration_minutes.label}}</td>
+            <td>{{create_recipe_form.duration_minutes}}</td>
+        </tr>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.servings.label}}</td>
+            <td>{{create_recipe_form.servings}}</td>
+        </tr>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.calories_per_serving.label}}</td>
+            <td>{{create_recipe_form.calories_per_serving}}</td>
+        </tr>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.notes.label}}</td>
+            <td>{{create_recipe_form.notes}}</td>
+        </tr>
+    </table>
+    <h2>Ingredients</h2>
+    {{create_recipe_form.extra_ingred_count}}
+    <table id="ingred-table" class="form-table">
+        <tr>
+            <th width="5%">Quantity</th>
+            <th width="25%">Unit</th>
+            <th width="40%">Food</th>
+            <th width="30%">Category</th>
+        </tr>
+        <tr>
+            <div class="ingred-form">
+                <td width="5%">{{create_recipe_form.ingred_0_quantity}}</td>
+                <td width="25%">{{create_recipe_form.ingred_0_unit_of_measurement}}</td>
+                <td width="40%">{{create_recipe_form.ingred_0_food}}</td>
+                <td width="30%">{{create_recipe_form.ingred_0_ingredient_category}}</td>
+            </div>
+        </tr>
+    </table>
+
+    <button class="form_mod_button" id="add-ingred-form" type="button">Add ingredient</button>
+    <button class="form_mod_button" id="delete-ingred-form" type="button">Remove ingredient</button>
+
+    <h2>Recipe</h2>
+    {{create_recipe_form.extra_step_count}}
+    <table id="step-table" class="form-table">
+        <tr>
+            <div class="step-form">
+                <td class="step-textbox">{{create_recipe_form.step_0_description}}</td>
+            </div>
+        </tr>
+    </table>
+
+    <button class="form_mod_button" id="add-step-form" type="button">Add another step</button>
+    <button class="form_mod_button" id="delete-step-form" type="button">Remove last step</button>
+    <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
+
+    <br><br>
+    <input type="submit" id="create_recipe_button" name="submitrecipe" value="Create recipe!" >
+</form>
+
+{% endblock content %}

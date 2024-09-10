@@ -1,0 +1,85 @@
+.hide{
+    display:none;
+}
+.show{
+    display:block;
+}
+.tag_check {
+    min-width: 100px;
+}
+#id_tags-label {
+    width: 50px;
+}
+.tags_row {
+    display: inline-block; 
+    vertical-align: middle;
+}
+.plus_icon {
+    width: 30px;
+    align-self: left;
+}
+.form-table {
+    padding-bottom: 2em;
+}
+input[id*='step_'][id$='description']{
+    height: 100px;
+}
+#create_recipe_button {
+    width: 500px;
+    height: 75px;
+    font-size: 1.25rem;
+    background-color: #3cc382;
+    font-weight: bold;
+    margin-left: 10px;
+    -webkit-appearance: button;
+}
+td.step_number {
+    width: 30px;
+}
+span.tag_display_label {
+    border:2px solid  #3cc382;
+    border-radius: 15px;
+    font-size: 1rem;
+    padding: 7px;
+    font-weight: normal;
+    margin-left: 10px;
+}
+.left_side_of_page {
+    padding-left: 10px;
+}
+
+#tags_cell {
+    min-width: 120px;
+}
+.recipe_summary_label {
+    max-width: 50px;
+}
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    ul {
+        columns: 2;
+        -webkit-columns: 2;
+        -moz-columns: 2;
+    }
+}
+/* When screen is at less than 600 px wide */
+@media screen and (max-width: 599px) {
+    button.form_mod_button {
+        width: 13rem;
+        font-size: 0.6rem;
+    }
+}
+
+button.form_mod_button {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 15px;
+}
+
+#tags_row {
+    display: flex;
+    align-items: center;
+}
+#search_button {
+    margin-top: 20px;
+}
