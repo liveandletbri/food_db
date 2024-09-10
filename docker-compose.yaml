@@ -22,8 +22,8 @@ services:
       dockerfile: ingred.Dockerfile
     container_name: food-db-ingred
     restart: always
-    volumes:
-      - ./ingredient_parse/parse_api:/app/parse_api
+    # volumes:
+    #   - ./ingredient_parse/parse_api:/app/parse_api
     ports:
       - "5000:5000"
     # healthcheck:
