@@ -27,6 +27,8 @@ You can debug the ingredient parser similarly:
 cd food_db/ingredient_parser
 docker build -t ingred-parse-image -f ingred.Dockerfile .
 docker run --rm -it -p 5000:5000 --name ingred-parse-debug --entrypoint bash ingred-parse-image
+
+python -m pdb parse_api/api.py
 ```
 #### Django
 Set up a super user by running `python manage.py createsuperuser`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
