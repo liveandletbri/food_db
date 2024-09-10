@@ -24,7 +24,7 @@
 input[id*='step_'][id$='description']{
     height: 100px;
 }
-#create_recipe_button {
+#submit_recipe_button {
     width: 500px;
     height: 75px;
     font-size: 1.25rem;

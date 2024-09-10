@@ -5,7 +5,7 @@
     var element_id = "add-tag-form";
 </script>    
 <script src="{% static 'js/show_on_click.js' %}"></script>
-<h1>Add a recipe</h1>
+<h1>{% if mode == 'add' %}Add a {% else %}Edit {% endif %}recipe</h1>
 <!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
 <form name="add_recipe" id="add_recipe_container" method="post" action="">
     {% csrf_token %}
@@ -113,7 +113,7 @@
     <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 
     <br><br>
-    <input type="submit" id="create_recipe_button" name="submitrecipe" value="Create recipe!" >
+    <input type="submit" id="submit_recipe_button" name="submitrecipe" value="{% if mode == 'add' %}Create {% else %}Update {% endif %} recipe!" >
 </form>
 
 {% endblock content %}
