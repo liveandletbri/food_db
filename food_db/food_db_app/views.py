@@ -19,14 +19,11 @@ def recipe_detail(request, title):
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
     ingredient_categories = set(ingred.ingredient_category for ingred in ingredients)
-    ingredients_have_categories = ingredient_categories != {None}
+    ingredients_have_categories = ingredient_categories != {''}
 
     ingreds_by_category = defaultdict(list)
-    if ingredients_have_categories:
-        for ingredient in ingredients:
-            ingreds_by_category[ingredient.ingredient_category].append(ingredient)
-    else:  # there are no categories
-        ingreds_by_category["__dummy__"] = ingredients
+    for ingredient in ingredients:
+        ingreds_by_category[ingredient.ingredient_category].append(ingredient)\
     
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     for step in steps:
@@ -71,10 +68,6 @@ def add_recipe(request):
             create_recipe_form.cleaned_data['servings_min'] = servings_min
             create_recipe_form.cleaned_data['servings_max'] = servings_max
             
-            # Extract tags from form data and create the relationship from tag -> recipe
-            tags = create_recipe_form.cleaned_data['tags']
-            create_recipe_form.cleaned_data.pop('tags')
-            
             recipe_instance = Recipe(
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
@@ -85,6 +78,10 @@ def add_recipe(request):
                 notes=create_recipe_form.cleaned_data.get('notes'),
             )
             recipe_instance.save()
+
+            # Extract tags from form data and create the relationship from tag -> recipe
+            tags = create_recipe_form.cleaned_data['tags']
+            
             if tags:
                 for tag in tags:
                     tag_instance = Tag.objects.get(name=tag)
