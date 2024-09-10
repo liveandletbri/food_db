@@ -11,7 +11,7 @@ Confirm the service is working by entering the container: `docker exec -it food-
 To debug, stop the container that was set up by Docker compose (`foob-db-django`). Run a new one, overriding the entrypoint, like this, then run the Python command inside the image.
 ```
 cd ~/food_db
-docker build -t food-db-image -f Dockerfile.sqlite .
+docker build -t food-db-image -f django.Dockerfile .
 docker run --rm -it -p 8000:8000 --name food-db-debug -v ./food_db/db_data:/app/db_data -v ./food_db/food_db_app:/app/food_db_app -v ./food_db/static:/app/static --entrypoint bash food-db-image
 
 python manage.py makemigrations --noinput &&

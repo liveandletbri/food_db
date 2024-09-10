@@ -3,8 +3,8 @@ FROM python:3.11
 WORKDIR /app
 
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY django-requirements.txt .
+RUN pip install --no-cache-dir -r django-requirements.txt
 
 # Copy the application code
 COPY food_db .
