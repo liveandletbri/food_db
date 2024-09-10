@@ -142,7 +142,7 @@ def add_recipe(request):
         'create_recipe_form': create_recipe_form,
     }
 
-    return render(request, 'add_recipe.html', context)
+    return render(request, 'add_edit_recipe.html', context)
 
 def search(request):
     text_search = RecipeTextFilter(request.GET, queryset=Recipe.objects.all())
