@@ -24,7 +24,7 @@ Finally, press `C` and enter when prompted by pdb to continue execution.
 
 You can debug the ingredient parser similarly:
 ```
-cd food_db/ingredient_parser
+cd food_db/ingredient_parse
 docker build -t ingred-parse-image -f ingred.Dockerfile .
 docker run --rm -it -p 5000:5000 --name ingred-parse-debug --entrypoint bash ingred-parse-image
 
