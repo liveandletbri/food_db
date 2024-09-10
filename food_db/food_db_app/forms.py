@@ -59,6 +59,7 @@ class CreateRecipeForm(forms.Form):
             self.fields[f'ingred_{index}_unit_of_measurement'] = forms.CharField(required=True)
             self.fields[f'ingred_{index}_food'] = forms.CharField(required=True)
             self.fields[f'ingred_{index}_ingredient_category'] = forms.CharField(required=False)
+            self.fields[f'ingred_{index}_notes'] = forms.CharField(required=False)
 
             self.fields[f'ingred_{index}_food'].widget = ListTextWidget(data_list=food_list, name='food-list')
             self.fields[f'ingred_{index}_unit_of_measurement'].widget = ListTextWidget(data_list=unit_list, name='unit-list')
@@ -87,6 +88,7 @@ class CreateRecipeForm(forms.Form):
     ingred_0_unit_of_measurement = forms.CharField(required=True)
     ingred_0_food = forms.CharField(required=True)
     ingred_0_ingredient_category = forms.CharField(required=False)
+    ingred_0_notes = forms.CharField(required=False)
 
     extra_ingred_count = forms.CharField(widget=forms.HiddenInput())
 

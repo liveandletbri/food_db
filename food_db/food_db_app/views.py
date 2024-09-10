@@ -1,5 +1,6 @@
-import datetime
+
 from collections import defaultdict
+from decimal import Decimal
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -15,7 +16,13 @@ def index(request):
     return render(request, 'index.html')
 
 def recipe_detail(request, title):
+    # assert isinstance(multiplier, float) and multiplier > 0, "Multiplier must be a positive number"
+    
     recipe = get_object_or_404(Recipe, title=title)
+    multiplier = float(request.GET.get('multiplier', 1))
+    recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
+    recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
+
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
     ingredient_categories = set(ingred.ingredient_category for ingred in ingredients)
@@ -23,7 +30,8 @@ def recipe_detail(request, title):
 
     ingreds_by_category = defaultdict(list)
     for ingredient in ingredients:
-        ingreds_by_category[ingredient.ingredient_category].append(ingredient)\
+        ingredient.quantity = str(Decimal(ingredient.quantity * multiplier))
+        ingreds_by_category[ingredient.ingredient_category].append(ingredient)
     
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     for step in steps:
@@ -36,6 +44,7 @@ def recipe_detail(request, title):
         'ingredient_categories': ingredient_categories,
         'ingredients': dict(ingreds_by_category),
         'steps': steps,
+        'multiplier': multiplier,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -91,7 +100,7 @@ def add_recipe(request):
             # For each ingredient
             for i in range(total_ingred_count):
                 # Gather ingredients fields together
-                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']}
+                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
                 existing_foods = [food.name for food in Food.objects.all()]
@@ -141,7 +150,7 @@ def add_recipe(request):
         'mode': 'add',
         'create_recipe_form': create_recipe_form,
         'ingredient_list': [
-            {'food': '', 'unit_of_measurement': '', 'quantity': None, 'ingredient_category': ''},
+            {'food': '', 'unit_of_measurement': '', 'quantity': None, 'ingredient_category': '', 'notes': ''},
         ],
         'step_list': [
             {'description': ''},
@@ -229,7 +238,7 @@ def edit_recipe(request, title):
             # For each ingredient in the form
             for i in range(total_ingred_count):
                 # Gather ingredients fields together
-                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']}
+                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
                 existing_foods = [food.name for food in Food.objects.all()]
@@ -291,7 +300,7 @@ def edit_recipe(request, title):
         ingredient_list = []
         for i, ingredient in enumerate(related_ingredients):
             ingredient_data = {}
-            for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']:
+            for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']:
                 # create_recipe_form.fields[f'ingred_{i}_{field}'].initial = getattr(ingredient, field)  # what you would set if using initial values
                 ingredient_data[field] = getattr(ingredient, field)
             ingredient_list.append(ingredient_data)

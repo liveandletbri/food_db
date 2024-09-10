@@ -60,6 +60,7 @@ class Ingredient(models.Model):
     )
     quantity = models.PositiveSmallIntegerField()
     ingredient_category = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
     _date_created = models.DateTimeField(auto_now_add=True)
     _date_modified = models.DateTimeField(auto_now=True)
 

@@ -1,9 +1,12 @@
 {% extends 'main.html' %}
+{% load static %}
 {% block content %}
 <h1>
     {{ recipe.title }}
     <a href="{% url 'edit_recipe' recipe.title %}"><button id="edit_recipe_button" type="button">Edit recipe</button></a>
 </h1>
+<h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
+<script src="{% static 'js/multiply_ingredients.js' %}"></script>
 {% if recipe.url != "" %}
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
     <br><br>
@@ -45,6 +48,7 @@
         {% if ingredients_have_categories %}<th>Category</th>{% endif %}
         <th>Ingredient</th>
         <th>Quantity</th>
+        <th>Notes</th>
     </tr></thead>
     {% for category in ingredient_categories %}
         {% for cat, ingredient_list in ingredients.items %}
@@ -60,6 +64,7 @@
                         {% endif %}
                         <td>{{ ingredient.food }}</td>
                         <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
+                        <td>{{ ingredient.notes }}</td>
                     </tr>
                 {% endfor %}
             {% endif %}

@@ -91,3 +91,8 @@ button.form_mod_button {
 #search_button {
     margin-top: 20px;
 }
+#ingredient_multiplier {
+    width: 75px;
+    display: inline-block; 
+    margin-left: 10px;
+}
