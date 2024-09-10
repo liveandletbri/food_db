@@ -2,12 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install Python dependencies
-COPY django-requirements.txt .
-RUN pip install --no-cache-dir -r django-requirements.txt
-
 # Copy the application code
 COPY food_db .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r django-requirements.txt
 
 # Run Django app
 EXPOSE 8000

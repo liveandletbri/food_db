@@ -30,15 +30,20 @@ If all looks good with your Docker logs, then confirm Django is running correctl
 #### Python
 If you want to run code locally, I used `pyenv` to get the virtual environment set up. However, I prefer to run everything inside the Docker container.
 ```
+cd food_db/food_db
 pyenv install 3.11.9
-pyenv virtualenv 3.12.5 food-db-3.11.9
+pyenv virtualenv 3.11.9 food-db-3.11.9
 pyenv local food-db-3.11.9
 pip install --upgrade pip pip-tools
-pip install -r requirements.txt
+pip install -r django-requirements.txt
+
+cd ../ingredient_parse
+pyenv virtualenv 3.11.9 ingredient-parse-3.11.9
+pyenv local ingredient-parse-3.11.9
+pip install --upgrade pip pip-tools
+pip install -r ingred-requirements.txt
 ```
 
 When returning later, run `pyenv activate food-db-3.11.9`
 
-
-
-
+Check out the docs for the ingredient parser [here](https://ingredient-parser.readthedocs.io/en/latest/start/index.html#optional-parameters), and the code [here](https://github.com/strangetom/ingredient-parser).
