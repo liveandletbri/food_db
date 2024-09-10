@@ -1,5 +1,6 @@
-import datetime
+
 from collections import defaultdict
+from decimal import Decimal
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -15,7 +16,13 @@ def index(request):
     return render(request, 'index.html')
 
 def recipe_detail(request, title):
+    # assert isinstance(multiplier, float) and multiplier > 0, "Multiplier must be a positive number"
+    
     recipe = get_object_or_404(Recipe, title=title)
+    multiplier = float(request.GET.get('multiplier', 1))
+    recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
+    recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
+
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
     ingredient_categories = set(ingred.ingredient_category for ingred in ingredients)
@@ -23,7 +30,8 @@ def recipe_detail(request, title):
 
     ingreds_by_category = defaultdict(list)
     for ingredient in ingredients:
-        ingreds_by_category[ingredient.ingredient_category].append(ingredient)\
+        ingredient.quantity = str(Decimal(ingredient.quantity * multiplier))
+        ingreds_by_category[ingredient.ingredient_category].append(ingredient)
     
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     for step in steps:
@@ -36,6 +44,7 @@ def recipe_detail(request, title):
         'ingredient_categories': ingredient_categories,
         'ingredients': dict(ingreds_by_category),
         'steps': steps,
+        'multiplier': multiplier,
     }
     return render(request, 'recipe_detail.html', context)
 
