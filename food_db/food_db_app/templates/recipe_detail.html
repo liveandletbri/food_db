@@ -4,6 +4,7 @@
     {{ recipe.title }}
     <a href="{% url 'edit_recipe' recipe.title %}"><button id="edit_recipe_button" type="button">Edit recipe</button></a>
 </h1>
+<h4>Multiplier: <input type="number" id="ingredient_multiplier" value="1" min="0" step="0.5"></h4>
 {% if recipe.url != "" %}
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
     <br><br>
