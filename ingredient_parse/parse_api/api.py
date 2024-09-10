@@ -5,17 +5,17 @@ from ingredient_parser import parse_ingredient
 
 app = Flask(__name__);
 
-@app.route('/parse', methods=['GET'])
+@app.route('/parse', methods=['POST'])
 def get_users():
-    request_body = json.loads(request.data)
-    request_lines = request_body.split('\n')
+    request_body = request.data
+    request_lines = request_body.decode('utf-8').split('\n')
     results = []
     for line in request_lines:
         parsed_ingredient = parse_ingredient(line)
         notes_list = []
         if parsed_ingredient.preparation:
             notes_list.append(parsed_ingredient.preparation.text)
-        if parse_ingredient.amount[0].APPROXIMATE:
+        if parsed_ingredient.amount[0].APPROXIMATE:
             notes_list.append('Amount is approximate')
         if parsed_ingredient.comment:
             notes_list.append(parsed_ingredient.comment.text)
@@ -24,7 +24,7 @@ def get_users():
         results.append({
             'food': parsed_ingredient.name.text,
             'quantity': parsed_ingredient.amount[0].quantity,
-            'unit_of_measurement': parsed_ingredient.amount[0].unit.name,
+            'unit_of_measurement': str(parsed_ingredient.amount[0].unit),
             'notes': '. '.join(notes_list)
         })
     # ParsedIngredient(
