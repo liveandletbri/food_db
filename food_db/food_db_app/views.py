@@ -91,7 +91,7 @@ def add_recipe(request):
             # For each ingredient
             for i in range(total_ingred_count):
                 # Gather ingredients fields together
-                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']}
+                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
                 existing_foods = [food.name for food in Food.objects.all()]
@@ -141,7 +141,7 @@ def add_recipe(request):
         'mode': 'add',
         'create_recipe_form': create_recipe_form,
         'ingredient_list': [
-            {'food': '', 'unit_of_measurement': '', 'quantity': None, 'ingredient_category': ''},
+            {'food': '', 'unit_of_measurement': '', 'quantity': None, 'ingredient_category': '', 'notes': ''},
         ],
         'step_list': [
             {'description': ''},
@@ -229,7 +229,7 @@ def edit_recipe(request, title):
             # For each ingredient in the form
             for i in range(total_ingred_count):
                 # Gather ingredients fields together
-                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']}
+                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
                 existing_foods = [food.name for food in Food.objects.all()]
@@ -291,7 +291,7 @@ def edit_recipe(request, title):
         ingredient_list = []
         for i, ingredient in enumerate(related_ingredients):
             ingredient_data = {}
-            for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category']:
+            for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']:
                 # create_recipe_form.fields[f'ingred_{i}_{field}'].initial = getattr(ingredient, field)  # what you would set if using initial values
                 ingredient_data[field] = getattr(ingredient, field)
             ingredient_list.append(ingredient_data)

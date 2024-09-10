@@ -45,6 +45,7 @@
         {% if ingredients_have_categories %}<th>Category</th>{% endif %}
         <th>Ingredient</th>
         <th>Quantity</th>
+        <th>Notes</th>
     </tr></thead>
     {% for category in ingredient_categories %}
         {% for cat, ingredient_list in ingredients.items %}
@@ -60,6 +61,7 @@
                         {% endif %}
                         <td>{{ ingredient.food }}</td>
                         <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
+                        <td>{{ ingredient.notes }}</td>
                     </tr>
                 {% endfor %}
             {% endif %}
