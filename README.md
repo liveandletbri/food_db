@@ -1,3 +1,6 @@
+## Wut
+Food DB is a small Django project to help store, tag, and query your recipes. It is run inside a Docker container, storing the SQLite database file on your computer.
+
 ## Getting started
 
 #### Docker
