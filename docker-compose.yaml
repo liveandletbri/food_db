@@ -2,7 +2,7 @@ version: '3'
 services:
   backend:
     build: 
-      context: .
+      context: ./food_db
       dockerfile: django.Dockerfile
     container_name: food-db-django
     restart: always
@@ -18,8 +18,8 @@ services:
     #   retries: 10
   ingredient_parse:
     build: 
-      context: .
-      dockerfile: django.Dockerfile
+      context: ./ingredient_parse
+      dockerfile: ingred.Dockerfile
     container_name: food-db-ingred
     restart: always
     volumes:

@@ -3,7 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy the application code
-COPY food_db .
+COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r django-requirements.txt
