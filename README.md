@@ -4,7 +4,7 @@ Food DB is a small Django project to help store, tag, and query your recipes. It
 ## Getting started
 
 #### Docker
-Docker compose is nice because you can run this regardless of if the image is built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build`. If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running docker logs food-db-django and look for "Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)" (this may be a Mac-specific flavor of the error).
+Docker compose is nice because you can run this regardless of if the image is built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build`. If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running `docker logs food-db-django` and look for `Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)` (this is the Mac-specific flavor of the error).
 
 Confirm the service is working by entering the container: `docker exec -it food-db-django bash`. If it's not running, you should be able to see the logs in the terminal, or else you can run `docker logs food-db-django`.
 
@@ -19,6 +19,8 @@ python manage.py makemigrations --noinput &&
     python manage.py collectstatic --noinput &&
     python -m pdb manage.py runserver 0.0.0.0:8000
 ```
+
+Finally, press `C` and enter when prompted by pdb to continue execution.
 
 #### Django
 Set up a super user by running `python manage.py createsuperuser`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.

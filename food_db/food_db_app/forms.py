@@ -44,7 +44,6 @@ class CreateRecipeForm(forms.Form):
         extra_ingred_fields = kwargs.pop('extra_ingreds', 0)
         extra_step_fields = kwargs.pop('extra_steps', 0)
         super(CreateRecipeForm,self).__init__(*args, **kwargs)
-        self.fields['tags'].empty_label = None  # without this, an entry is put in at the top of the list that looks like --------
 
         # Ingredient fields
         food_list = [food.name for food in Food.objects.all()]
@@ -68,12 +67,6 @@ class CreateRecipeForm(forms.Form):
         self.fields['extra_step_count'].initial = extra_step_fields
         for index in range(1, int(extra_step_fields)+1):
             self.fields[f'step_{index}_description'] = forms.CharField(required=True)
-
-
-
-        # the "name" parameter will allow you to use the same widget more than once in the same
-        # form, not setting this parameter differently will cuse all inputs display the
-        # same list.
 
     class Meta:
         model = Recipe  

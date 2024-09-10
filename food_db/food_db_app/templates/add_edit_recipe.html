@@ -5,7 +5,7 @@
     var element_id = "add-tag-form";
 </script>    
 <script src="{% static 'js/show_on_click.js' %}"></script>
-<h1>Add a recipe</h1>
+<h1>{% if mode == 'add' %}Add a recipe{% else %}Edit recipe: {{create_recipe_form.title.value}}{% endif %}</h1>
 <!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
 <form name="add_recipe" id="add_recipe_container" method="post" action="">
     {% csrf_token %}
@@ -17,7 +17,7 @@
                     {% for value, text in create_recipe_form.tags.field.choices %}
                     
                         <div class="ui slider checkbox tag_check">
-                            <input id="id_tags_{{ forloop.counter0 }}" name="{{ form.tags.name }}" type="checkbox" value="{{ value }}"{% if value in checked_providers %} checked="checked"{% endif %}>
+                            <input id="id_tags_{{ forloop.counter0 }}" type="checkbox" value="{{ value }}"{% if text in checked_tags %} checked="checked"{% endif %}>
                             {{ text }}
                         </div>
                         <!-- {% if forloop.counter|divisibleby:2 %}</ul><ul>{% endif %} -->
@@ -85,14 +85,28 @@
             <th width="40%">Food</th>
             <th width="30%">Category</th>
         </tr>
+        {% for ingred in ingredient_list %}
         <tr>
             <div class="ingred-form">
-                <td width="5%">{{create_recipe_form.ingred_0_quantity}}</td>
-                <td width="25%">{{create_recipe_form.ingred_0_unit_of_measurement}}</td>
-                <td width="40%">{{create_recipe_form.ingred_0_food}}</td>
-                <td width="30%">{{create_recipe_form.ingred_0_ingredient_category}}</td>
+                <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" required id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
+                <td width="25%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" required id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
+                    <datalist id="list__unit-list">
+                        {% for unit in unit_list %}
+                        <option value="{{ unit }}">
+                        {% endfor %}
+                    </datalist>
+                </td>
+                <td width="40%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" required id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
+                    <datalist id="list__food-list">
+                        {% for food in food_list %}
+                        <option value="{{ food }}">
+                        {% endfor %}
+                    </datalist>
+                </td>
+                <td width="30%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
             </div>
         </tr>
+        {% endfor %}
     </table>
 
     <button class="form_mod_button" id="add-ingred-form" type="button">Add ingredient</button>
@@ -101,11 +115,15 @@
     <h2>Recipe</h2>
     {{create_recipe_form.extra_step_count}}
     <table id="step-table" class="form-table">
+        {% for step in step_list %}
         <tr>
             <div class="step-form">
-                <td class="step-textbox">{{create_recipe_form.step_0_description}}</td>
+                <td class="step-textbox">
+                    <input type="text" name="step_{{ forloop.counter0 }}_description" value="{{ step.description }}" required="" id="id_step_{{ forloop.counter0 }}_description">
+                </td>
             </div>
         </tr>
+        {% endfor %}
     </table>
 
     <button class="form_mod_button" id="add-step-form" type="button">Add another step</button>
@@ -113,7 +131,7 @@
     <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 
     <br><br>
-    <input type="submit" id="create_recipe_button" name="submitrecipe" value="Create recipe!" >
+    <input type="submit" id="submit_recipe_button" name="submitrecipe" value="{% if mode == 'add' %}Create {% else %}Update {% endif %} recipe!" >
 </form>
 
 {% endblock content %}
