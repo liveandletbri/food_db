@@ -41,7 +41,7 @@ def get_users():
     #     purpose=None,
     #     sentence='3 pounds pork shoulder, cut into 2-inch chunks'
     # )
-    return 'Get users'
+    return json.dumps(results)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
