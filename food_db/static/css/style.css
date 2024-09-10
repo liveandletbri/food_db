@@ -37,10 +37,12 @@ td.step_number {
     width: 30px;
 }
 span.tag_display_label {
-    border:2px solid  #3cc382;
+    /* border:2px solid  #3cc382; */
+    background-color: #3cc382;
+    color: white;
     border-radius: 15px;
     font-size: 1rem;
-    padding: 7px;
+    padding: 9px;
     font-weight: normal;
     margin-left: 10px;
 }

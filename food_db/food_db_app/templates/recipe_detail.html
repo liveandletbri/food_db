@@ -9,10 +9,11 @@
     <br><br>
 {% endif %}
 {% if recipe.tags.all %}
-    <hr>
+    <h4>Tags:
     {% for tag in recipe.tags.all %}
         <span class="tag_display_label">{{ tag }}</span>
     {% endfor %}
+    </h4>
     <hr>
 {% endif %}
 <table>
