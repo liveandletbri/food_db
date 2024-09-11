@@ -15,7 +15,7 @@ def get_users():
         notes_list = []
         if parsed_ingredient.preparation:
             notes_list.append(parsed_ingredient.preparation.text)
-        if parsed_ingredient.amount[0].APPROXIMATE:
+        if len(parsed_ingredient.amount) > 0 and parsed_ingredient.amount[0].APPROXIMATE:
             notes_list.append('Amount is approximate')
         if parsed_ingredient.comment:
             notes_list.append(parsed_ingredient.comment.text)

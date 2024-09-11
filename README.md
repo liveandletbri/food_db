@@ -14,6 +14,7 @@ I have included a database file to make cloning and getting started easy. But si
 ```
 git rm --cached food_db/db_data/db.sqlite3
 ```
+As far as git is concerned, this is the same as deleting it, but it leaves a local copy on your computer. Now though, you'll have its deletion as a potential change to commit, so... Be careful :)
 
 ### Docker
 Docker compose is nice because you can run this regardless of if the image is built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build`. If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running `docker logs food-db-django` and look for `Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)` (this is the Mac-specific flavor of the error).
