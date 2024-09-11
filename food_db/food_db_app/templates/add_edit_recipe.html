@@ -56,6 +56,14 @@
             <td>{{create_recipe_form.url}}</td>
         </tr>
         <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.recipe_book.label}}</td>
+            <td>{{create_recipe_form.recipe_book}}</td>
+        </tr>
+        <tr>
+            <td class="recipe_summary_label">{{create_recipe_form.recipe_book_page.label}}</td>
+            <td>{{create_recipe_form.recipe_book_page}}</td>
+        </tr>
+        <tr>
             <td class="recipe_summary_label">{{create_recipe_form.duration_minutes.label}}</td>
             <td>{{create_recipe_form.duration_minutes}}</td>
         </tr>
@@ -89,15 +97,15 @@
             </tr>
             {% for ingred in ingredient_list %}
             <tr>
-                <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" required id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" required id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
+                <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
+                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
                     <datalist id="list__unit-list">
                         {% for unit in unit_list %}
                         <option value="{{ unit }}">
                         {% endfor %}
                     </datalist>
                 </td>
-                <td width="35%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" required id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
+                <td width="35%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
                     <datalist id="list__food-list">
                         {% for food in food_list %}
                         <option value="{{ food }}">
@@ -130,7 +138,7 @@
         <tr>
             <div class="step-form">
                 <td class="step-textbox">
-                    <textarea name="step_{{ forloop.counter0 }}_description" value="{{ step.description }}" required="" id="id_step_{{ forloop.counter0 }}_description"></textarea>
+                    <textarea name="step_{{ forloop.counter0 }}_description" value="{{ step.description }}" id="id_step_{{ forloop.counter0 }}_description"></textarea>
                 </td>
             </div>
         </tr>

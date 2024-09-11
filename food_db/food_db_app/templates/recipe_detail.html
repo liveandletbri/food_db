@@ -5,11 +5,16 @@
     {{ recipe.title }}
     <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
 </h1>
+{% if recipe.recipe_book == "" %}
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
+{% endif %}
 <script src="{% static 'js/multiply_ingredients.js' %}"></script>
 {% if recipe.url != "" %}
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
     <br><br>
+{% endif %}
+{% if recipe.recipe_book != "" %}
+    <h3>Found in <i>{{ recipe.recipe_book }}</i>, page {{ recipe.recipe_book_page }}</h3>
 {% endif %}
 {% if recipe.tags.all %}
     <h4>Tags:
@@ -20,14 +25,18 @@
     <hr>
 {% endif %}
 <table>
+    {% if recipe.duration_minutes %}
     <tr>
         <td>Prep time:</td>
         <td>{{ recipe.duration_minutes }} minutes</td>
     </tr>
+    {% endif %}
+    {% if recipe.servings_min %}
     <tr>
         <td>Servings:</td>
         <td>{{ recipe.servings_min }} - {{ recipe.servings_max }}</td>
     </tr>
+    {% endif %}
     {% if recipe.calories %}
     <tr>
         <td>Calories per serving:</td>
@@ -41,44 +50,45 @@
     </tr>
     {% endif %}
 </table>
-
-<h2>Ingredients</h2>
-<table>
-    <thead><tr>
-        {% if ingredients_have_categories %}<th>Category</th>{% endif %}
-        <th>Ingredient</th>
-        <th>Quantity</th>
-        <th>Notes</th>
-    </tr></thead>
-    {% for category in ingredient_categories %}
-        {% for cat, ingredient_list in ingredients.items %}
-            {% if cat == category %}
-                {% for ingredient in ingredient_list %}
-                    <tr>
-                        {% if ingredients_have_categories %}
-                            {% if forloop.first %}
-                                <td>{{ ingredient.ingredient_category }}</td>
-                            {% else %}
-                                <td></td>
-                            {% endif%}
-                        {% endif %}
-                        <td>{{ ingredient.food }}</td>
-                        <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
-                        <td>{{ ingredient.notes }}</td>
-                    </tr>
-                {% endfor %}
-            {% endif %}
+{% if recipe.recipe_book == "" %}
+    <h2>Ingredients</h2>
+    <table>
+        <thead><tr>
+            {% if ingredients_have_categories %}<th>Category</th>{% endif %}
+            <th>Ingredient</th>
+            <th>Quantity</th>
+            <th>Notes</th>
+        </tr></thead>
+        {% for category in ingredient_categories %}
+            {% for cat, ingredient_list in ingredients.items %}
+                {% if cat == category %}
+                    {% for ingredient in ingredient_list %}
+                        <tr>
+                            {% if ingredients_have_categories %}
+                                {% if forloop.first %}
+                                    <td>{{ ingredient.ingredient_category }}</td>
+                                {% else %}
+                                    <td></td>
+                                {% endif%}
+                            {% endif %}
+                            <td>{{ ingredient.food }}</td>
+                            <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
+                            <td>{{ ingredient.notes }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
-</table>
+    </table>
 
-<h2>Steps</h2>
-<table>
-    {% for step in steps %}
-        <tr>
-            <td class="step_number">{{ step.order_number }}.</td>
-            <td>{{ step.description }}</td>
-        </tr>
-    {% endfor %}
-</table>
+    <h2>Steps</h2>
+    <table>
+        {% for step in steps %}
+            <tr>
+                <td class="step_number">{{ step.order_number }}.</td>
+                <td>{{ step.description }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}
 {% endblock content %}

@@ -6,6 +6,8 @@ class Recipe(models.Model):
         return self.title
     title = models.CharField(max_length=255, unique=True)
     url = models.TextField(blank=True)
+    recipe_book = models.CharField(max_length=255, blank=True)
+    recipe_book_page = models.PositiveSmallIntegerField(null=True, blank=True)
     duration_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_min = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_max = models.PositiveSmallIntegerField(null=True, blank=True)
