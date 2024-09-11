@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 from .admin import my_admin_site
-from .models import Food, Recipe, Ingredient, Tag, UnitOfMeasurement
+from .models import Food, Recipe, RecipeBook, Ingredient, Tag, UnitOfMeasurement
 from .widgets import CustomRelatedFieldWidgetWrapper, ListTextWidget
 
 # Getting objects! You can run these queries directly by doing python manage.py shell
@@ -48,9 +48,11 @@ class CreateRecipeForm(forms.Form):
         # Ingredient fields
         food_list = [food.name for food in Food.objects.all()]
         unit_list = [unit.name for unit in UnitOfMeasurement.objects.all()]
+        book_list = [book.name for book in RecipeBook.objects.all()]
 
         self.fields['ingred_0_food'].widget = ListTextWidget(data_list=food_list, name='food-list')
         self.fields['ingred_0_unit_of_measurement'].widget = ListTextWidget(data_list=unit_list, name='unit-list')
+        self.fields['recipe_book'].widget = ListTextWidget(data_list=book_list, name='book-list')
 
         self.fields['extra_ingred_count'].initial = extra_ingred_fields
         for index in range(1, int(extra_ingred_fields)+1):
