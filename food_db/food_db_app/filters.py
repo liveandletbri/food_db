@@ -8,7 +8,7 @@ class RecipeTextFilter(filters.FilterSet):
     tag = filters.MultipleChoiceFilter(
         label='Tagged with',
         field_name='tags__name',
-        choices=[(tag.name, tag.name) for tag in Tag.objects.all()],
+        choices=[(tag.name, tag.name) for tag in Tag.objects.all().order_by('name')],
         widget=forms.CheckboxSelectMultiple(),
         conjoined=True,
     )

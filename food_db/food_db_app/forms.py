@@ -78,7 +78,7 @@ class CreateRecipeForm(forms.Form):
     servings = forms.CharField(required=True)
     calories_per_serving = forms.IntegerField(required=False)
     notes = forms.CharField(required=False)
-    tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all(), widget=forms.CheckboxSelectMultiple())
+    tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple())
     
     # Tag fields
     new_tag = forms.CharField(required=False)

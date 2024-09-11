@@ -292,7 +292,7 @@ def edit_recipe(request, title):
             extra_ingreds=len(related_ingredients) - 1,
             extra_steps=len(related_steps) - 1,
         )
-        create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context
+        create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context via related_tags
         create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min) + " - " + str(recipe_instance.servings_max)
 
         # Prepping ingredients and steps as dictionaries to be passed to the template, rather than setting inital fields,
