@@ -16,8 +16,8 @@ function showIngredientParserOnClick(){
 
 async function hideIngredientParserOnClick(){
     let currentUrl = window.location.href
-    let currentUrlNoPort = currentUrl.split(":")[0]
-    let response = await fetch(`${currentUrlNoPort}:5000/parse`, {
+    let currentUrlDomain = currentUrl.split("/add")[0]
+    let response = await fetch(`${currentUrlDomain}/ingred_parse`, {
         method: "POST",
         body: ingredParserTextbox.value,
     })

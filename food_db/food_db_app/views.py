@@ -1,10 +1,13 @@
 
+import requests
+
 from collections import defaultdict
 from decimal import Decimal
 from django.forms import formset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import CreateView
 
 from .filters import RecipeTextFilter
@@ -363,3 +366,9 @@ def edit_recipe(request, title):
     }
 
     return render(request, 'add_edit_recipe.html', context)
+
+@csrf_exempt
+def ingredient_parse_api(request):
+    response = requests.post('http://ingredient_parse:5000/parse', request.body)
+
+    return HttpResponse(response)
