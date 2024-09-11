@@ -15,16 +15,23 @@ def get_users():
         notes_list = []
         if parsed_ingredient.preparation:
             notes_list.append(parsed_ingredient.preparation.text)
-        if len(parsed_ingredient.amount) > 0 and parsed_ingredient.amount[0].APPROXIMATE:
-            notes_list.append('Amount is approximate')
+        if len(parsed_ingredient.amount) > 0:
+            amount = parsed_ingredient.amount[0]
+            if amount.APPROXIMATE:
+                notes_list.append('Amount is approximate')
+            quantity = amount.quantity
+            unit = str(amount.unit)
+        else:
+            quantity = None
+            unit = None
         if parsed_ingredient.comment:
             notes_list.append(parsed_ingredient.comment.text)
         if parsed_ingredient.purpose:
             notes_list.append('Purpose: ' + parsed_ingredient.purpose.text)
         results.append({
             'food': parsed_ingredient.name.text,
-            'quantity': parsed_ingredient.amount[0].quantity,
-            'unit_of_measurement': str(parsed_ingredient.amount[0].unit),
+            'quantity': quantity,
+            'unit_of_measurement': unit,
             'notes': '. '.join(notes_list)
         })
     # ParsedIngredient(
