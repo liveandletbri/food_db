@@ -6,6 +6,13 @@ class Recipe(models.Model):
         return self.title
     title = models.CharField(max_length=255, unique=True)
     url = models.TextField(blank=True)
+    recipe_book = models.ForeignKey(
+        'RecipeBook', 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    recipe_book_page = models.PositiveSmallIntegerField(null=True, blank=True)
     duration_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_min = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_max = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -93,3 +100,11 @@ class CookedMeal(models.Model):
     )
     date_cooked = models.DateField(auto_now=True)
     _date_created = models.DateField(auto_now_add=True)
+
+class RecipeBook(models.Model):
+    def __str__(self):
+        return self.name
+    name = models.CharField(max_length=255)
+    author = models.CharField(max_length=255, blank=True)
+    _date_created = models.DateTimeField(auto_now_add=True)
+    _date_modified = models.DateTimeField(auto_now=True)

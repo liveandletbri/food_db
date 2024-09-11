@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 from .admin import my_admin_site
-from .models import Food, Recipe, Ingredient, Tag, UnitOfMeasurement
+from .models import Food, Recipe, RecipeBook, Ingredient, Tag, UnitOfMeasurement
 from .widgets import CustomRelatedFieldWidgetWrapper, ListTextWidget
 
 # Getting objects! You can run these queries directly by doing python manage.py shell
@@ -48,16 +48,18 @@ class CreateRecipeForm(forms.Form):
         # Ingredient fields
         food_list = [food.name for food in Food.objects.all()]
         unit_list = [unit.name for unit in UnitOfMeasurement.objects.all()]
+        book_list = [book.name for book in RecipeBook.objects.all()]
 
         self.fields['ingred_0_food'].widget = ListTextWidget(data_list=food_list, name='food-list')
         self.fields['ingred_0_unit_of_measurement'].widget = ListTextWidget(data_list=unit_list, name='unit-list')
+        self.fields['recipe_book'].widget = ListTextWidget(data_list=book_list, name='book-list')
 
         self.fields['extra_ingred_count'].initial = extra_ingred_fields
         for index in range(1, int(extra_ingred_fields)+1):
             # generate extra fields in the number specified via extra_ingred_fields
-            self.fields[f'ingred_{index}_quantity'] = forms.DecimalField(required=True)
-            self.fields[f'ingred_{index}_unit_of_measurement'] = forms.CharField(required=True)
-            self.fields[f'ingred_{index}_food'] = forms.CharField(required=True)
+            self.fields[f'ingred_{index}_quantity'] = forms.DecimalField(required=False)
+            self.fields[f'ingred_{index}_unit_of_measurement'] = forms.CharField(required=False)
+            self.fields[f'ingred_{index}_food'] = forms.CharField(required=False)
             self.fields[f'ingred_{index}_ingredient_category'] = forms.CharField(required=False)
             self.fields[f'ingred_{index}_notes'] = forms.CharField(required=False)
 
@@ -67,15 +69,17 @@ class CreateRecipeForm(forms.Form):
         # Recipe step fields
         self.fields['extra_step_count'].initial = extra_step_fields
         for index in range(1, int(extra_step_fields)+1):
-            self.fields[f'step_{index}_description'] = forms.CharField(required=True)
+            self.fields[f'step_{index}_description'] = forms.CharField(required=False)
 
     class Meta:
         model = Recipe  
     
     title = forms.CharField(required=True)
     url = forms.URLField(required=False)
+    recipe_book = forms.CharField(required=False)
+    recipe_book_page = forms.IntegerField(required=False)
     duration_minutes = forms.IntegerField(required=False)
-    servings = forms.CharField(required=True)
+    servings = forms.CharField(required=False)
     calories_per_serving = forms.IntegerField(required=False)
     notes = forms.CharField(required=False)
     tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple())
@@ -84,27 +88,29 @@ class CreateRecipeForm(forms.Form):
     new_tag = forms.CharField(required=False)
 
     # Ingredient fields
-    ingred_0_quantity = forms.DecimalField(required=True)
-    ingred_0_unit_of_measurement = forms.CharField(required=True)
-    ingred_0_food = forms.CharField(required=True)
+    ingred_0_quantity = forms.DecimalField(required=False)
+    ingred_0_unit_of_measurement = forms.CharField(required=False)
+    ingred_0_food = forms.CharField(required=False)
     ingred_0_ingredient_category = forms.CharField(required=False)
     ingred_0_notes = forms.CharField(required=False)
 
     extra_ingred_count = forms.CharField(widget=forms.HiddenInput())
 
     # Recipe step fields
-    step_0_description = forms.CharField(required=True)
+    step_0_description = forms.CharField(required=False)
     extra_step_count = forms.CharField(widget=forms.HiddenInput())
 
     def clean_servings(self):
-        raw_servings_str = self.cleaned_data['servings']
+        raw_servings_str = self.data['servings']
+        if raw_servings_str != '':
+            cleaned_str = re.sub(r"\s", "", raw_servings_str, flags = re.MULTILINE)
+            try:
+                assert re.match(r"^[0-9]+-[0-9]+$", cleaned_str)
+            except AssertionError:
+                raise ValidationError("Servings must be in the format '##-##'.")
 
-        cleaned_str = re.sub(r"\s", "", raw_servings_str, flags = re.MULTILINE)
-        try:
-            assert re.match(r"^[0-9]+-[0-9]+$", cleaned_str)
-        except AssertionError:
-            raise ValidationError("Servings must be in the format '##-##'.")
+            (servings_min, servings_max) = cleaned_str.split('-')
 
-        (servings_min, servings_max) = cleaned_str.split('-')
-
-        return (servings_min, servings_max)
+            return (servings_min, servings_max)
+        else:
+            return (None, None)
