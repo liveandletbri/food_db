@@ -101,8 +101,7 @@ class CreateRecipeForm(forms.Form):
     extra_step_count = forms.CharField(widget=forms.HiddenInput())
 
     def clean_servings(self):
-        raw_servings_str = self.cleaned_data['servings']
-
+        raw_servings_str = self.data['servings']
         if raw_servings_str != '':
             cleaned_str = re.sub(r"\s", "", raw_servings_str, flags = re.MULTILINE)
             try:

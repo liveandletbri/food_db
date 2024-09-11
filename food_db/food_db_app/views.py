@@ -9,7 +9,7 @@ from django.views.generic.edit import CreateView
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
-from .models import Food, Ingredient, Recipe, RecipeStep, Tag, UnitOfMeasurement
+from .models import Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
 
 # Create your views here.
 def index(request):
@@ -52,6 +52,7 @@ def recipe_detail(request, title):
 def add_recipe(request):
     existing_foods = [food.name for food in Food.objects.all()]
     existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
+    existing_books = [book.name for book in RecipeBook.objects.all()]
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
@@ -83,7 +84,6 @@ def add_recipe(request):
             recipe_instance = Recipe(
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
-                recipe_book=create_recipe_form.cleaned_data.get('recipe_book'),
                 recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page'),
                 duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
                 servings_min=servings_min,
@@ -91,6 +91,15 @@ def add_recipe(request):
                 calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
             )
+
+            if create_recipe_form.cleaned_data['recipe_book'] != '':
+                try:
+                    book_instance = RecipeBook.objects.get(name=create_recipe_form.cleaned_data['recipe_book'])
+                except RecipeBook.DoesNotExist:
+                    book_instance = RecipeBook(name=create_recipe_form.cleaned_data['recipe_book'])
+                    book_instance.save()
+                recipe_instance.recipe_book = book_instance
+                
             recipe_instance.save()
 
             # Extract tags from form data and create the relationship from tag -> recipe
@@ -164,6 +173,7 @@ def add_recipe(request):
         ],
         'food_list': existing_foods,
         'unit_list': existing_units,
+        'book_list': existing_books,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -211,15 +221,26 @@ def edit_recipe(request, title):
             create_recipe_form.cleaned_data['servings_max'] = servings_max
 
             # Update the recipe instance with the new data
-            recipe_instance.title=create_recipe_form.cleaned_data['title'],
-            recipe_instance.url=create_recipe_form.cleaned_data.get('url'),
-            recipe_instance.recipe_book=create_recipe_form.cleaned_data.get('recipe_book'),
-            recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page'),
-            recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
-            recipe_instance.servings_min=servings_min,
-            recipe_instance.servings_max=servings_max,
-            recipe_instance.calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving'),
-            recipe_instance.notes=create_recipe_form.cleaned_data.get('notes'),
+            recipe_instance.title=create_recipe_form.cleaned_data['title']
+            recipe_instance.url=create_recipe_form.cleaned_data.get('url')
+            recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
+            recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
+            recipe_instance.calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving')
+            recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
+
+            if servings_min:
+                recipe_instance.servings_min=servings_min
+                recipe_instance.servings_max=servings_max
+
+            if create_recipe_form.cleaned_data['recipe_book'] != '':
+                try:
+                    book_instance = RecipeBook.objects.get(name=create_recipe_form.cleaned_data['recipe_book'])
+                except RecipeBook.DoesNotExist:
+                    book_instance = RecipeBook(name=create_recipe_form.cleaned_data['recipe_book'])
+                    book_instance.save()
+                recipe_instance.recipe_book = book_instance
+            else:
+                recipe_instance.recipe_book = ''
 
             recipe_instance.save()
 
@@ -238,11 +259,11 @@ def edit_recipe(request, title):
                     tag_instance.save()
 
             # Remove any existing ingredients and steps from the recipe
-            existing_ingreds = Ingredient.objects.filter(recipes=recipe_instance)
+            existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance)
             for ingred in existing_ingreds:
                 ingred.delete()
 
-            existing_steps = RecipeStep.objects.filter(recipes=recipe_instance)
+            existing_steps = RecipeStep.objects.filter(recipe=recipe_instance)
             for step in existing_steps:
                 step.delete()
 
@@ -288,6 +309,9 @@ def edit_recipe(request, title):
             # redirect to a new URL:
             return redirect('recipe_detail', title=create_recipe_form.cleaned_data['title'])
 
+        else:
+            # import pdb; pdb.set_trace()
+            print(create_recipe_form.errors)
 
     # If this is a GET (or any other method), populate the form with the recipe's existing info.
     else:
@@ -297,6 +321,7 @@ def edit_recipe(request, title):
 
         existing_foods = [food.name for food in Food.objects.all()]
         existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
+        existing_books = [book.name for book in RecipeBook.objects.all()]
         
         create_recipe_form = CreateRecipeForm(
             initial=recipe_instance.__dict__,
@@ -334,6 +359,7 @@ def edit_recipe(request, title):
         'step_list': step_list,
         'food_list': existing_foods,
         'unit_list': existing_units,
+        'book_list': existing_books,
     }
 
     return render(request, 'add_edit_recipe.html', context)
