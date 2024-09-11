@@ -11,7 +11,7 @@ function hideTagFormOnClick(){
 function showIngredientParserOnClick(){
     document.getElementById('ingred-form').className="hide";
     document.getElementById('ingred-parser').className="show";
-    document.getElementById('show_ingred_parse_button').className="show";
+    document.getElementById('show_ingred_parse_button').className="hide";
 }
 
 async function hideIngredientParserOnClick(){
@@ -51,7 +51,7 @@ async function hideIngredientParserOnClick(){
     
     document.getElementById('ingred-form').className="show"
     document.getElementById('ingred-parser').className="hide"
-    document.getElementById('show_ingred_parse_button').className="hide";
+    document.getElementById('show_ingred_parse_button').className="header_button";
 }
 
 function clearParserTextbox(e){
