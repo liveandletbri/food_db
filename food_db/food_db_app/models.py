@@ -57,6 +57,8 @@ class Ingredient(models.Model):
     unit_of_measurement = models.ForeignKey(
         'UnitOfMeasurement',
         on_delete=models.PROTECT,
+        null=True,
+        blank=True,
     )
     quantity = models.PositiveSmallIntegerField()
     ingredient_category = models.CharField(max_length=255, blank=True)
