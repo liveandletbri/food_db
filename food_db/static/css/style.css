@@ -46,6 +46,14 @@ span.tag_display_label {
     font-weight: normal;
     margin-left: 10px;
 }
+span.tag_display_label.small {
+    border-radius: 10px;
+    font-size: 0.7rem;
+    padding: 6px;
+}
+.search_result {
+    margin-bottom: 5px;
+}
 .left_side_of_page {
     padding-left: 10px;
 }

@@ -162,9 +162,11 @@ def add_recipe(request):
     return render(request, 'add_edit_recipe.html', context)
 
 def search(request):
-    text_search = RecipeTextFilter(request.GET, queryset=Recipe.objects.all())
+    text_search = RecipeTextFilter(request.GET, queryset=Recipe.objects.all().order_by('-_date_created'))
+    tags_by_recipe = {recipe.title : [tag.name for tag in Tag.objects.filter(recipes=recipe)] for recipe in text_search.qs}
     context = {
-        'text_search': text_search
+        'text_search': text_search,
+        'tags_by_recipe': tags_by_recipe,
     }
     return render(request, 'search.html', context)
 
