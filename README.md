@@ -4,7 +4,7 @@ Food DB is a small Django project to help store, tag, and query your recipes. It
 ## Getting started
 The only absolutely required prerequisite is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need.
 
-For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker run` commands, prepend `winpty`, like this:
+For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker run` or `docker exec` commands, prepend `winpty`, like this:
 ```
 winpty docker run --rm -it -p 8000:8000 ...
 ```
@@ -18,7 +18,7 @@ git rm --cached food_db/db_data/db.sqlite3
 ### Docker
 Docker compose is nice because you can run this regardless of if the image is built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build`. If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running `docker logs food-db-django` and look for `Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)` (this is the Mac-specific flavor of the error).
 
-Confirm the service is working by entering the container: `docker exec -it food-db-django bash`. If it's not running, you should be able to see the logs in the terminal, or else you can run `docker logs food-db-django`.
+Confirm the service is working by entering the container: `docker exec -it food-db-django bash`. If it's not running, you should be able to see the logs in the terminal from the attempted run, or else you can run `docker logs food-db-django`.
 
 If all looks good with your Docker logs, then confirm Django is running correctly by visiting http://127.0.0.1:8000.
 
@@ -32,7 +32,11 @@ If you open up a port on your computer, you can access Food DB from anywhere. No
 
 That said, here are the steps I took: you'll need to configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) and then on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
 
-With both of those set up, find your IP address (not your computer's IP in your internal network, like 192.168.1.x, but your public-facing IP). From at home or away, you can now visit `http://<your IP address>:8000` to access your Food DB. Neat!
+With both of those set up, find your IP address. You have two: your private IP address (unless you're in an office, this is likely something like 192.168.1.x), and your public IP address (the address your router exposes to the rest of the world).
+
+If you just need to access Food DB from your kitchen, you can use your private IP address, because your phone/tablet/whatever will be connected to the same wifi router as your computer (which needs to be running all the time to keep the server up). However, if you want to access this from the outside world, you'll want to use your public IP address.
+
+Whichever you choose, add them to `settings.py` under `ALLOWED_HOSTS`. You can see I've put my private IP address there already. Restart the Docker containers and then, from another device, you can now visit `http://<your IP address>:8000` to access your Food DB. Neat!
 
 ## Debugging
 ### Docker
