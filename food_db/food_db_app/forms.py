@@ -74,7 +74,7 @@ class CreateRecipeForm(forms.Form):
     
     title = forms.CharField(required=True)
     url = forms.URLField(required=False)
-    duration_minutes = forms.IntegerField(required=True)
+    duration_minutes = forms.IntegerField(required=False)
     servings = forms.CharField(required=True)
     calories_per_serving = forms.IntegerField(required=False)
     notes = forms.CharField(required=False)

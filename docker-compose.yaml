@@ -2,8 +2,8 @@ version: '3'
 services:
   backend:
     build: 
-      context: .
-      dockerfile: Dockerfile.sqlite
+      context: ./food_db
+      dockerfile: django.Dockerfile
     container_name: food-db-django
     restart: always
     volumes:
@@ -12,6 +12,20 @@ services:
       - ./food_db/static:/app/static
     ports:
       - "8000:8000"
+    # healthcheck:
+    #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
+    #   timeout: 20s
+    #   retries: 10
+  ingredient_parse:
+    build: 
+      context: ./ingredient_parse
+      dockerfile: ingred.Dockerfile
+    container_name: food-db-ingred
+    restart: always
+    # volumes:
+    #   - ./ingredient_parse/parse_api:/app/parse_api
+    ports:
+      - "5000:5000"
     # healthcheck:
     #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
     #   timeout: 20s
