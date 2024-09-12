@@ -3,7 +3,7 @@
 {% block content %}
 <h1>{% if mode == 'add' %}Add a recipe{% else %}Edit recipe: {{create_recipe_form.title.value}}{% endif %}</h1>
 <!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
-<form name="add_recipe" id="add_recipe_container" method="post" action="">
+<form name="add_recipe" id="add_recipe_container" method="post" action="" onsubmit="event.preventDefault()">
     {% csrf_token %}
     <table id="tags_table">
         <tr id="tags_row">

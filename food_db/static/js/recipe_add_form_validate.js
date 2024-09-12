@@ -1,4 +1,5 @@
 let submitRecipeButton = document.querySelector("#submit_recipe_button")
+let form = document.querySelector("#add_recipe_container")
 
 let titleInput = document.querySelector("#id_title")
 let urlInput = document.querySelector("#id_url")
@@ -21,6 +22,16 @@ let caloriesTooltip = document.querySelector("#calories_per_serving_tooltip")
 let ingredFoodTooltip = document.querySelector("#ingred_0_food_tooltip")
 let stepTooltip = document.querySelector("#step_0_description_tooltip")
 
+// Disable form submission on pressing Enter
+// $(document).ready(function() {
+//     $(window).keydown(function(event){
+//         if(event.keyCode == 13) {
+//             event.preventDefault();
+//             return false;
+//         }
+//     });
+// });
+
 function hideToolTip(tooltip) {
     tooltip.className = "form_validate_tooltip"
 }
@@ -37,6 +48,8 @@ function showAndHideTooltip(tooltip) {
 
 async function validateAddRecipe(e) {
     e.preventDefault()
+
+    let invalid = false
     
     // Get current form values
     let title = titleInput.value
@@ -62,9 +75,13 @@ async function validateAddRecipe(e) {
     })
     if (responseCode == 200) {
         showAndHideTooltip(titleTooltip)
+        invalid = true
     } else if (responseCode != 404) {
         console.log(`Ooops somehow we got a ${responseCode} on the title validation`)
-    }
+        invalid = true
+    } else (
+        console.log("Don't worry, that 404 was a good thing. It means this is a unique title!")
+    )
 
     // URL must be valid URL
     if ( url != '') {
@@ -72,6 +89,7 @@ async function validateAddRecipe(e) {
             let testUrl = new URL(url)
         } catch (_) {
             showAndHideTooltip(urlTooltip)
+            invalid = true
         }
     }
 
@@ -82,12 +100,14 @@ async function validateAddRecipe(e) {
         (recipeBook != '' && recipeBookPage == '')
     ) {
         showAndHideTooltip(recipeBookTooltip)
+        invalid = true
     }
 
     // Recipe book page
     if (recipeBookPage != '') {
         if (/^\d+$/.test(recipeBookPage) == false) {
             showAndHideTooltip(recipeBookPageTooltip)
+            invalid = true
         }
     }
 
@@ -95,6 +115,7 @@ async function validateAddRecipe(e) {
     if (duration != '') {
         if (/^\d+$/.test(duration) == false) {
             showAndHideTooltip(durationTooltip)
+            invalid = true
         }
     }
 
@@ -103,6 +124,7 @@ async function validateAddRecipe(e) {
         let servingsNoSpaces = servings.replace(/\s/g,'')
         if (/^\d+$/.test(servingsNoSpaces) == false && /^\d+\-\d+$/.test(servingsNoSpaces) == false) {
             showAndHideTooltip(servingsTooltip)
+            invalid = true
         }
     }
 
@@ -110,9 +132,14 @@ async function validateAddRecipe(e) {
     if (calories != '') {
         if (/^\d+$/.test(calories) == false) {
             showAndHideTooltip(caloriesTooltip)
+            invalid = true
         }
     }
     
+    // Submit if all clear!
+    if (invalid == false) {
+        form.submit()
+    }
 }
 
 submitRecipeButton.addEventListener('click', validateAddRecipe)
