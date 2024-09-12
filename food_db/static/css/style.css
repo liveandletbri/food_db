@@ -29,9 +29,9 @@ input[id*='step_'][id$='description']{
     height: 75px;
     font-size: 1.25rem;
     background-color: #3cc382;
-    font-weight: bold;
     margin-left: 10px;
     -webkit-appearance: button;
+    color: black;
 }
 td.step_number {
     width: 30px;
@@ -115,4 +115,23 @@ button.form_mod_button {
 }
 textarea.default_text {
     color: gray;
+}
+.form_validate_tooltip {
+    /* display: block; */
+    display: none;
+    background: #d65f5f;
+    color: white;
+    margin: -20px;
+    margin-left: 100px;
+    opacity: 80%;
+    font-weight: 500;
+    border-radius: 15px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+    text-align: center;
+    max-width: 350px;
+}
+.form_validate_tooltip.visible {
+    display: block;
 }
