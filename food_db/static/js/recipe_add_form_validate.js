@@ -22,16 +22,6 @@ let caloriesTooltip = document.querySelector("#calories_per_serving_tooltip")
 let ingredFoodTooltip = document.querySelector("#ingred_0_food_tooltip")
 let stepTooltip = document.querySelector("#step_0_description_tooltip")
 
-// Disable form submission on pressing Enter
-// $(document).ready(function() {
-//     $(window).keydown(function(event){
-//         if(event.keyCode == 13) {
-//             event.preventDefault();
-//             return false;
-//         }
-//     });
-// });
-
 function hideToolTip(tooltip) {
     tooltip.className = "form_validate_tooltip"
 }
