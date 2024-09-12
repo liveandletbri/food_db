@@ -25,6 +25,8 @@ def recipe_detail(request, title):
     multiplier = float(request.GET.get('multiplier', 1))
     if recipe.servings_min:
         recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
+        
+    if recipe.servings_max:
         recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
 
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
