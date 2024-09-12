@@ -53,7 +53,7 @@ python manage.py makemigrations --noinput &&
     python -m pdb manage.py runserver 0.0.0.0:8000
 ```
 
-Finally, press `C` and enter when prompted by pdb to continue execution. Now insert `import pdb; pdb.set_trace()` wherever you need it.
+Finally, press `c` and enter when prompted by pdb to continue execution. Now insert `import pdb; pdb.set_trace()` wherever you need it.
 
 You can debug the ingredient parser similarly:
 ```
