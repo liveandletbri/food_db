@@ -171,11 +171,12 @@
     <button class="form_mod_button" id="add-step-form" type="button">Add another step</button>
     <button class="form_mod_button" id="delete-step-form" type="button">Remove last step</button>
 
-    <script src="{% static 'js/recipe_add_show_hide.js' %}"></script>
-    <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
-
     <br><br>
     <button type="button" id="submit_recipe_button" name="submitrecipe">{% if mode == 'add' %}Create {% else %}Update {% endif %}recipe!</button>
 </form>
 
+
+<script src="{% static 'js/recipe_add_show_hide.js' %}"></script>
+<script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
+<script src="{% static 'js/recipe_add_form_validate.js' %}"></script>
 {% endblock content %}
