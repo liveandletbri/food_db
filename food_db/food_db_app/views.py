@@ -89,7 +89,7 @@ def add_recipe(request):
             recipe_instance = Recipe(
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
-                recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page'),
+                recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page', ''),
                 duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
                 servings_min=servings_min,
                 servings_max=servings_max,

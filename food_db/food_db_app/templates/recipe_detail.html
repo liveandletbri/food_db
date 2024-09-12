@@ -13,7 +13,7 @@
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
     <br><br>
 {% endif %}
-{% if recipe.recipe_book != "" %}
+{% if recipe.recipe_book %}
     <h3>Found in <i>{{ recipe.recipe_book }}</i>, page {{ recipe.recipe_book_page }}</h3>
 {% endif %}
 {% if recipe.tags.all %}
@@ -50,7 +50,7 @@
     </tr>
     {% endif %}
 </table>
-{% if recipe.recipe_book == "" %}
+{% if not recipe.recipe_book %}
     <h2>Ingredients</h2>
     <table>
         <thead><tr>
