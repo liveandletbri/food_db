@@ -27,25 +27,25 @@
 <table>
     {% if recipe.duration_minutes %}
     <tr>
-        <td>Prep time:</td>
+        <td class="recipe_summary_label">Prep time:</td>
         <td>{{ recipe.duration_minutes }} minutes</td>
     </tr>
     {% endif %}
     {% if recipe.servings_min %}
     <tr>
-        <td>Servings:</td>
+        <td class="recipe_summary_label">Servings:</td>
         <td>{{ recipe.servings_min }}{% if recipe.servings_max %} - {{ recipe.servings_max }}{% endif %}</td>
     </tr>
     {% endif %}
     {% if recipe.calories %}
     <tr>
-        <td>Calories per serving:</td>
+        <td class="recipe_summary_label">Calories per serving:</td>
         <td>{{ recipe.calories_per_serving }}</td>
     </tr>
     {% endif %}
     {% if recipe.notes %}
     <tr>
-        <td>Notes:</td>
+        <td class="recipe_summary_label">Notes:</td>
         <td>{{ recipe.notes }}</td>
     </tr>
     {% endif %}
