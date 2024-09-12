@@ -34,7 +34,7 @@
     {% if recipe.servings_min %}
     <tr>
         <td>Servings:</td>
-        <td>{{ recipe.servings_min }} - {{ recipe.servings_max }}</td>
+        <td>{{ recipe.servings_min }}{% if recipe.servings_max %} - {{ recipe.servings_max }}{% endif %}</td>
     </tr>
     {% endif %}
     {% if recipe.calories %}
