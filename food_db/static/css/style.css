@@ -117,7 +117,7 @@ textarea.default_text {
     color: gray;
 }
 .form_validate_tooltip {
-    /* display: block; */
+    /* display: none; */
     background: #d65f5f;
     color: white;
     margin: -20px;
@@ -126,7 +126,7 @@ textarea.default_text {
     border-radius: 15px;
     padding: 10px;
     position: absolute;
-    z-index: 1000;
+    z-index: 1;
     text-align: center;
     max-width: 350px;
     
@@ -138,4 +138,17 @@ textarea.default_text {
 }
 .form_validate_tooltip.visible {
     opacity: 80%;
+    /* display: block; */
+    z-index: 1000;
+}
+textarea,
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="email"],
+input[type="tel"],
+input[type="search"],
+input[type="url"] {
+    z-index: 2;
+    position: relative;
 }
