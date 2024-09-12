@@ -25,6 +25,8 @@ def recipe_detail(request, title):
     multiplier = float(request.GET.get('multiplier', 1))
     if recipe.servings_min:
         recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
+        
+    if recipe.servings_max:
         recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
 
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
@@ -87,7 +89,7 @@ def add_recipe(request):
             recipe_instance = Recipe(
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
-                recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page'),
+                recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page', ''),
                 duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
                 servings_min=servings_min,
                 servings_max=servings_max,

@@ -29,13 +29,13 @@ You should be up and running at this point, but you'll want to create a super us
 Set up a super user by running `python manage.py createsuperuser`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
 
 ### Port forwarding
-If you open up a port on your computer, you can access Food DB from anywhere. Now, _please consider the security implications of opening a port to the internet_. I'm sure there are safer ways to do this. I'm not a security expert. Please do your research if you're considering this. I'm just doing this as a hobby, and putting my own ass on the line :)
+You have two options when port forwarding - open up to any computer/phone/car/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises here and there in my Django security. Are you really going to trust me, a rando, with the security of all the computers on your network? Think carefully.
 
-That said, here are the steps I took: you'll need to configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) and then on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
+If you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, please consider the security implications of opening a port to the internet. I'm sure there are safer ways to do this. I'm not a security expert. Do your research. I'm just doing this as a hobby, and putting my own ass on the line :)
 
-With both of those set up, find your IP address. You have two: your private IP address (unless you're in an office, this is likely something like 192.168.1.x), and your public IP address (the address your router exposes to the rest of the world).
+Ok, with the disclaimers all out the way, here are the steps I took: you'll need to configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) for internal sharing. Then, if you want to expose to the open internet, configure port forwarding on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
 
-If you just need to access Food DB from your kitchen, you can use your private IP address, because your phone/tablet/whatever will be connected to the same wifi router as your computer (which needs to be running all the time to keep the server up). However, if you want to access this from the outside world, you'll want to use your public IP address.
+With both of those set up, find your IP address. If only sharing internally, use your private IP address (unless you're in an office, this is likely something like 192.168.1.x). If sharing externally, use your public IP address (the address your router exposes to the rest of the world). 
 
 Whichever you choose, add them to `settings.py` under `ALLOWED_HOSTS`. You can see I've put my private IP address there already. Restart the Docker containers and then, from another device, you can now visit `http://<your IP address>:8000` to access your Food DB. Neat!
 
@@ -53,7 +53,7 @@ python manage.py makemigrations --noinput &&
     python -m pdb manage.py runserver 0.0.0.0:8000
 ```
 
-Finally, press `C` and enter when prompted by pdb to continue execution. Now insert `import pdb; pdb.set_trace()` wherever you need it.
+Finally, press `c` and enter when prompted by pdb to continue execution. Now insert `import pdb; pdb.set_trace()` wherever you need it.
 
 You can debug the ingredient parser similarly:
 ```

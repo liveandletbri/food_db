@@ -13,7 +13,7 @@
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
     <br><br>
 {% endif %}
-{% if recipe.recipe_book != "" %}
+{% if recipe.recipe_book %}
     <h3>Found in <i>{{ recipe.recipe_book }}</i>, page {{ recipe.recipe_book_page }}</h3>
 {% endif %}
 {% if recipe.tags.all %}
@@ -27,30 +27,30 @@
 <table>
     {% if recipe.duration_minutes %}
     <tr>
-        <td>Prep time:</td>
+        <td class="recipe_summary_label">Prep time:</td>
         <td>{{ recipe.duration_minutes }} minutes</td>
     </tr>
     {% endif %}
     {% if recipe.servings_min %}
     <tr>
-        <td>Servings:</td>
-        <td>{{ recipe.servings_min }} - {{ recipe.servings_max }}</td>
+        <td class="recipe_summary_label">Servings:</td>
+        <td>{{ recipe.servings_min }}{% if recipe.servings_max %} - {{ recipe.servings_max }}{% endif %}</td>
     </tr>
     {% endif %}
     {% if recipe.calories %}
     <tr>
-        <td>Calories per serving:</td>
+        <td class="recipe_summary_label">Calories per serving:</td>
         <td>{{ recipe.calories_per_serving }}</td>
     </tr>
     {% endif %}
     {% if recipe.notes %}
     <tr>
-        <td>Notes:</td>
+        <td class="recipe_summary_label">Notes:</td>
         <td>{{ recipe.notes }}</td>
     </tr>
     {% endif %}
 </table>
-{% if recipe.recipe_book == "" %}
+{% if not recipe.recipe_book %}
     <h2>Ingredients</h2>
     <table>
         <thead><tr>

@@ -105,11 +105,15 @@ class CreateRecipeForm(forms.Form):
         if raw_servings_str != '':
             cleaned_str = re.sub(r"\s", "", raw_servings_str, flags = re.MULTILINE)
             try:
-                assert re.match(r"^[0-9]+-[0-9]+$", cleaned_str)
+                assert re.match(r"^[0-9]+-[0-9]+$", cleaned_str) or re.match(r"^[0-9]+$", cleaned_str)
             except AssertionError:
-                raise ValidationError("Servings must be in the format '##-##'.")
+                raise ValidationError("Servings must be in the format '##' or '##-##'.")
 
-            (servings_min, servings_max) = cleaned_str.split('-')
+            if '-' in cleaned_str:
+                (servings_min, servings_max) = cleaned_str.split('-')
+            else:
+                servings_min = cleaned_str
+                servings_max = None
 
             return (servings_min, servings_max)
         else:

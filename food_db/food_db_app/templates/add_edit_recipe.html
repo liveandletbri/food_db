@@ -3,7 +3,7 @@
 {% block content %}
 <h1>{% if mode == 'add' %}Add a recipe{% else %}Edit recipe: {{create_recipe_form.title.value}}{% endif %}</h1>
 <!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
-<form name="add_recipe" id="add_recipe_container" method="post" action="">
+<form name="add_recipe" id="add_recipe_container" method="post" action="" onsubmit="event.preventDefault()">
     {% csrf_token %}
     <table id="tags_table">
         <tr id="tags_row">
@@ -24,7 +24,7 @@
             <td class="plus_icon">
                 <div>
                     <a style="cursor: pointer;" onmouseover="" id="add_id_tags">
-                        <img class="tags_row" onclick="showTagFormOnClick()" src="http://localhost:8000/static/admin/img/icon-addlink.svg" width="20" height="20" alt="Add Another"/>
+                        <img class="tags_row" onclick="showTagFormOnClick()" src="{% static 'img/plus-icon.svg' %}" width="20" height="20" alt="Add Another"/>
                     </a>
                 </div>
             </td>
@@ -49,31 +49,52 @@
     <table>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.title.label}}</td>
-            <td>{{create_recipe_form.title}}</td>
+            <td>
+                {{create_recipe_form.title}}
+                <span id="title_tooltip" class="form_validate_tooltip">You must enter a unique title</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.url.label}}</td>
-            <td>{{create_recipe_form.url}}</td>
+            <td>
+                {{create_recipe_form.url}}
+                <span id="url_tooltip" class="form_validate_tooltip">This needs to be a valid URL</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.recipe_book.label}}</td>
-            <td>{{create_recipe_form.recipe_book}}</td>
+            <td>
+                {{create_recipe_form.recipe_book}}
+                <span id="recipe_book_tooltip" class="form_validate_tooltip">You gotta specify either at least one ingredient and one step, <i>or</i> a recipe book and page</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.recipe_book_page.label}}</td>
-            <td>{{create_recipe_form.recipe_book_page}}</td>
+            <td>
+                {{create_recipe_form.recipe_book_page}}
+                <span id="recipe_book_page_tooltip" class="form_validate_tooltip">The page number must be a positive integer</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.duration_minutes.label}}</td>
-            <td>{{create_recipe_form.duration_minutes}}</td>
+            <td>
+                {{create_recipe_form.duration_minutes}}
+                <span id="duration_minutes_tooltip" class="form_validate_tooltip">The duration must be a positive integer</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.servings.label}}</td>
-            <td>{{create_recipe_form.servings}}</td>
+            <td>
+                {{create_recipe_form.servings}}
+                <span id="servings_tooltip" class="form_validate_tooltip">Servings must either be a single integer, like "4", or a range of integers, like "5-6"</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.calories_per_serving.label}}</td>
-            <td>{{create_recipe_form.calories_per_serving}}</td>
+            <td>
+                {{create_recipe_form.calories_per_serving}}
+                <span id="calories_per_serving_tooltip" class="form_validate_tooltip">The calories must be a positive integer</span>
+            </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.notes.label}}</td>
@@ -111,6 +132,7 @@
                         <option value="{{ food }}">
                         {% endfor %}
                     </datalist>
+                    <span id="ingred_{{ forloop.counter0 }}_food_tooltip" class="form_validate_tooltip">You must specify at least one ingredient</span>
                 </td>
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
@@ -139,6 +161,7 @@
             <div class="step-form">
                 <td class="step-textbox">
                     <textarea name="step_{{ forloop.counter0 }}_description" value="{{ step.description }}" id="id_step_{{ forloop.counter0 }}_description"></textarea>
+                    <span id="step_{{ forloop.counter0 }}_description_tooltip" class="form_validate_tooltip">You must specify at least one recipe step</span>
                 </td>
             </div>
         </tr>
@@ -148,11 +171,12 @@
     <button class="form_mod_button" id="add-step-form" type="button">Add another step</button>
     <button class="form_mod_button" id="delete-step-form" type="button">Remove last step</button>
 
-    <script src="{% static 'js/recipe_add_show_hide.js' %}"></script>
-    <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
-
     <br><br>
-    <input type="submit" id="submit_recipe_button" name="submitrecipe" value="{% if mode == 'add' %}Create {% else %}Update {% endif %} recipe!" >
+    <button type="button" id="submit_recipe_button" name="submitrecipe">{% if mode == 'add' %}Create {% else %}Update {% endif %}recipe!</button>
 </form>
 
+
+<script src="{% static 'js/recipe_add_show_hide.js' %}"></script>
+<script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
+<script src="{% static 'js/recipe_add_form_validate.js' %}"></script>
 {% endblock content %}

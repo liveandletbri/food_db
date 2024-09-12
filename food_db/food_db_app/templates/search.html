@@ -21,7 +21,7 @@
     <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
     {% endwith %}
     {% for recipe, tags in tags_by_recipe.items %}
-        <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.title %}">{{ recipe }}</a>{% for tag in tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
+        <p class="search_result"><a class="left_side_of_page" href="/recipe/{{recipe}}">{{ recipe }}</a>{% for tag in tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
     {% endfor %}
 </div>
 <script src="{% static 'js/search.js' %}"></script>
