@@ -17,7 +17,7 @@ function addIngredientRow(e) {
     // Since you can delete rows from the middle, we need to find the last ingredient ID number and increment that for the new row
     let lastRow = ingredTable.rows[ingredTable.rows.length - 1]
     let lastRowFirstInputName = lastRow.querySelector("td:first-child > input").name
-    let lastRowNumber = lastRowFirstInputName.replace('ingred_','').split('_')[0]
+    let lastRowNumber = Number(lastRowFirstInputName.replace('ingred_','').split('_')[0])
     let newRowNumber = lastRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `ingred_${newRowNumber}`) // Update the new row to have the correct row number
@@ -33,6 +33,14 @@ function removeBottomIngredientRow(e) {
 
     let lastRowNum = ingredTable.rows.length - 1
     ingredTable.deleteRow(lastRowNum)
+
+    extraIngredRowNum--
+    extraIngredRowCountField.value = extraIngredRowNum
+}
+
+function removeThisIngredientRow(deleteButton) {
+    let row = deleteButton.parentNode.parentNode.parentNode
+    ingredTable.removeChild(row)
 
     extraIngredRowNum--
     extraIngredRowCountField.value = extraIngredRowNum
@@ -60,7 +68,7 @@ function addStepRow(e) {
     // Since you can delete rows from the middle, we need to find the last step ID number and increment that for the new row
     let lastRow = stepTable.rows[stepTable.rows.length - 1]
     let lastRowFirstInputName = lastRow.querySelector("td:first-child > input").name
-    let lastRowNumber = lastRowFirstInputName.replace('step_','').split('_')[0]
+    let lastRowNumber = Number(lastRowFirstInputName.replace('step_','').split('_')[0])
     let newRowNumber = lastRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `step_${newRowNumber}`) // Update the new row to have the correct row number
@@ -76,6 +84,14 @@ function removeBottomStepRow(e) {
 
     let lastRowNum = stepTable.rows.length - 1
     stepTable.deleteRow(lastRowNum)
+
+    extraStepRowNum--
+    extraStepRowCountField.value = extraStepRowNum
+}
+
+function removeThisStepRow(deleteButton) {
+    let row = deleteButton.parentNode.parentNode
+    stepTable.removeChild(row)
 
     extraStepRowNum--
     extraStepRowCountField.value = extraStepRowNum
