@@ -5,68 +5,82 @@ let ingredTable = document.querySelector("#ingred-table")
 let addIngredientButton = document.querySelector("#add-ingred-form")
 let deleteIngredientButton = document.querySelector("#delete-ingred-form")
 
-let extraIngredFormCountField = document.querySelector("#id_extra_ingred_count")
-let extraIngredFormNum = Number(extraIngredFormCountField.value);
+let extraIngredRowCountField = document.querySelector("#id_extra_ingred_count")
+let extraIngredRowNum = Number(extraIngredRowCountField.value);
 
-function addIngredientForm(e) {
+function addIngredientRow(e) {
     e.preventDefault()
 
-    let newForm = ingredTable.rows[1].cloneNode(true) // Clone the ingredient form
-    let formRegex = RegExp(`ingred_(\\d){1}`,'g') // Regex to find all instances of the form number
+    let newRow = ingredTable.rows[1].cloneNode(true) // Clone the first ingredient row
+    let idRegex = RegExp(`ingred_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
-    extraIngredFormNum++ // Increment the form number
-    newForm.innerHTML = newForm.innerHTML.replace(formRegex, `ingred_${extraIngredFormNum}`) //Update the new form to have the correct form number
-    ingredTable.appendChild(newForm)
+    // Since you can delete rows from the middle, we need to find the last ingredient ID number and increment that for the new row
+    let lastRow = ingredTable.rows[ingredTable.rows.length - 1]
+    let lastRowFirstInputName = lastRow.querySelector("td:first-child > input").name
+    let lastRowNumber = lastRowFirstInputName.replace('ingred_','').split('_')[0]
+    let newRowNumber = lastRowNumber + 1
+    
+    newRow.innerHTML = newRow.innerHTML.replace(idRegex, `ingred_${newRowNumber}`) // Update the new row to have the correct row number
+    ingredTable.appendChild(newRow)
 
-    extraIngredFormCountField.value = extraIngredFormNum // Increment the number of total forms in the management form
+    // Increment the number of total rows in the hidden field
+    extraIngredRowNum++
+    extraIngredRowCountField.value = extraIngredRowNum 
 }
 
-function removeBottomIngredientForm(e) {
+function removeBottomIngredientRow(e) {
     e.preventDefault()
 
     let lastRowNum = ingredTable.rows.length - 1
     ingredTable.deleteRow(lastRowNum)
 
-    extraIngredFormNum--
-    extraIngredFormCountField.value = extraIngredFormNum
+    extraIngredRowNum--
+    extraIngredRowCountField.value = extraIngredRowNum
 }
 
-addIngredientButton.addEventListener('click', addIngredientForm)
-deleteIngredientButton.addEventListener('click', removeBottomIngredientForm)
+addIngredientButton.addEventListener('click', addIngredientRow)
+deleteIngredientButton.addEventListener('click', removeBottomIngredientRow)
 
 
 // Same thing, but now Steps
 
 let stepTable = document.querySelector("#step-table")
-let addstepientButton = document.querySelector("#add-step-form")
-let deletestepientButton = document.querySelector("#delete-step-form")
+let addStepButton = document.querySelector("#add-step-form")
+let deleteStepButton = document.querySelector("#delete-step-form")
 
-let extrastepFormCountField = document.querySelector("#id_extra_step_count")
-let extrastepFormNum = Number(extrastepFormCountField.value);
+let extraStepRowCountField = document.querySelector("#id_extra_step_count")
+let extraStepRowNum = Number(extraStepRowCountField.value);
 
-function addstepientForm(e) {
+function addStepRow(e) {
     e.preventDefault()
 
-    let newForm = stepTable.rows[0].cloneNode(true) // Clone the stepient form
-    let formRegex = RegExp(`step_(\\d){1}`,'g') // Regex to find all instances of the form number
+    let newRow = stepTable.rows[1].cloneNode(true) // Clone the first step row
+    let idRegex = RegExp(`step_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
-    extrastepFormNum++ // Increment the form number
-    newForm.innerHTML = newForm.innerHTML.replace(formRegex, `step_${extrastepFormNum}`) //Update the new form to have the correct form number
-    stepTable.appendChild(newForm)
+    // Since you can delete rows from the middle, we need to find the last step ID number and increment that for the new row
+    let lastRow = stepTable.rows[stepTable.rows.length - 1]
+    let lastRowFirstInputName = lastRow.querySelector("td:first-child > input").name
+    let lastRowNumber = lastRowFirstInputName.replace('step_','').split('_')[0]
+    let newRowNumber = lastRowNumber + 1
+    
+    newRow.innerHTML = newRow.innerHTML.replace(idRegex, `step_${newRowNumber}`) // Update the new row to have the correct row number
+    stepTable.appendChild(newRow)
 
-    extrastepFormCountField.value = extrastepFormNum // Increment the number of total forms in the management form
+    // Increment the number of total rows in the hidden field
+    extraStepRowNum++
+    extraStepRowCountField.value = extraStepRowNum 
 }
 
-function removeBottomstepientForm(e) {
+function removeBottomStepRow(e) {
     e.preventDefault()
 
     let lastRowNum = stepTable.rows.length - 1
     stepTable.deleteRow(lastRowNum)
 
-    extrastepFormNum--
-    extrastepFormCountField.value = extrastepFormNum
+    extraStepRowNum--
+    extraStepRowCountField.value = extraStepRowNum
 }
 
-addstepientButton.addEventListener('click', addstepientForm)
-deletestepientButton.addEventListener('click', removeBottomstepientForm)
+addStepButton.addEventListener('click', addStepRow)
+deleteStepButton.addEventListener('click', removeBottomStepRow)
 
