@@ -1,13 +1,29 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block content %}
-<h1>
-    {{ recipe.title }}
-    <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
-</h1>
-{% if recipe.recipe_book == "" %}
+<table>
+    <tr>
+        <td>
+            <h1 id="recipe_title">
+                <p>{{ recipe.title }}</p>
+            </h1>
+        </td>
+        <td class="recipe_detail_header_buttons">
+            <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
+        </td>
+        <td id="upvote_button_td" class="recipe_detail_header_buttons">    
+
+                <i id="cooked_recipe_upvote_icon_before" class="fa-regular fa-square-caret-up fa-2x cooked_recipe_upvote_icon" onclick="cookMeal('{{ recipe.title }}')"></i>
+                <i id="cooked_recipe_upvote_icon_clicked" class="fa-solid fa-square-caret-up fa-2x cooked_recipe_upvote_icon" onclick="cookMeal('{{ recipe.title }}')"></i>
+                <label id="cooked_count_label">Cooked {{ total_cooked_meal_counts }} time{% if total_cooked_meal_counts != 1 %}s{% endif %}</label>
+   
+        </td>
+    </tr>
+</table>
+{% if not recipe.recipe_book %}
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
 {% endif %}
+<script src="{% static 'js/cook_meal.js' %}"></script>
 <script src="{% static 'js/multiply_ingredients.js' %}"></script>
 {% if recipe.url != "" %}
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
@@ -72,7 +88,11 @@
                                 {% endif%}
                             {% endif %}
                             <td>{{ ingredient.food }}</td>
-                            <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
+                            <td>
+                                {% if ingredient.quantity %}
+                                    {{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" and ingredient.unit_of_measurement|length > 0 %}s{% endif %}
+                                {% endif %}
+                            </td>
                             <td>{{ ingredient.notes }}</td>
                         </tr>
                     {% endfor %}

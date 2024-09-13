@@ -152,3 +152,25 @@ input[type="url"] {
     z-index: 2;
     position: relative;
 }
+.recipe_detail_header_buttons {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    width: 10%;
+}
+#upvote_button_td {
+    width: 20%;
+}
+.cooked_count_text {
+    display: block;
+}
+#recipe_title {
+    margin: 0 0 0 0;
+}
+#cooked_recipe_upvote_icon_before {
+    color: gray;
+    display: inline-block;
+}
+#cooked_recipe_upvote_icon_clicked {
+    display: none;
+}

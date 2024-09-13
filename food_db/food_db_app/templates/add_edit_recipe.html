@@ -163,7 +163,7 @@
         <tr>
             <div class="step-form">
                 <td class="step-textbox">
-                    <textarea name="step_{{ forloop.counter0 }}_description" value="{{ step.description }}" id="id_step_{{ forloop.counter0 }}_description"></textarea>
+                    <textarea name="step_{{ forloop.counter0 }}_description" id="id_step_{{ forloop.counter0 }}_description">{{ step.description }}</textarea>
                     <span id="step_{{ forloop.counter0 }}_description_tooltip" class="form_validate_tooltip">You must specify at least one recipe step</span>
                 </td>
             </div>

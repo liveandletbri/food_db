@@ -62,12 +62,12 @@ let extraStepRowNum = Number(extraStepRowCountField.value);
 function addStepRow(e) {
     e.preventDefault()
 
-    let newRow = stepTable.rows[1].cloneNode(true) // Clone the first step row
+    let newRow = stepTable.rows[0].cloneNode(true) // Clone the first step row
     let idRegex = RegExp(`step_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
     // Since you can delete rows from the middle, we need to find the last step ID number and increment that for the new row
     let lastRow = stepTable.rows[stepTable.rows.length - 1]
-    let lastRowFirstInputName = lastRow.querySelector("td:first-child > input").name
+    let lastRowFirstInputName = lastRow.querySelector("td:first-child > textarea").name
     let lastRowNumber = Number(lastRowFirstInputName.replace('step_','').split('_')[0])
     let newRowNumber = lastRowNumber + 1
     
