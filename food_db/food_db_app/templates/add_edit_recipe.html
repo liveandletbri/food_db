@@ -117,7 +117,7 @@
                 <th width="20%">Notes</th>
             </tr>
             {% for ingred in ingredient_list %}
-            <tr>
+            <tr name="ingred_{{ forloop.counter0 }}_row">
                 <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
                     <datalist id="list__unit-list">
@@ -136,12 +136,15 @@
                 </td>
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
+                <td><a style="cursor: pointer;" onmouseover="">
+                    <img id="delete_ingred_button" onclick="removeThisIngredientRow(this)" src="{% static 'img/x-icon.svg' %}" width="20" height="20" alt="Delete row"/>
+                </a></td>
             </tr>
             {% endfor %}
         </table>
 
     <button class="form_mod_button" id="add-ingred-form" type="button">Add ingredient</button>
-    <button class="form_mod_button" id="delete-ingred-form" type="button">Remove ingredient</button>
+    <button class="form_mod_button" id="delete-ingred-form" type="button">Remove last ingredient</button>
     </div>
     <div id="ingred-parser" class="hide">
         <textarea id="ingred-parser-textbox" class="default_text">Enter your ingredients here, separated by line. Follow this format:

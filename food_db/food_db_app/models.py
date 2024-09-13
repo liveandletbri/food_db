@@ -48,10 +48,6 @@ class RecipeStep(models.Model):
 class Ingredient(models.Model):
     def __str__(self):
         return f'{self.recipe.title}: {self.ingredient_category + " - " if self.ingredient_category else ""}{self.food.name}'
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['recipe', 'food', 'ingredient_category'], name='unique_recipe_food_category')
-        ]
     
     recipe = models.ForeignKey(
         Recipe,
@@ -67,7 +63,7 @@ class Ingredient(models.Model):
         null=True,
         blank=True,
     )
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(null=True, blank=True)
     ingredient_category = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
     _date_created = models.DateTimeField(auto_now_add=True)
