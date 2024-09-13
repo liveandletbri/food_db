@@ -1,10 +1,24 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block content %}
-<h1>
-    <p id="recipe_title">{{ recipe.title }}</p>
-    <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
-</h1>
+<table>
+    <tr>
+        <td>
+            <h1 id="recipe_title">
+                <p>{{ recipe.title }}</p>
+            </h1>
+        </td>
+        <td class="recipe_detail_header_buttons">
+            <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
+        </td>
+        <td id="upvote_button_td" class="recipe_detail_header_buttons">    
+
+                <i id="cooked_recipe_upvote_icon" class="fa-regular fa-square-caret-up fa-2x"></i>
+                <label>Cooked 5 times</label>
+   
+        </td>
+    </tr>
+</table>
 {% if not recipe.recipe_book %}
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
 {% endif %}
