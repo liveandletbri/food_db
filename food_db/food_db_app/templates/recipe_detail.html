@@ -2,10 +2,10 @@
 {% load static %}
 {% block content %}
 <h1>
-    {{ recipe.title }}
+    <p id="recipe_title">{{ recipe.title }}</p>
     <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
 </h1>
-{% if recipe.recipe_book == "" %}
+{% if not recipe.recipe_book %}
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
 {% endif %}
 <script src="{% static 'js/multiply_ingredients.js' %}"></script>
@@ -72,7 +72,11 @@
                                 {% endif%}
                             {% endif %}
                             <td>{{ ingredient.food }}</td>
-                            <td>{{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}</td>
+                            <td>
+                                {% if ingredient.quantity %}
+                                    {{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" and ingredient.unit_of_measurement|length > 0 %}s{% endif %}
+                                {% endif %}
+                            </td>
                             <td>{{ ingredient.notes }}</td>
                         </tr>
                     {% endfor %}

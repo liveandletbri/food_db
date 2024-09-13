@@ -55,23 +55,25 @@ async function validateAddRecipe(e) {
     
     // Title must be unique
     let currentUrl = window.location.href
-    let currentUrlDomain = currentUrl.split("/add")[0]
-    let responseCode = await fetch(`${currentUrlDomain}/recipe/${title}`, {
-        method: "GET",
-    })
-    .then(function(response) {
-        // The response is a Response instance.
-        return response.status
-    })
-    if (responseCode == 200) {
-        showAndHideTooltip(titleTooltip)
-        invalid = true
-    } else if (responseCode != 404) {
-        console.log(`Ooops somehow we got a ${responseCode} on the title validation`)
-        invalid = true
-    } else (
-        console.log("Don't worry, that 404 was a good thing. It means this is a unique title!")
-    )
+    if (currentUrl.endsWith('/add')) {
+        let currentUrlDomain = currentUrl.split("/add")[0]
+        let responseCode = await fetch(`${currentUrlDomain}/recipe/${title}`, {
+            method: "GET",
+        })
+        .then(function(response) {
+            // The response is a Response instance.
+            return response.status
+        })
+        if (responseCode == 200) {
+            showAndHideTooltip(titleTooltip)
+            invalid = true
+        } else if (responseCode != 404) {
+            console.log(`Ooops somehow we got a ${responseCode} on the title validation`)
+            invalid = true
+        } else (
+            console.log("Don't worry, that 404 was a good thing. It means this is a unique title!")
+        )
+    }
 
     // URL must be valid URL
     if ( url != '') {

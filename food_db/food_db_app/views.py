@@ -36,7 +36,8 @@ def recipe_detail(request, title):
 
     ingreds_by_category = defaultdict(list)
     for ingredient in ingredients:
-        ingredient.quantity = str(Decimal(ingredient.quantity * multiplier))
+        if ingredient.quantity:
+            ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
         ingreds_by_category[ingredient.ingredient_category].append(ingredient)
     
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
@@ -143,6 +144,7 @@ def add_recipe(request):
                         unit_of_measurement=UnitOfMeasurement.objects.get(name=selected_unit),
                         quantity=ingred['quantity'],
                         ingredient_category=ingred.get('ingredient_category', ''),
+                        notes=ingred.get('notes', ''),
                     )
                     ingredient_instance.save()
 
@@ -245,7 +247,7 @@ def edit_recipe(request, title):
                     book_instance.save()
                 recipe_instance.recipe_book = book_instance
             else:
-                recipe_instance.recipe_book = ''
+                recipe_instance.recipe_book = None
 
             recipe_instance.save()
 
@@ -298,6 +300,7 @@ def edit_recipe(request, title):
                     unit_of_measurement=UnitOfMeasurement.objects.get(name=selected_unit),
                     quantity=ingred['quantity'],
                     ingredient_category=ingred.get('ingredient_category', ''),
+                    notes=ingred.get('notes', ''),
                 )
                 ingredient_instance.save()
 
@@ -334,7 +337,9 @@ def edit_recipe(request, title):
             extra_steps=len(related_steps) - 1,
         )
         create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context via related_tags
-        create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min) + " - " + str(recipe_instance.servings_max)
+        create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min)
+        if recipe_instance.servings_max:
+            create_recipe_form.fields['servings'].initial+= " - " + str(recipe_instance.servings_max)
 
         # Prepping ingredients and steps as dictionaries to be passed to the template, rather than setting inital fields,
         # because the template cannot dyanmically access dictionary keys (i.e. cannot do this: create_recipe_form['ingred_' + number + '_food'].value)
@@ -347,7 +352,7 @@ def edit_recipe(request, title):
             ingredient_list.append(ingredient_data)
 
         step_list = []
-        for i, step in enumerate(related_steps):
+        for step in related_steps:
             step_data = {}
             for field in ['description']:
                 # create_recipe_form.fields[f'step_{i}_{field}'].initial = getattr(step, field)
