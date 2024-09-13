@@ -13,8 +13,9 @@
         </td>
         <td id="upvote_button_td" class="recipe_detail_header_buttons">    
 
-                <i id="cooked_recipe_upvote_icon" class="fa-regular fa-square-caret-up fa-2x"></i>
-                <label>Cooked 5 times</label>
+                <i id="cooked_recipe_upvote_icon_before" class="fa-regular fa-square-caret-up fa-2x cooked_recipe_upvote_icon" onclick="cookMeal('{{ recipe.title }}')"></i>
+                <i id="cooked_recipe_upvote_icon_clicked" class="fa-solid fa-square-caret-up fa-2x cooked_recipe_upvote_icon" onclick="cookMeal('{{ recipe.title }}')"></i>
+                <label id="cooked_count_label">Cooked {{ total_cooked_meal_counts }} time{% if total_cooked_meal_counts != 1 %}s{% endif %}</label>
    
         </td>
     </tr>
@@ -22,6 +23,7 @@
 {% if not recipe.recipe_book %}
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
 {% endif %}
+<script src="{% static 'js/cook_meal.js' %}"></script>
 <script src="{% static 'js/multiply_ingredients.js' %}"></script>
 {% if recipe.url != "" %}
     <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>

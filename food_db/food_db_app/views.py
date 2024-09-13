@@ -12,7 +12,7 @@ from django.views.generic.edit import CreateView
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
-from .models import Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
+from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
 
 # Create your views here.
 def index(request):
@@ -45,6 +45,8 @@ def recipe_detail(request, title):
         # increment by one to make the base-zero index look human-friendly
         step.order_number += 1
 
+    total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe).count()
+
     context = {
         'recipe': recipe,
         'ingredients_have_categories': ingredients_have_categories,
@@ -52,6 +54,7 @@ def recipe_detail(request, title):
         'ingredients': dict(ingreds_by_category),
         'steps': steps,
         'multiplier': multiplier,
+        'total_cooked_meal_counts': total_cooked_meal_counts,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -379,3 +382,14 @@ def ingredient_parse_api(request):
     response = requests.post('http://ingredient_parse:5000/parse', request.body)
 
     return HttpResponse(response)
+
+@csrf_exempt
+def cook_meal(request):
+    recipe_name = request.body.decode('utf-8')
+    recipe_instance = Recipe.objects.get(title=recipe_name)
+    cooked_meal_instance = CookedMeal(recipe=recipe_instance)
+    cooked_meal_instance.save()
+
+    total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
+
+    return HttpResponse(total_cooked_meal_counts)
