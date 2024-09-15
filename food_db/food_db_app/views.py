@@ -379,9 +379,13 @@ def edit_recipe(request, title):
 
 @csrf_exempt
 def ingredient_parse_api(request):
-    response = requests.post('http://ingredient_parse:5000/parse', request.body)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        response = requests.post('http://ingredient_parse:5000/parse', data['text'])
 
-    return HttpResponse(response)
+        return HttpResponse(response)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
 
 @csrf_exempt
 def cook_meal(request):
