@@ -168,7 +168,7 @@ input[type="url"] {
     margin: 0 0 0 0;
 }
 #cooked_recipe_upvote_icon_before {
-    color: gray;
+    color: rgb(33, 0, 151);
     display: inline-block;
 }
 #cooked_recipe_upvote_icon_clicked {

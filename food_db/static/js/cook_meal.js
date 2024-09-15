@@ -14,6 +14,7 @@ async function cookMeal() {
         
         let currentUrl = window.location.href
         let currentUrlDomain = currentUrl.split("/recipe/")[0]
+
         let cookedMealResponse = await fetch(`${currentUrlDomain}/cook/`, {
             method: "POST",
             body: recipeTitle,
@@ -23,6 +24,12 @@ async function cookMeal() {
             console.log(`Response status: ${response.status}`)
             if (response.status == 200) {
                 upvoteSvgBefore.setAttribute('api_return_successful','true')
+                // "success!" color
+                upvoteSvgBefore.children[0].style.color = 'green'
+            }
+            else {
+                // "fail :(" color
+                upvoteSvgBefore.children[0].style.color = 'red'
             }
             return response.text()
         })
@@ -37,9 +44,6 @@ async function cookMeal() {
         
         // Update the path of the before to match the after (the after is not placed correctly on page and I didn't think of a better way to do this so /shrug)
         upvoteSvgBefore.children[0].setAttribute('d', afterIconPath)
-        
-        // I wanted to keep the style changes and path changes together. Doing this here feels wrong but idk here we are. 
-        upvoteSvgBefore.children[0].style.color = 'green'
     }       
 }
 
