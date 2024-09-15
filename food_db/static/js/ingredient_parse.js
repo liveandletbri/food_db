@@ -12,7 +12,13 @@ async function hideIngredientParserOnClick(){
     let currentUrlDomain = currentUrl.split(":8000")[0]
     let response = await fetch(`${currentUrlDomain}:8000/ingred_parse`, {
         method: "POST",
-        body: ingredParserTextbox.value,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            text: ingredParserTextbox.value,
+        })
     })
     .then(function(response) {
         // The response is a Response instance.

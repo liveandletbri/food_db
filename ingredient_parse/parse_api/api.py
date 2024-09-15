@@ -10,30 +10,33 @@ def get_users():
     request_body = request.data
     request_lines = request_body.decode('utf-8').split('\n')
     results = []
-    for line in request_lines:
-        parsed_ingredient = parse_ingredient(line)
-        notes_list = []
-        if parsed_ingredient.preparation:
-            notes_list.append(parsed_ingredient.preparation.text)
-        if len(parsed_ingredient.amount) > 0:
-            amount = parsed_ingredient.amount[0]
-            if amount.APPROXIMATE:
-                notes_list.append('Amount is approximate')
-            quantity = amount.quantity
-            unit = str(amount.unit)
-        else:
-            quantity = None
-            unit = None
-        if parsed_ingredient.comment:
-            notes_list.append(parsed_ingredient.comment.text)
-        if parsed_ingredient.purpose:
-            notes_list.append('Purpose: ' + parsed_ingredient.purpose.text)
-        results.append({
-            'food': parsed_ingredient.name.text,
-            'quantity': quantity,
-            'unit_of_measurement': unit,
-            'notes': '. '.join(notes_list)
-        })
+    for raw_line in request_lines:
+        line = raw_line.strip()
+        if line != '':
+            parsed_ingredient = parse_ingredient(line)
+            notes_list = []
+            if parsed_ingredient.preparation:
+                notes_list.append(parsed_ingredient.preparation.text)
+            if len(parsed_ingredient.amount) > 0:
+                amount = parsed_ingredient.amount[0]
+                if amount.APPROXIMATE:
+                    notes_list.append('Amount is approximate')
+                quantity = amount.quantity
+                unit = str(amount.unit)
+            else:
+                quantity = ''
+                unit = ''
+            if parsed_ingredient.comment:
+                notes_list.append(parsed_ingredient.comment.text)
+            if parsed_ingredient.purpose:
+                notes_list.append('Purpose: ' + parsed_ingredient.purpose.text)
+            data = {
+                'food': parsed_ingredient.name.text,
+                'quantity': quantity,
+                'unit_of_measurement': unit,
+                'notes': '. '.join(notes_list)
+            }
+            results.append(data)
     # ParsedIngredient(
     #     name=IngredientText(text='pork shoulder', confidence=0.999193),
     #     size=None,
