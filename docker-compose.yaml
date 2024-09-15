@@ -27,7 +27,7 @@ services:
     #   - ./ingredient_parse/parse_api:/app/parse_api
     ports:
       - "5000:5000"
-    stdin_open: true # docker run -i
+    stdin_open: true # docker run -i 
     tty: true        # docker run -t
     # healthcheck:
     #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
