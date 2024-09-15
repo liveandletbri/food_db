@@ -392,4 +392,4 @@ def cook_meal(request):
 
     total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
 
-    return HttpResponse(total_cooked_meal_counts)
+    return HttpResponse(str(total_cooked_meal_counts))
