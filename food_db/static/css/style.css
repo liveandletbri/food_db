@@ -174,3 +174,6 @@ input[type="url"] {
 #cooked_recipe_upvote_icon_clicked {
     display: none;
 }
+#upvote_button_div {
+    cursor: pointer;
+}
