@@ -4,35 +4,15 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from ..models import Food, Recipe, RecipeBook, UnitOfMeasurement
+from .config import create_base_data
 
 logger = logging.getLogger(__name__)
 
-# tests for models, without needing to render a view
-
-def populate_base_data(title='My recipe'):
-    book = RecipeBook(name='book')
-    book.save()
-    recipe = Recipe(
-        title = title,
-        recipe_book = book,
-        recipe_book_page = 22,
-    )
-    recipe.save()
-    unit = UnitOfMeasurement(name = 'cup')
-    unit.save()
-    food = Food(name='banana')
-    food.save()
-
-    return {
-        'recipe': recipe,
-        'unit': unit,
-        'food': food,
-        'book': book,
-    }
-
-class APITests(TestCase):    
+class APITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        create_base_data(cls)
     def test_cook_meal(self):
-        populate_base_data()
         post_data = {
             'title': 'My recipe'
         }
@@ -54,7 +34,7 @@ class APITests(TestCase):
         disgusting_title = """
         \n\nThis recipe's ;janky-title: a F$#ckin! `${shart_show}`
         """
-        populate_base_data(disgusting_title)
+        Recipe.objects.create(title=disgusting_title)
         post_data = {
             'title': disgusting_title
         }
