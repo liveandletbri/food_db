@@ -44,13 +44,11 @@ Whichever you choose, add them to `settings.py` under `ALLOWED_HOSTS`. You can s
 To debug, stop the container that was set up by Docker compose (`foob-db-django`). From the root of the repo, run a new one, overriding the entrypoint, like this, then run the Python command inside the image.
 ```
 cd ~/food_db 
-docker build -t food-db-image -f food_db/django.Dockerfile food_db
-docker run --rm -it -p 8000:8000 --name food-db-debug -v ./food_db/db_data:/app/db_data -v ./food_db/food_db_app:/app/food_db_app -v ./food_db/static:/app/static --entrypoint bash food-db-image
-
-python manage.py makemigrations --noinput &&
-    python manage.py migrate --noinput &&
-    python manage.py collectstatic --noinput &&
-    python -m pdb manage.py runserver 0.0.0.0:8000
+docker compose run --build --name django-debug backend sh -c ' \
+    python manage.py makemigrations --noinput && \
+    python manage.py migrate --noinput && \
+    python manage.py collectstatic --noinput && \
+    python -m pdb manage.py runserver 0.0.0.0:8000'
 ```
 
 Finally, press `c` and enter when prompted by pdb to continue execution. Now insert `import pdb; pdb.set_trace()` wherever you need it.
@@ -58,10 +56,7 @@ Finally, press `c` and enter when prompted by pdb to continue execution. Now ins
 You can debug the ingredient parser similarly:
 ```
 cd ~/food_db
-docker build -t ingred-parse-image -f ingredient_parse/ingred.Dockerfile ingredient_parse
-docker run --rm -it -p 5000:5000 --name ingred-parse-debug --entrypoint bash ingred-parse-image
-
-python -m pdb parse_api/api.py
+docker compose run --build --name ingred-parser-debug backend sh -c 'python -m pdb parse_api/api.py'
 ```
 
 ### Python
@@ -71,13 +66,13 @@ cd food_db/food_db
 pyenv install 3.11.9
 pyenv virtualenv 3.11.9 food-db-3.11.9
 pyenv local food-db-3.11.9
-pip install --upgrade pip pip-tools
+pip install --upgrade pip
 pip install -r django-requirements.txt
 
 cd ../ingredient_parse
 pyenv virtualenv 3.11.9 ingredient-parse-3.11.9
 pyenv local ingredient-parse-3.11.9
-pip install --upgrade pip pip-tools
+pip install --upgrade pip 
 pip install -r ingred-requirements.txt
 ```
 
