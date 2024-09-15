@@ -26,13 +26,7 @@ If all looks good, the last check is to visit http://127.0.0.1:8000.
 ### Django
 You should be up and running at this point. You'll want to create a super user in your Django DB to access the admin panel.
 
-Set up a super user by running `python manage.py createsuperuser`. You could use `docker exec` to open a shell in the container to do this, or do it in one go from here:
-```
-cd ~/food_db 
-docker compose run --build --name django-debug backend sh -c 'python manage.py createsuperuser'
-```
-
-This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
+Set up a super user by running `docker compose exec backend sh -c 'python manage.py test'`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
 
 ### Port forwarding
 You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises (search the repo for `csrf_exempt` 😅) in my Django security.
@@ -47,7 +41,7 @@ Whichever you choose, add them to `settings.py` under `ALLOWED_HOSTS`. You can s
 
 ## Debugging
 ### Docker
-To debug, stop the container that was set up by Docker compose (`foob-db-django`). From the root of the repo, run a new one, overriding the entrypoint, like this, then run the Python command inside the image.
+To debug, stop the container that was set up by Docker compose (`foob-db-django`). From the root of the repo, run a new one like this:
 ```
 cd ~/food_db 
 docker compose run --build --name django-debug backend sh -c ' \
