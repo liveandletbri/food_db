@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'fontawesomefree',
+    'rest_framework',
     'food_db_app',
 ]
 
