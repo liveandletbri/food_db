@@ -22,9 +22,24 @@
     {% endwith %}
     <table id="search_results_table">
         <thead>
-            <th>Recipe</th>
-            <th>Times cooked</th>
-            <th>Last cooked</th>
+            <th>
+                <a>Recipe</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <i id="recipe_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Times cooked</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <i id="times_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="times_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Last cooked</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <i id="last_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="last_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
         </thead>
         <tbody>
             {% for recipe, data in recipe_data.items %}

@@ -177,3 +177,6 @@ input[type="url"] {
 #upvote_button_div {
     cursor: pointer;
 }
+.search_sort_icon {
+    display: none;
+}
