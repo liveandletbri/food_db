@@ -1,13 +1,6 @@
 let ingredParserTextbox = document.querySelector("#ingred-parser-textbox")
 let originalParserText = ingredParserTextbox.value;
 
-function showTagFormOnClick(){
-    document.getElementById('add-tag-form').className="show";
-}
-function hideTagFormOnClick(){
-    document.getElementById('add-tag-form').className="hide";
-}
-
 function showIngredientParserOnClick(){
     document.getElementById('ingred-form').className="hide";
     document.getElementById('ingred-parser').className="show";
@@ -19,7 +12,13 @@ async function hideIngredientParserOnClick(){
     let currentUrlDomain = currentUrl.split(":8000")[0]
     let response = await fetch(`${currentUrlDomain}:8000/ingred_parse`, {
         method: "POST",
-        body: ingredParserTextbox.value,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            text: ingredParserTextbox.value,
+        })
     })
     .then(function(response) {
         // The response is a Response instance.

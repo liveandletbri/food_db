@@ -17,7 +17,13 @@ async function cookMeal() {
 
         let cookedMealResponse = await fetch(`${currentUrlDomain}/cook/`, {
             method: "POST",
-            body: recipeTitle,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: recipeTitle,
+            })
         })
         .then(function(response) {
             // The response is a Response instance.

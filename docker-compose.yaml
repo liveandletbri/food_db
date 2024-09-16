@@ -11,6 +11,8 @@ services:
       - ./food_db/static:/app/static
     ports:
       - "8000:8000"
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
     # healthcheck:
     #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
     #   timeout: 20s
@@ -25,6 +27,8 @@ services:
     #   - ./ingredient_parse/parse_api:/app/parse_api
     ports:
       - "5000:5000"
+    stdin_open: true # docker run -i 
+    tty: true        # docker run -t
     # healthcheck:
     #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
     #   timeout: 20s
