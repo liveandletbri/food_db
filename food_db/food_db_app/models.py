@@ -1,3 +1,4 @@
+import datetime
 import json
 from django.db import models
 
@@ -90,11 +91,13 @@ class UnitOfMeasurement(models.Model):
     _date_modified = models.DateTimeField(auto_now=True)
 
 class CookedMeal(models.Model):
+    def __str__(self):
+        return self.recipe.title + ' - ' + self.date_cooked.strftime('%Y/%m/%d')
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
     )
-    date_cooked = models.DateField(auto_now=True)
+    date_cooked = models.DateField(default=datetime.date.today)
     _date_created = models.DateField(auto_now_add=True)
 
 class RecipeBook(models.Model):
