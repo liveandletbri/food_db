@@ -13,7 +13,7 @@
                     {% for value, text in create_recipe_form.tags.field.choices %}
                     
                         <div class="ui slider checkbox tag_check">
-                            <input id="id_tags_{{ forloop.counter0 }}" type="checkbox" value="{{ value }}"{% if text in checked_tags %} checked="checked"{% endif %}>
+                            <input id="id_tags_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ text }}"{% if text in checked_tags %} checked="checked"{% endif %}>
                             {{ text }}
                         </div>
                         <!-- {% if forloop.counter|divisibleby:2 %}</ul><ul>{% endif %} -->

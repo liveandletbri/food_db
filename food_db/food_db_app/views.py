@@ -261,7 +261,7 @@ def edit_recipe(request, title):
                 tag.save()
             
             # Extract tags from form data and create new relationships from tag -> recipe
-            tags = create_recipe_form.cleaned_data['tags']
+            tags = request.POST.getlist('tag')
             if tags:
                 for tag in tags:
                     tag_instance = Tag.objects.get(name=tag)
