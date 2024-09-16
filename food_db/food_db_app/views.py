@@ -47,7 +47,7 @@ def recipe_detail(request, title):
 
     total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe).count()
 
-    last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('-date_cooked').last()
+    last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
     if last_cooked_meal:
         last_cooked_date = last_cooked_meal.date_cooked.strftime('%b %d, %Y')
     else:
