@@ -159,6 +159,32 @@ class ViewTests(TestCase):
         self.assertEqual(Ingredient.objects.filter(recipe=recipe_instance).count(), 2)
         self.assertEqual(RecipeStep.objects.filter(recipe=recipe_instance).count(), 2)
 
+    def test_edit_recipe_add_tag_POST(self):
+        title = 'My recipe'
+        recipe_instance = Recipe.objects.get(title=title)
+        
+        # add tags
+        Tag.objects.create(name='winter')
+        Tag.objects.create(name='autumn')
+
+        self.assertEqual(Tag.objects.filter(recipes=recipe_instance).count(), 0)
+
+        # this removes the link between recipe book and the recipe, and adds ingredients, steps, foods, and units
+        post_data = {
+            'title': title,
+            'tag': ['winter'],
+            'servings': '',  # servings is required here because it gets passed into the cleaning function of the form
+            'extra_ingred_count': 0,
+            'extra_step_count': 0,
+        }
+        response = self.client.post(
+            self.edit_recipe(title),
+            data=post_data,
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(Tag.objects.filter(recipes=recipe_instance).count(), 1)
+        self.assertEqual(Tag.objects.get(recipes=recipe_instance).name, 'winter')
+
     def test_new_tag_POST(self):
         self.assertEqual(Tag.objects.all().count(), 0)
         post_data = {
