@@ -201,6 +201,7 @@ def search(request):
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
         recipe_data[recipe.title]['tags'] = [tag.name for tag in Tag.objects.filter(recipes=recipe)]
+        recipe_data[recipe.title]['date_created'] = recipe._date_created.strftime('%b %d, %Y')
         cooked_count = CookedMeal.objects.filter(recipe=recipe).count()
         last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
         if cooked_count > 0:

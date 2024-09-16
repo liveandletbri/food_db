@@ -24,21 +24,27 @@
         <thead>
             <th>
                 <a>Recipe</a>
-                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
                 <i id="recipe_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
                 <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
             </th>
             <th>
                 <a>Times cooked</a>
-                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
                 <i id="times_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
                 <i id="times_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
             </th>
             <th>
                 <a>Last cooked</a>
-                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
                 <i id="last_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
                 <i id="last_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Recipe created</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="date_created_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="date_created_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
             </th>
         </thead>
         <tbody>
@@ -52,6 +58,9 @@
                 </td>
                 <td>
                     {{ data.last_cooked }}
+                </td>
+                <td>
+                    {{ data.date_created }}
                 </td>
             </tr>
             {% endfor %}
