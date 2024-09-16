@@ -1,5 +1,4 @@
-// This import is effectively done for us in the HTML, by adding it in </script> tags in main.html 
-// import { reapplyEveryOtherRowCss } from reapply_table_css
+// From this answer https://stackoverflow.com/a/49041392, modified slightly to insert into tbody
 
 const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
 
