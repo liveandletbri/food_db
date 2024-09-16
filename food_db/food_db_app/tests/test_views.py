@@ -98,9 +98,9 @@ class ViewTests(TestCase):
             self.add_recipe,
             data=post_data,
         )
-        recipe_page_redirect_url = post_response.url
         self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
 
+        recipe_page_redirect_url = post_response.url
         recipe_detail_url = self.recipe_detail(post_data['title'])
         self.assertEqual(recipe_page_redirect_url, recipe_detail_url)
 
@@ -115,5 +115,49 @@ class ViewTests(TestCase):
         new_recipe_instance = Recipe.objects.get(title=post_data['title'])
         self.assertEqual(Ingredient.objects.filter(recipe=new_recipe_instance).count(), 1)
         self.assertEqual(RecipeStep.objects.filter(recipe=new_recipe_instance).count(), 1)
+
+    def test_edit_recipe_POST(self):
+        title = 'My recipe'
+        recipe_instance = Recipe.objects.get(title=title)
+        
+        self.assertEqual(Recipe.objects.all().count(), 1)
+        self.assertEqual(Food.objects.all().count(), 1)
+        self.assertEqual(UnitOfMeasurement.objects.all().count(), 1)
+        self.assertEqual(Ingredient.objects.filter(recipe=recipe_instance).count(), 0)
+        self.assertEqual(RecipeStep.objects.filter(recipe=recipe_instance).count(), 0)
+
+        # this removes the link between recipe book and the recipe, and adds ingredients, steps, foods, and units
+        post_data = {
+            'title': title,
+            'duration_minutes': 300,
+            'servings': '4-6',
+            'calories_per_serving': 200,
+            'extra_ingred_count': 1,
+            'ingred_0_quantity': 2,
+            'ingred_0_unit_of_measurement': 'pound',
+            'ingred_0_food': 'raw garlic',
+            'ingred_1_quantity': 5,
+            'ingred_1_unit_of_measurement': 'bulb',
+            'ingred_1_food': 'roasted garlic',
+            'ingred_1_notes': 'Yum!',
+            'extra_step_count': 1,
+            'step_0_description': 'Eat the garlic',
+            'step_0_description': 'Eat the roasted garlic',
+        }
+        response = self.client.post(
+            self.edit_recipe(title),
+            data=post_data,
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        recipe_page_redirect_url = response.url
+        recipe_detail_url = self.recipe_detail(title)
+        self.assertEqual(recipe_page_redirect_url, recipe_detail_url)
+        
+        self.assertEqual(Food.objects.all().count(), 3)
+        self.assertEqual(UnitOfMeasurement.objects.all().count(), 3)
+        self.assertEqual(Ingredient.objects.filter(recipe=recipe_instance).count(), 2)
+        self.assertEqual(RecipeStep.objects.filter(recipe=recipe_instance).count(), 2)
+
 
 
