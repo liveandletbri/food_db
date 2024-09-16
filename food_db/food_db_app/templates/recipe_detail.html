@@ -18,6 +18,7 @@
                 <i id="cooked_recipe_upvote_icon_clicked" class="fa-solid fa-square-caret-up fa-2x cooked_recipe_upvote_icon"></i>
             </div>
             <label id="cooked_count_label">Cooked {{ total_cooked_meal_counts }} time{% if total_cooked_meal_counts != 1 %}s{% endif %}</label>
+            <h5 id="last_cooked_date">{% if last_cooked_date != "" %}Last cooked {{ last_cooked_date}}{% endif %}</h5>
         </td>
     </tr>
 </table>
