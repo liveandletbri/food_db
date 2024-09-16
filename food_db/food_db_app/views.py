@@ -47,6 +47,12 @@ def recipe_detail(request, title):
 
     total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe).count()
 
+    last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
+    if last_cooked_meal:
+        last_cooked_date = last_cooked_meal.date_cooked.strftime('%b %d, %Y')
+    else:
+        last_cooked_date = ''
+
     context = {
         'recipe': recipe,
         'ingredients_have_categories': ingredients_have_categories,
@@ -55,6 +61,7 @@ def recipe_detail(request, title):
         'steps': steps,
         'multiplier': multiplier,
         'total_cooked_meal_counts': total_cooked_meal_counts,
+        'last_cooked_date': last_cooked_date,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -189,11 +196,23 @@ def add_recipe(request):
     return render(request, 'add_edit_recipe.html', context)
 
 def search(request):
-    text_search = RecipeTextFilter(request.GET, queryset=Recipe.objects.all().order_by('-_date_created'))
-    tags_by_recipe = {recipe.title : [tag.name for tag in Tag.objects.filter(recipes=recipe)] for recipe in text_search.qs}
+    text_search_form = RecipeTextFilter(request.GET, queryset=Recipe.objects.all().order_by('-_date_created'))
+    found_recipes = text_search_form.qs
+    recipe_data = {recipe.title : {} for recipe in found_recipes}
+    for recipe in found_recipes:
+        recipe_data[recipe.title]['tags'] = [tag.name for tag in Tag.objects.filter(recipes=recipe)]
+        cooked_count = CookedMeal.objects.filter(recipe=recipe).count()
+        last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
+        if cooked_count > 0:
+            recipe_data[recipe.title]['times_cooked'] = str(cooked_count)
+            recipe_data[recipe.title]['last_cooked'] = last_cooked_meal.date_cooked.strftime('%b %d, %Y')
+        else:
+            recipe_data[recipe.title]['times_cooked'] = ''
+            recipe_data[recipe.title]['last_cooked'] = ''
+    
     context = {
-        'text_search': text_search,
-        'tags_by_recipe': tags_by_recipe,
+        'text_search': text_search_form,
+        'recipe_data': recipe_data,
     }
     return render(request, 'search.html', context)
 

@@ -1,4 +1,5 @@
 let countLabel = document.querySelector("#cooked_count_label")
+let datelabel = document.querySelector("#last_cooked_date_label")
 
 let recipeTitleH1 = document.querySelector('#recipe_title')
 let recipeTitle = recipeTitleH1.textContent.replace('\n','').trim()
@@ -40,10 +41,16 @@ async function cookMeal() {
             return response.text()
         })
 
+        // Update cook count and last cooked date
         countLabel.textContent = `Cooked ${cookedMealResponse} time`
         if (cookedMealResponse != "1") {
             countLabel.textContent += 's'
         }
+        let today = new Date()
+        month = today.toLocaleString('default', { month: 'short' })
+        date = today.getDate()
+        year = today.getFullYear()
+        datelabel.textContent = `Last cooked ${month} ${date}, ${year}`
 
         // Get the guts of the <path> element inside the "after" icon tell the browser what to draw
         let afterIconPath = upvoteSvgAfter.children[0].getAttribute('d') 

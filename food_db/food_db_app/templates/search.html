@@ -20,10 +20,45 @@
     {% with result_count=text_search.qs|length %}
     <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
     {% endwith %}
-    {% for recipe, tags in tags_by_recipe.items %}
-        <p class="search_result"><a class="left_side_of_page" href="/recipe/{{recipe}}">{{ recipe }}</a>{% for tag in tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
-    {% endfor %}
+    <table id="search_results_table">
+        <thead>
+            <th>
+                <a>Recipe</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <i id="recipe_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Times cooked</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <i id="times_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="times_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Last cooked</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in updateSortIcon(). -->
+                <i id="last_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="last_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+        </thead>
+        <tbody>
+            {% for recipe, data in recipe_data.items %}
+            <tr>
+                <td>
+                    <p class="search_result"><a class="left_side_of_page" href="/recipe/{{recipe}}">{{ recipe }}</a>{% for tag in data.tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
+                </td>
+                <td>
+                    {{ data.times_cooked }}
+                </td>
+                <td>
+                    {{ data.last_cooked }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-<script src="{% static 'js/search.js' %}"></script>
+<script src="{% static 'js/search_filter.js' %}"></script>
+<script src="{% static 'js/search_sort.js' %}"></script>
 
 {% endblock content %}

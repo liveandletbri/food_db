@@ -18,6 +18,7 @@
                 <i id="cooked_recipe_upvote_icon_clicked" class="fa-solid fa-square-caret-up fa-2x cooked_recipe_upvote_icon"></i>
             </div>
             <label id="cooked_count_label">Cooked {{ total_cooked_meal_counts }} time{% if total_cooked_meal_counts != 1 %}s{% endif %}</label>
+            <h5 id="last_cooked_date_label">{% if last_cooked_date != "" %}Last cooked {{ last_cooked_date}}{% endif %}</h5>
         </td>
     </tr>
 </table>
@@ -71,10 +72,9 @@
     <h2>Ingredients</h2>
     <table>
         <thead><tr>
-            {% if ingredients_have_categories %}<th>Category</th>{% endif %}
-            <th>Ingredient</th>
-            <th>Quantity</th>
-            <th>Notes</th>
+            {% if ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
+            <th class="recipe_detail_ingredient_food">Ingredient</th>
+            <th class="recipe_detail_ingredient_notes">Notes</th>
         </tr></thead>
         <!-- Print the category only on its first ingredient row, so each category is printed only once -->
         {% for category in ingredient_categories %}
@@ -85,18 +85,17 @@
                         <tr>
                             {% if ingredients_have_categories %}
                                 {% if forloop.first %}
-                                    <td>{{ ingredient.ingredient_category }}</td>
+                                    <td class="recipe_detail_ingredient_category">{{ ingredient.ingredient_category }}</td>
                                 {% else %}
                                     <td></td>
                                 {% endif%}
                             {% endif %}
-                            <td>{{ ingredient.food }}</td>
-                            <td>
+                            <td class="recipe_detail_ingredient_food">
                                 {% if ingredient.quantity %}
-                                    {{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" and ingredient.unit_of_measurement|length > 0 %}s{% endif %}
+                                    {{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" and ingredient.unit_of_measurement != "" %}s{% endif %}
                                 {% endif %}
-                            </td>
-                            <td>{{ ingredient.notes }}</td>
+                                {{ ingredient.food }}</td>
+                            <td class="recipe_detail_ingredient_notes">{{ ingredient.notes }}</td>
                         </tr>
                     {% endfor %}
                 {% endif %}
