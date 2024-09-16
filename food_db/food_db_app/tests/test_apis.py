@@ -12,6 +12,7 @@ class APITests(TestCase):
     @classmethod
     def setUpTestData(cls):
         create_base_data(cls)
+        
     def test_cook_meal(self):
         post_data = {
             'title': 'My recipe'
