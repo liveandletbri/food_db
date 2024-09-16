@@ -1,10 +1,10 @@
-
+import json
 import requests
 
 from collections import defaultdict
 from decimal import Decimal
 from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -379,17 +379,24 @@ def edit_recipe(request, title):
 
 @csrf_exempt
 def ingredient_parse_api(request):
-    response = requests.post('http://ingredient_parse:5000/parse', request.body)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        response = requests.post('http://ingredient_parse:5000/parse', data['text'])
 
-    return HttpResponse(response)
+        return HttpResponse(response)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
 
 @csrf_exempt
 def cook_meal(request):
-    recipe_name = request.body.decode('utf-8')
-    recipe_instance = Recipe.objects.get(title=recipe_name)
-    cooked_meal_instance = CookedMeal(recipe=recipe_instance)
-    cooked_meal_instance.save()
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe_instance = Recipe.objects.get(title=data['title'])
+        cooked_meal_instance = CookedMeal(recipe=recipe_instance)
+        cooked_meal_instance.save()
 
-    total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
+        total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
 
-    return HttpResponse(str(total_cooked_meal_counts))
+        return HttpResponse(str(total_cooked_meal_counts))
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])

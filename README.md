@@ -4,9 +4,9 @@ Food DB is a small Django project to help store, tag, and query your recipes. It
 ## Getting started
 The only absolutely required prerequisite is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need.
 
-For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker run` or `docker exec` (not `docker compose` though) commands, prepend `winpty`, like this:
+For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker attach` or `docker exec` (not `docker compose` though) commands, prepend `winpty`, like this:
 ```
-winpty docker run --rm -it -p 8000:8000 ...
+winpty docker docker exec -it...
 ```
 
 ### Ignoring the database
@@ -26,13 +26,7 @@ If all looks good, the last check is to visit http://127.0.0.1:8000.
 ### Django
 You should be up and running at this point. You'll want to create a super user in your Django DB to access the admin panel.
 
-Set up a super user by running `python manage.py createsuperuser`. You could use `docker exec` to open a shell in the container to do this, or do it in one go from here:
-```
-cd ~/food_db 
-docker compose run --build --name django-debug backend sh -c 'python manage.py createsuperuser'
-```
-
-This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
+Set up a super user by running `docker compose exec backend sh -c 'python manage.py createsuperuser'`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
 
 ### Port forwarding
 You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises (search the repo for `csrf_exempt` 😅) in my Django security.
@@ -45,25 +39,14 @@ Now on a different device, use your browser to visit your IP address at port 800
 
 Whichever you choose, add them to `settings.py` under `ALLOWED_HOSTS`. You can see I've put my private IP address there already. Restart the Docker containers and then, from another device, you can now visit `http://<your IP address>:8000` to access your Food DB. Neat!
 
+## Testing
+Run both services using `docker compose up`, then run in a separate terminal, `docker compose exec backend sh -c 'python manage.py test'`. If you use `pdb.set_trace()` anywhere in your tests, you can engage with the `pdb` terminal in this same window.
+
 ## Debugging
 ### Docker
-To debug, stop the container that was set up by Docker compose (`foob-db-django`). From the root of the repo, run a new one, overriding the entrypoint, like this, then run the Python command inside the image.
-```
-cd ~/food_db 
-docker compose run --build --name django-debug backend sh -c ' \
-    python manage.py makemigrations --noinput && \
-    python manage.py migrate --noinput && \
-    python manage.py collectstatic --noinput && \
-    python -m pdb manage.py runserver 0.0.0.0:8000'
-```
+To debug, you can keep running the containers with `docker compose up`. Insert `import pdb; pdb.set_trace()` into your code somewhere. Then in a separate terminal, run `docker attach food-db-django`. This terminal window is now streaming the `stdin` of your container, and when you trigger `pdb`, you can engage with it here.
 
-Finally, press `c` and enter when prompted by pdb to continue execution. Now insert `import pdb; pdb.set_trace()` wherever you need it.
-
-You can debug the ingredient parser similarly:
-```
-cd ~/food_db
-docker compose run --build --name ingred-parser-debug backend sh -c 'python -m pdb parse_api/api.py'
-```
+You can debug the ingredient parser similarly, using `docker attach food-db-ingred`.
 
 ### Python
 If you want to run code locally, I used `pyenv` to get the virtual environment set up. However, I prefer to run everything inside the Docker container.
