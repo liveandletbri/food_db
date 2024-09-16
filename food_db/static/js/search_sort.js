@@ -14,5 +14,4 @@ document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() =
     Array.from(tableBody.querySelectorAll('tr'))
         .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
         .forEach(tr => tableBody.appendChild(tr) )
-    reapplyEveryOtherRowCss(table.id)
 })))
