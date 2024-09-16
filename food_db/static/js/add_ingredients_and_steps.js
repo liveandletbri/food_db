@@ -2,6 +2,7 @@
 
 
 let ingredTable = document.querySelector("#ingred-table")
+let ingredTableBody = ingredTable.querySelector('tbody')
 let addIngredientButton = document.querySelector("#add-ingred-form")
 let deleteIngredientButton = document.querySelector("#delete-ingred-form")
 
@@ -21,7 +22,7 @@ function addIngredientRow(e) {
     let newRowNumber = lastRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `ingred_${newRowNumber}`) // Update the new row to have the correct row number
-    ingredTable.appendChild(newRow)
+    ingredTableBody.appendChild(newRow)
 
     // Increment the number of total rows in the hidden field
     extraIngredRowNum++
@@ -40,7 +41,7 @@ function removeBottomIngredientRow(e) {
 
 function removeThisIngredientRow(deleteButton) {
     let row = deleteButton.parentNode.parentNode.parentNode
-    ingredTable.removeChild(row)
+    ingredTableBody.removeChild(row)
 
     extraIngredRowNum--
     extraIngredRowCountField.value = extraIngredRowNum
@@ -53,6 +54,7 @@ deleteIngredientButton.addEventListener('click', removeBottomIngredientRow)
 // Same thing, but now Steps
 
 let stepTable = document.querySelector("#step-table")
+let stepTableBody = stepTable.querySelector('tbody')
 let addStepButton = document.querySelector("#add-step-form")
 let deleteStepButton = document.querySelector("#delete-step-form")
 
@@ -72,7 +74,7 @@ function addStepRow(e) {
     let newRowNumber = lastRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `step_${newRowNumber}`) // Update the new row to have the correct row number
-    stepTable.appendChild(newRow)
+    stepTableBody.appendChild(newRow)
 
     // Increment the number of total rows in the hidden field
     extraStepRowNum++
@@ -91,7 +93,7 @@ function removeBottomStepRow(e) {
 
 function removeThisStepRow(deleteButton) {
     let row = deleteButton.parentNode.parentNode
-    stepTable.removeChild(row)
+    stepTableBody.removeChild(row)
 
     extraStepRowNum--
     extraStepRowCountField.value = extraStepRowNum
