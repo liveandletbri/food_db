@@ -7,7 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from functools import partial
 from rest_framework import status
-from ..models import Food, Ingredient, Recipe, RecipeBook, RecipeStep, UnitOfMeasurement
+from ..models import Food, Ingredient, Recipe, RecipeBook, RecipeStep, UnitOfMeasurement, Tag
 from ..urls import urlpatterns
 from .config import create_base_data
 
@@ -159,5 +159,17 @@ class ViewTests(TestCase):
         self.assertEqual(Ingredient.objects.filter(recipe=recipe_instance).count(), 2)
         self.assertEqual(RecipeStep.objects.filter(recipe=recipe_instance).count(), 2)
 
-
-
+    def test_new_tag_POST(self):
+        self.assertEqual(Tag.objects.all().count(), 0)
+        post_data = {
+            'new_tag': 'winter',
+            'extra_ingred_count': 0,
+            'extra_step_count': 0,
+        }
+        response = self.client.post(
+            self.add_recipe,
+            data=post_data,
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, self.add_recipe)
+        self.assertEqual(Tag.objects.all().count(), 1)
