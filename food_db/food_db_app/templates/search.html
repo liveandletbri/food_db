@@ -20,10 +20,24 @@
     {% with result_count=text_search.qs|length %}
     <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
     {% endwith %}
-    {% for recipe, tags in tags_by_recipe.items %}
-        <p class="search_result"><a class="left_side_of_page" href="/recipe/{{recipe}}">{{ recipe }}</a>{% for tag in tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
-    {% endfor %}
+    <table id="search_results_table">
+        <thead>
+            <th>Recipe</th>
+            <th>Times cooked</th>
+            <th>Last cooked</th>
+        </thead>
+        <tbody>
+            {% for recipe, tags in tags_by_recipe.items %}
+            <tr>
+                <td>
+                    <p class="search_result"><a class="left_side_of_page" href="/recipe/{{recipe}}">{{ recipe }}</a>{% for tag in tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-<script src="{% static 'js/search.js' %}"></script>
+<script src="{% static 'js/search_filter.js' %}"></script>
+<script src="{% static 'js/search_sort.js' %}"></script>
 
 {% endblock content %}
