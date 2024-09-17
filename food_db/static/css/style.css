@@ -183,16 +183,26 @@ input[type="url"] {
 
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
-    .step_x_icon {
+    .step_row_buttons {
         width: 4%;
     }
 }
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
-    .step_x_icon {
+    .step_row_buttons {
         width: 12%;
     }
 }
+.step_row_buttons {
+    text-align: center;
+}
 #step_table {
     table-layout: fixed;
+}
+.delete_step_button {
+    cursor: pointer;
+}
+.parse_step_button {
+    cursor: pointer;
+    color: blue;
 }

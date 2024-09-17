@@ -167,8 +167,9 @@
                     <textarea name="step_{{ forloop.counter0 }}_description" id="id_step_{{ forloop.counter0 }}_description">{{ step.description }}</textarea>
                     <span id="step_{{ forloop.counter0 }}_description_tooltip" class="form_validate_tooltip">You must specify at least one recipe step</span>
                 </td>
-                <td class="step_x_icon"><a style="cursor: pointer;" onmouseover="">
-                    <img class="delete_step_button" src="{% static 'img/x-icon.svg' %}" width="20" height="20" alt="Delete step"/>
+                <td class="step_row_buttons"><a style="cursor: pointer;" onmouseover="">
+                    <img class="delete_step_button" src="{% static 'img/x-icon.svg' %}" width="20" height="20" title="Delete step"/>
+                    <i class="fa-solid fa-ellipsis parse_step_button" title="Parse bulk text into separate steps"></i>
                 </a></td>
             </div>
         </tr>
