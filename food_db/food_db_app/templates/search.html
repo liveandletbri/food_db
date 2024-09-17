@@ -11,8 +11,14 @@
         {{ text_search.form.ingredient }}
         <br>
         <label>{{ text_search.form.tag.label }}:</label>
-        {{ text_search.form.tag }}
-    
+        <label class="tags_row"><ul>
+            {% for value, text in tags %}
+                <div class="ui slider checkbox tag_check">
+                    <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ text }}">
+                    {{ text }}
+                </div>
+            {% endfor %}
+        </ul></label>
     <!-- <input id="search_button" type="submit" /> -->
     </div>
 </form>
