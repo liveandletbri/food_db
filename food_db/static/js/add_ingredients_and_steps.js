@@ -5,7 +5,6 @@ let ingredTable = document.querySelector("#ingred-table")
 let ingredTableBody = ingredTable.querySelector('tbody')
 let addIngredientButton = document.querySelector("#add-ingred-form")
 let deleteLastIngredientButton = document.querySelector("#delete-ingred-form")
-let deleteThisIngredientButtons = document.querySelectorAll(".delete_ingred_button")
 
 let extraIngredRowCountField = document.querySelector("#id_extra_ingred_count")
 let extraIngredRowNum = Number(extraIngredRowCountField.value);
@@ -13,27 +12,46 @@ let extraIngredRowNum = Number(extraIngredRowCountField.value);
 function addListenersToRowButtons() {
     let deleteThisIngredientButtons = document.querySelectorAll(".delete_ingred_button")
     let deleteThisStepButtons = document.querySelectorAll(".delete_step_button")
+    let parseThisStepButtons = document.querySelectorAll(".parse_step_button")
 
     deleteThisIngredientButtons.forEach(btn => btn.addEventListener('click', removeThisIngredientRow, btn))
     deleteThisStepButtons.forEach(btn => btn.addEventListener('click', removeThisStepRow, btn))
+    parseThisStepButtons.forEach(btn => btn.addEventListener('click', parseThisStepRow, btn))
 }
 
-addListenersToRowButtons()
+// Need to wait for "onload" to be after all the SVGs are rendered by Font Awesome magic
+window.onload = function() {
+    addListenersToRowButtons()
+}
 
-function addIngredientRow(e) {
+function addIngredientRow(e, rowToInsertAfter = null) {
     e.preventDefault()
 
     let newRow = ingredTable.rows[1].cloneNode(true) // Clone the first ingredient row
     let idRegex = RegExp(`ingred_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
-    // Since you can delete rows from the middle, we need to find the last ingredient ID number and increment that for the new row
-    let lastRow = ingredTable.rows[ingredTable.rows.length - 1]
-    let lastRowFirstInputName = lastRow.querySelector("td:first-child > input").name
-    let lastRowNumber = Number(lastRowFirstInputName.replace('ingred_','').split('_')[0])
-    let newRowNumber = lastRowNumber + 1
+    // Since you can delete and add rows in the middle of the table, we need to find the highest ingredient ID number and increment that for the new row
+    let ingredTableArray = Array.from(ingredTable.rows) // convert HTMLCollection into Array, so we can...
+    let ingredRows = ingredTableArray.slice(1) // Remove header row
+    
+    let highestRowNumber = Math.max(...
+        ingredRows.map(row => row.querySelector("td:first-child > input").name) // iterate over ingredient rows and strip the name of each row
+        .map(name =>  Number(name.replace('ingred_','').split('_')[0])) // strip number out of name
+    )
+    let newRowNumber = highestRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `ingred_${newRowNumber}`) // Update the new row to have the correct row number
-    ingredTableBody.appendChild(newRow)
+    newRow.querySelectorAll('input').forEach(x => x.value = '') // Blank out text in new row
+
+    // If specified, insert this row after another row. Otherwise, append to bottom
+    let rowToInsertBefore
+    if ( rowToInsertAfter == null ) {
+        // set artificially high number as the row to insert before - it will just add to the end
+        rowToInsertBefore = 999
+    } else {
+        rowToInsertBefore = rowToInsertAfter.rowIndex + 1
+    }
+    ingredTableBody.insertBefore(newRow, ingredTable.rows[rowToInsertBefore])
 
     // Increment the number of total rows in the hidden field
     extraIngredRowNum++
@@ -62,7 +80,6 @@ function removeThisIngredientRow(e) {
 
 addIngredientButton.addEventListener('click', addIngredientRow)
 deleteLastIngredientButton.addEventListener('click', removeBottomIngredientRow)
-deleteThisIngredientButtons.forEach(btn => btn.addEventListener('click', removeThisIngredientRow, btn))
 
 // Same thing, but now Steps
 
@@ -74,20 +91,32 @@ let deleteLastStepButton = document.querySelector("#delete-step-form")
 let extraStepRowCountField = document.querySelector("#id_extra_step_count")
 let extraStepRowNum = Number(extraStepRowCountField.value);
 
-function addStepRow(e) {
+function addStepRow(e, rowToInsertAfter = null) {
     e.preventDefault()
 
     let newRow = stepTable.rows[0].cloneNode(true) // Clone the first step row
     let idRegex = RegExp(`step_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
-    // Since you can delete rows from the middle, we need to find the last step ID number and increment that for the new row
-    let lastRow = stepTable.rows[stepTable.rows.length - 1]
-    let lastRowFirstInputName = lastRow.querySelector("td:first-child > textarea").name
-    let lastRowNumber = Number(lastRowFirstInputName.replace('step_','').split('_')[0])
-    let newRowNumber = lastRowNumber + 1
+    // Since you can delete and add rows in the middle of the table, we need to find the highest step ID number and increment that for the new row
+    let highestRowNumber = Math.max(...
+        Array.from(stepTable.rows, // convert HTMLCollection into Array, so we can...
+        (row) => row.querySelector("td:first-child > textarea").name) // iterate over it and strip the name of each row
+        .map(name =>  Number(name.replace('step_','').split('_')[0])) // strip number out of name
+    )
+    let newRowNumber = highestRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `step_${newRowNumber}`) // Update the new row to have the correct row number
-    stepTableBody.appendChild(newRow)
+    newRow.querySelector('textarea').value = '' // Blank out text in new row
+
+    // If specified, insert this row after another row. Otherwise, append to bottom
+    let rowToInsertBefore
+    if ( rowToInsertAfter == null ) {
+        // set artificially high number as the row to insert before - it will just add to the end
+        rowToInsertBefore = 999
+    } else {
+        rowToInsertBefore = rowToInsertAfter.rowIndex + 1
+    }
+    stepTableBody.insertBefore(newRow, stepTable.rows[rowToInsertBefore])
 
     // Increment the number of total rows in the hidden field
     extraStepRowNum++
@@ -112,6 +141,27 @@ function removeThisStepRow(e) {
 
     extraStepRowNum--
     extraStepRowCountField.value = extraStepRowNum
+}
+
+function parseThisStepRow(e) {
+    let row = e.currentTarget.closest('tr')
+    let rawText = row.querySelector('textarea').value
+    let parsedText = rawText.split(/(\n)(\d\.)*/gm)
+        .filter(chunk => chunk) // remove undefined
+        .filter(chunk => !chunk.match(/^\s+$/)) // remove chunks that are just white space
+        .filter(chunk => !chunk.match(/^\d\.$/)) // remove chunks that are just a number and period
+        .map(chunk => chunk.trim())
+        .map(chunk => chunk.replace(/^\d\./,''))
+    let numberNewSteps = parsedText.length - 1
+    
+    // create new steps and set their values to the parsed text chunks
+    for(let i = 0; i < numberNewSteps; i++){ // Note the less than - it will insert exactly numberNewSteps rows
+        addStepRow(e, rowToInsertAfter=stepTable.rows[row.rowIndex])
+    }
+    for(let i = 0; i <= numberNewSteps; i++){ // Less than or equal - this runs one more time to account for the original row that we are keeping
+        let rowNumber = i + row.rowIndex
+        stepTable.rows[rowNumber].querySelector('textarea').value = parsedText[i]
+    }
 }
 
 addStepButton.addEventListener('click', addStepRow)
