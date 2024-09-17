@@ -5,8 +5,12 @@ let ingredientSearch = document.querySelector("#id_ingredient")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 
 async function stealthSubmit(e) {
-    // if(e && e.keyCode == 13) { // 13 is the enter key
-    
+    // An async 'form submission' rather than an actual form submission that loads
+    // a new page. Retrieves results from the /search URL (this page's URL) with a
+    // GET, then extracts HTML from the result and patches it onto the current page's
+    // HTML, rather than actually moving to a new URL. It's pretty brute force but
+    // hey, what are side projects for?
+
     let titleSearchValue = titleSearch.value
     let ingredientSearchValue = ingredientSearch.value
     let selectedTags = Array.from(tags)
@@ -17,6 +21,8 @@ async function stealthSubmit(e) {
         title: titleSearchValue,
         ingredient: ingredientSearchValue,
     }
+
+    // Format params as URL query string
     let param_string = Object.entries(params)
         .map(([k, v]) => (`${k}=${v}`))
         .join('&')
@@ -35,13 +41,13 @@ async function stealthSubmit(e) {
         return response.text();
     })
     
+    // Render the response text as an html element, then extract the new search result div from its innards
     let responseHtml = document.createElement('html')
     responseHtml.innerHTML = response
-    
     let responseSearchResults = responseHtml.querySelector('#search_results')
-    searchResults.innerHTML = responseSearchResults.innerHTML
 
-    // e.currentTarget.focus()
+    // Frankenstein it right into our existing page
+    searchResults.innerHTML = responseSearchResults.innerHTML
 }
 
 titleSearch.addEventListener("input", stealthSubmit);
