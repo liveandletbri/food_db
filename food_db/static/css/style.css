@@ -72,7 +72,7 @@ span.tag_display_label.small {
         -moz-columns: 2;
     }
 }
-/* When screen is at less than 600 px wide */
+/* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
     button.form_mod_button {
         width: 13rem;
@@ -179,4 +179,30 @@ input[type="url"] {
 }
 .search_sort_icon {
     display: none;
+}
+
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    .step_row_buttons {
+        width: 4%;
+    }
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    .step_row_buttons {
+        width: 12%;
+    }
+}
+.step_row_buttons {
+    text-align: center;
+}
+#step_table {
+    table-layout: fixed;
+}
+.delete_step_button {
+    cursor: pointer;
+}
+.parse_step_button {
+    cursor: pointer;
+    color: blue;
 }
