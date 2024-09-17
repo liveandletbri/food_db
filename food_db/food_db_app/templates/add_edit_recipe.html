@@ -138,7 +138,7 @@
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
                 <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
                 <td><a style="cursor: pointer;" onmouseover="">
-                    <img class="delete_ingred_button" src="{% static 'img/x-icon.svg' %}" width="20" height="20" alt="Delete row"/>
+                    <img class="delete_ingred_button" src="{% static 'img/x-icon.svg' %}" width="20" height="20" title="Delete row"/>
                 </a></td>
             </tr>
             {% endfor %}
