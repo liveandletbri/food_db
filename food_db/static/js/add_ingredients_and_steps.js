@@ -4,10 +4,21 @@
 let ingredTable = document.querySelector("#ingred-table")
 let ingredTableBody = ingredTable.querySelector('tbody')
 let addIngredientButton = document.querySelector("#add-ingred-form")
-let deleteIngredientButton = document.querySelector("#delete-ingred-form")
+let deleteLastIngredientButton = document.querySelector("#delete-ingred-form")
+let deleteThisIngredientButtons = document.querySelectorAll(".delete_ingred_button")
 
 let extraIngredRowCountField = document.querySelector("#id_extra_ingred_count")
 let extraIngredRowNum = Number(extraIngredRowCountField.value);
+
+function addListenersToRowButtons() {
+    let deleteThisIngredientButtons = document.querySelectorAll(".delete_ingred_button")
+    let deleteThisStepButtons = document.querySelectorAll(".delete_step_button")
+
+    deleteThisIngredientButtons.forEach(btn => btn.addEventListener('click', removeThisIngredientRow, btn))
+    deleteThisStepButtons.forEach(btn => btn.addEventListener('click', removeThisStepRow, btn))
+}
+
+addListenersToRowButtons()
 
 function addIngredientRow(e) {
     e.preventDefault()
@@ -27,6 +38,8 @@ function addIngredientRow(e) {
     // Increment the number of total rows in the hidden field
     extraIngredRowNum++
     extraIngredRowCountField.value = extraIngredRowNum 
+
+    addListenersToRowButtons()
 }
 
 function removeBottomIngredientRow(e) {
@@ -39,8 +52,8 @@ function removeBottomIngredientRow(e) {
     extraIngredRowCountField.value = extraIngredRowNum
 }
 
-function removeThisIngredientRow(deleteButton) {
-    let row = deleteButton.parentNode.parentNode.parentNode
+function removeThisIngredientRow(e) {
+    let row = e.currentTarget.closest('tr')
     ingredTableBody.removeChild(row)
 
     extraIngredRowNum--
@@ -48,15 +61,15 @@ function removeThisIngredientRow(deleteButton) {
 }
 
 addIngredientButton.addEventListener('click', addIngredientRow)
-deleteIngredientButton.addEventListener('click', removeBottomIngredientRow)
-
+deleteLastIngredientButton.addEventListener('click', removeBottomIngredientRow)
+deleteThisIngredientButtons.forEach(btn => btn.addEventListener('click', removeThisIngredientRow, btn))
 
 // Same thing, but now Steps
 
-let stepTable = document.querySelector("#step-table")
+let stepTable = document.querySelector("#step_table")
 let stepTableBody = stepTable.querySelector('tbody')
 let addStepButton = document.querySelector("#add-step-form")
-let deleteStepButton = document.querySelector("#delete-step-form")
+let deleteLastStepButton = document.querySelector("#delete-step-form")
 
 let extraStepRowCountField = document.querySelector("#id_extra_step_count")
 let extraStepRowNum = Number(extraStepRowCountField.value);
@@ -78,7 +91,9 @@ function addStepRow(e) {
 
     // Increment the number of total rows in the hidden field
     extraStepRowNum++
-    extraStepRowCountField.value = extraStepRowNum 
+    extraStepRowCountField.value = extraStepRowNum
+
+    addListenersToRowButtons() 
 }
 
 function removeBottomStepRow(e) {
@@ -91,8 +106,8 @@ function removeBottomStepRow(e) {
     extraStepRowCountField.value = extraStepRowNum
 }
 
-function removeThisStepRow(deleteButton) {
-    let row = deleteButton.parentNode.parentNode
+function removeThisStepRow(e) {
+    let row = e.currentTarget.closest('tr')
     stepTableBody.removeChild(row)
 
     extraStepRowNum--
@@ -100,5 +115,4 @@ function removeThisStepRow(deleteButton) {
 }
 
 addStepButton.addEventListener('click', addStepRow)
-deleteStepButton.addEventListener('click', removeBottomStepRow)
-
+deleteLastStepButton.addEventListener('click', removeBottomStepRow)
