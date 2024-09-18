@@ -1,11 +1,11 @@
 import datetime
-import json
 from django.db import models
 
 class Recipe(models.Model):
     def __str__(self):
         return self.title
-    title = models.CharField(max_length=255, unique=True)
+    clean_key = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=255)
     url = models.TextField(blank=True)
     recipe_book = models.ForeignKey(
         'RecipeBook', 
@@ -73,22 +73,66 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     def __str__(self):
         return self.name
-    name = models.CharField(max_length=255, unique=True)
+    # clean_key = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     _date_created = models.DateTimeField(auto_now_add=True)
 
 class Food(models.Model):
     def __str__(self):
         return self.name
+    clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     qfc_aisle = models.CharField(max_length=255, blank=True)
     _date_created = models.DateTimeField(auto_now_add=True)
 
+    def clean_name(self, raw_name):
+        return raw_name.lower()
+    
+    def save(self, **kwargs):
+        self.name = self.clean_name(self.name)
+        self.clean_key = self.clean_name(self.clean_key)
+
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "name" in update_fields:
+            kwargs["update_fields"] = {"name"}.union(update_fields)
+
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "clean_key" in update_fields:
+            kwargs["update_fields"] = {"clean_key"}.union(update_fields)
+
+        super().save(**kwargs)
+
 class UnitOfMeasurement(models.Model):
     def __str__(self):
         return self.name
+    clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     _date_created = models.DateTimeField(auto_now_add=True)
     _date_modified = models.DateTimeField(auto_now=True)
+
+    def clean_name(self, raw_name):
+        clean_name = raw_name.lower()
+        if clean_name.endswith('s'):
+            clean_name = clean_name[:-1]
+        return clean_name
+    
+    def save(self, **kwargs):
+        self.name = self.clean_name(self.name)
+        self.clean_key = self.clean_name(self.clean_key)
+
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "name" in update_fields:
+            kwargs["update_fields"] = {"name"}.union(update_fields)
+
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "clean_key" in update_fields:
+            kwargs["update_fields"] = {"clean_key"}.union(update_fields)
+
+        super().save(**kwargs)
 
 class CookedMeal(models.Model):
     def __str__(self):
@@ -103,6 +147,7 @@ class CookedMeal(models.Model):
 class RecipeBook(models.Model):
     def __str__(self):
         return self.name
+    clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     author = models.CharField(max_length=255, blank=True)
     _date_created = models.DateTimeField(auto_now_add=True)

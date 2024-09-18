@@ -9,6 +9,7 @@ from functools import partial
 from rest_framework import status
 from ..models import Food, Ingredient, Recipe, RecipeBook, RecipeStep, UnitOfMeasurement, Tag
 from ..urls import urlpatterns
+from ..views import sanitize_string
 from .config import create_base_data
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class ViewTests(TestCase):
             page_name = pattern.name
             setattr(cls, page_name, reverse(page_name)) 
 
-        # For those with params, the attribute can be a function. So self.page_name(param_value), e.g. self.recipe_detail('My recipe')
+        # For those with params, the attribute can be a function. So self.page_name(param_value), e.g. self.recipe_detail('my-recipe')
 
         # This is the template of the function:
         # def url_func(self, param_value):
@@ -54,11 +55,11 @@ class ViewTests(TestCase):
         # I had this dynamic method of doing this ^ but my functions were being equated to the same thing (shallow copies overwriting each other somehow) so screw it, here's the manual way
         
         def recipe_detail(self, param_value):
-                return reverse('recipe_detail', kwargs={'title': param_value})
+                return reverse('recipe_detail', kwargs={'key': param_value})
         cls.recipe_detail = recipe_detail
         
         def edit_recipe(self, param_value):
-                return reverse('edit_recipe', kwargs={'title': param_value})
+                return reverse('edit_recipe', kwargs={'key': param_value})
         cls.edit_recipe = edit_recipe
         
 
@@ -72,12 +73,12 @@ class ViewTests(TestCase):
         self.assertTemplateUsed(response, 'index.html')
     
     def test_recipe_detail_GET(self):
-        response = self.client.get(self.recipe_detail('My recipe'))
+        response = self.client.get(self.recipe_detail('my-recipe'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTemplateUsed(response, 'recipe_detail.html')
     
     def test_recipe_detail_bad_recipe_GET(self):
-        response = self.client.get(self.recipe_detail('My nonexistent recipe'))
+        response = self.client.get(self.recipe_detail('my-nonexistent-recipe'))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_recipe_POST(self):
@@ -101,7 +102,7 @@ class ViewTests(TestCase):
         self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
 
         recipe_page_redirect_url = post_response.url
-        recipe_detail_url = self.recipe_detail(post_data['title'])
+        recipe_detail_url = self.recipe_detail(sanitize_string(post_data['title']))
         self.assertEqual(recipe_page_redirect_url, recipe_detail_url)
 
         get_response = self.client.get(recipe_detail_url)
@@ -118,7 +119,8 @@ class ViewTests(TestCase):
 
     def test_edit_recipe_POST(self):
         title = 'My recipe'
-        recipe_instance = Recipe.objects.get(title=title)
+        clean_key = sanitize_string(title)
+        recipe_instance = Recipe.objects.get(clean_key=clean_key)
         
         self.assertEqual(Recipe.objects.all().count(), 1)
         self.assertEqual(Food.objects.all().count(), 1)
@@ -145,13 +147,13 @@ class ViewTests(TestCase):
             'step_0_description': 'Eat the roasted garlic',
         }
         response = self.client.post(
-            self.edit_recipe(title),
+            self.edit_recipe(clean_key),
             data=post_data,
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         recipe_page_redirect_url = response.url
-        recipe_detail_url = self.recipe_detail(title)
+        recipe_detail_url = self.recipe_detail(clean_key)
         self.assertEqual(recipe_page_redirect_url, recipe_detail_url)
         
         self.assertEqual(Food.objects.all().count(), 3)
@@ -161,6 +163,7 @@ class ViewTests(TestCase):
 
     def test_edit_recipe_add_tag_POST(self):
         title = 'My recipe'
+        clean_key = sanitize_string(title)
         recipe_instance = Recipe.objects.get(title=title)
         
         # add tags
@@ -178,7 +181,7 @@ class ViewTests(TestCase):
             'extra_step_count': 0,
         }
         response = self.client.post(
-            self.edit_recipe(title),
+            self.edit_recipe(clean_key),
             data=post_data,
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
@@ -199,3 +202,40 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, self.add_recipe)
         self.assertEqual(Tag.objects.all().count(), 1)
+
+    def test_add_recipe_sanitize_units_and_foods_POST(self):
+        Food.objects.create(name='garlic', clean_key='garlic')
+        UnitOfMeasurement.objects.create(name='kilogram', clean_key='kilogram')
+
+        number_existing_foods_before = Food.objects.all().count()
+        number_existing_units_before = UnitOfMeasurement.objects.all().count()
+
+        clean_key = 'clever-recipe-name'
+
+        post_data = {
+            'clean_key': clean_key,
+            'title': 'Clever Recipe Name!',
+            'servings': '',
+            'extra_ingred_count': 0,
+            'ingred_0_quantity': 1,
+            'ingred_0_unit_of_measurement': 'KiloGrams',  # extra capital letters, ends in S
+            'ingred_0_food': 'gArLiC',  # extra capital letters
+            'extra_step_count': 0,
+            'step_0_description': 'Eat the garlic',
+        }
+        self.client.post(
+            self.add_recipe,
+            data=post_data,
+        )
+
+        number_existing_foods_after = Food.objects.all().count()
+        number_existing_units_after = UnitOfMeasurement.objects.all().count()
+
+        self.assertEqual(number_existing_foods_before, number_existing_foods_after)
+        self.assertEqual(number_existing_units_before, number_existing_units_after)
+
+        new_recipe = Recipe.objects.get(clean_key=clean_key)
+        ingred = Ingredient.objects.get(recipe=new_recipe)
+
+        self.assertEqual(ingred.food.name, 'garlic')
+        self.assertEqual(ingred.unit_of_measurement.name, 'kilogram')

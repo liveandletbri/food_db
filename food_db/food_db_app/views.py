@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 
 from collections import defaultdict
@@ -14,14 +15,21 @@ from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
 
+def sanitize_string(raw_string: str):
+    trimmed = raw_string.lower().strip()
+    remove_common_chars = re.sub(r'''[:,'!"&\(\)]''', '', trimmed)
+    clean_string = re.sub(r'[^a-z0-9]', '-', remove_common_chars)
+
+    return clean_string
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
 
-def recipe_detail(request, title):
+def recipe_detail(request, key):
     # assert isinstance(multiplier, float) and multiplier > 0, "Multiplier must be a positive number"
     
-    recipe = get_object_or_404(Recipe, title=title)
+    recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
     if recipe.servings_min:
         recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
@@ -97,7 +105,10 @@ def add_recipe(request):
             create_recipe_form.cleaned_data['servings_min'] = servings_min
             create_recipe_form.cleaned_data['servings_max'] = servings_max
             
+            clean_key = sanitize_string(create_recipe_form.cleaned_data['title'])
+
             recipe_instance = Recipe(
+                clean_key=clean_key,
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
                 recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page', ''),
@@ -134,24 +145,33 @@ def add_recipe(request):
                     ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                     # Check if food specified in ingredient already exists. If not, create it.
-                    existing_foods = [food.name for food in Food.objects.all()]
-                    selected_food = ingred['food']
+                    existing_foods = [food.clean_key for food in Food.objects.all()]
+                    selected_food = sanitize_string(ingred['food'])
                     if selected_food not in existing_foods:
-                        new_food = Food(name=selected_food)
+                        new_food = Food(
+                            name=ingred['food'],
+                            clean_key=selected_food,
+                        )
                         new_food.save()
                     
                     # Same for unit of measurement
-                    existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
-                    selected_unit = ingred['unit_of_measurement']
+                    existing_units = [unit.clean_key for unit in UnitOfMeasurement.objects.all()]
+                    raw_unit = ingred['unit_of_measurement']
+                    if raw_unit.endswith('s'):
+                        raw_unit = raw_unit[:-1]
+                    selected_unit = sanitize_string(raw_unit)
                     if selected_unit not in existing_units:
-                        new_unit = UnitOfMeasurement(name=selected_unit)
+                        new_unit = UnitOfMeasurement(
+                            name=raw_unit,
+                            clean_key=selected_unit,
+                        )
                         new_unit.save()
                     
                     # Save ingredient
                     ingredient_instance = Ingredient(
-                        food=Food.objects.get(name=selected_food),
+                        food=Food.objects.get(clean_key=selected_food),
                         recipe=recipe_instance,
-                        unit_of_measurement=UnitOfMeasurement.objects.get(name=selected_unit),
+                        unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
                         ingredient_category=ingred.get('ingredient_category', ''),
                         notes=ingred.get('notes', ''),
@@ -170,7 +190,7 @@ def add_recipe(request):
                     step_instance.save()
 
             # redirect to a new URL:
-            return redirect('recipe_detail', title=create_recipe_form.cleaned_data['title'])
+            return redirect('recipe_detail', key=clean_key)
         else:
             # import pdb; pdb.set_trace()
             print(create_recipe_form.errors)
@@ -222,8 +242,8 @@ def search(request):
 
 
 
-def edit_recipe(request, title):
-    recipe_instance = get_object_or_404(Recipe, title=title)
+def edit_recipe(request, key):
+    recipe_instance = get_object_or_404(Recipe, clean_key=key)
 
     # If this is a POST request then process the Form data similarly to an add_recipe request, 
     if request.method == 'POST':
@@ -254,6 +274,8 @@ def edit_recipe(request, title):
             create_recipe_form.cleaned_data['servings_max'] = servings_max
 
             # Update the recipe instance with the new data
+            clean_key=sanitize_string(create_recipe_form.cleaned_data['title'])
+            recipe_instance.clean_key=clean_key
             recipe_instance.title=create_recipe_form.cleaned_data['title']
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
@@ -306,24 +328,33 @@ def edit_recipe(request, title):
                 ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
-                existing_foods = [food.name for food in Food.objects.all()]
-                selected_food = ingred['food']
+                existing_foods = [food.clean_key for food in Food.objects.all()]
+                selected_food = sanitize_string(ingred['food'])
                 if selected_food not in existing_foods:
-                    new_food = Food(name=selected_food)
+                    new_food = Food(
+                        name=ingred['food'],
+                        clean_key=selected_food,
+                    )
                     new_food.save()
                 
                 # Same for unit of measurement
-                existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
-                selected_unit = ingred['unit_of_measurement']
+                existing_units = [unit.clean_key for unit in UnitOfMeasurement.objects.all()]
+                raw_unit = ingred['unit_of_measurement']
+                if raw_unit.endswith('s'):
+                    raw_unit = raw_unit[:-1]
+                selected_unit = sanitize_string(raw_unit)
                 if selected_unit not in existing_units:
-                    new_unit = UnitOfMeasurement(name=selected_unit)
+                    new_unit = UnitOfMeasurement(
+                        name=raw_unit,
+                        clean_key=selected_unit,
+                    )
                     new_unit.save()
                 
                 # Save ingredient
                 ingredient_instance = Ingredient(
-                    food=Food.objects.get(name=selected_food),
+                    food=Food.objects.get(clean_key=selected_food),
                     recipe=recipe_instance,
-                    unit_of_measurement=UnitOfMeasurement.objects.get(name=selected_unit),
+                    unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
                     ingredient_category=ingred.get('ingredient_category', ''),
                     notes=ingred.get('notes', ''),
@@ -341,7 +372,7 @@ def edit_recipe(request, title):
                 step_instance.save()
 
             # redirect to a new URL:
-            return redirect('recipe_detail', title=create_recipe_form.cleaned_data['title'])
+            return redirect('recipe_detail', key=clean_key)
 
         else:
             # import pdb; pdb.set_trace()

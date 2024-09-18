@@ -42,3 +42,21 @@ class ModelTests(TestCase):
         logging.info('abcdefg')
         logging.info(ingred)
         self.assertEqual(ingred, found_ingred)
+
+    def test_create_unit_with_plural_name(self):
+        """
+        UnitOfMeasurement should strip the s from the end of a name, as well as lowercase it
+        """
+        bad_name = 'Kilograms'
+        good_name = 'kilogram'
+        unit = UnitOfMeasurement(
+            name = bad_name,
+            clean_key = bad_name,
+        )
+        unit.save()
+        
+        found_units = UnitOfMeasurement.objects.filter(name=bad_name)
+        self.assertEqual(len(found_units), 0)
+
+        found_units = UnitOfMeasurement.objects.filter(name=good_name)
+        self.assertEqual(len(found_units), 1)
