@@ -206,3 +206,7 @@ input[type="url"] {
     cursor: pointer;
     color: blue;
 }
+.parse_url_button {
+    cursor: pointer;
+    color: blue;
+}

@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '192.168.1.12',  # my computer in my local network - this can potentially change as your computer disconnects and connects to your wifi!
+    # 'cooked.wiki',
 ]
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
