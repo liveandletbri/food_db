@@ -1,11 +1,11 @@
 import datetime
-import json
 from django.db import models
 
 class Recipe(models.Model):
     def __str__(self):
         return self.title
-    title = models.CharField(max_length=255, unique=True)
+    clean_key = models.CharField(max_length=255, null=True)
+    title = models.CharField(max_length=255)
     url = models.TextField(blank=True)
     recipe_book = models.ForeignKey(
         'RecipeBook', 
@@ -73,22 +73,34 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     def __str__(self):
         return self.name
-    name = models.CharField(max_length=255, unique=True)
+    # clean_key = models.CharField(max_length=255, null=True)
+    name = models.CharField(max_length=255)
     _date_created = models.DateTimeField(auto_now_add=True)
 
 class Food(models.Model):
     def __str__(self):
         return self.name
+    clean_key = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255)
     qfc_aisle = models.CharField(max_length=255, blank=True)
     _date_created = models.DateTimeField(auto_now_add=True)
 
+    def set_name(self, raw_name):
+        self.name = raw_name.lower()
+
 class UnitOfMeasurement(models.Model):
     def __str__(self):
         return self.name
+    clean_key = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255)
     _date_created = models.DateTimeField(auto_now_add=True)
     _date_modified = models.DateTimeField(auto_now=True)
+
+    def set_name(self, raw_name):
+        clean_name = raw_name.lower()
+        if clean_name.endswith('s'):
+            clean_name = clean_name[:-1]
+        self.name = clean_name
 
 class CookedMeal(models.Model):
     def __str__(self):
@@ -103,6 +115,7 @@ class CookedMeal(models.Model):
 class RecipeBook(models.Model):
     def __str__(self):
         return self.name
+    clean_key = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255)
     author = models.CharField(max_length=255, blank=True)
     _date_created = models.DateTimeField(auto_now_add=True)
