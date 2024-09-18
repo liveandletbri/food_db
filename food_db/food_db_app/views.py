@@ -197,7 +197,7 @@ def add_recipe(request):
 
     # If this is a GET (or any other method) create the default form.
     else:
-        create_recipe_form = CreateRecipeForm(initial={'title': 'My cool new recipe!'})
+        create_recipe_form = CreateRecipeForm()
 
     context = {
         'mode': 'add',
