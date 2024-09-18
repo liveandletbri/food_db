@@ -57,7 +57,7 @@
             {% for recipe, data in recipe_data.items %}
             <tr>
                 <td>
-                    <p class="search_result"><a class="left_side_of_page" href="/recipe/{{recipe}}">{{ recipe }}</a>{% for tag in data.tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
+                    <p class="search_result"><a class="left_side_of_page" href="/recipe/{{data.clean_key}}">{{ recipe }}</a>{% for tag in data.tags %}<span class="tag_display_label small">{{ tag }}</span>{% endfor %}<br /></p>
                 </td>
                 <td>
                     {{ data.times_cooked }}
