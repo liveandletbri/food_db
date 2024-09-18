@@ -12,10 +12,10 @@
         <br>
         <label>{{ text_search.form.tag.label }}:</label>
         <label class="tags_row"><ul>
-            {% for value, text in tags %}
+            {% for tag in tags %}
                 <div class="ui slider checkbox tag_check">
-                    <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ text }}">
-                    {{ text }}
+                    <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}">
+                    {{ tag.name }}
                 </div>
             {% endfor %}
         </ul></label>
