@@ -92,7 +92,7 @@
                             {% endif %}
                             <td class="recipe_detail_ingredient_food">
                                 {% if ingredient.quantity %}
-                                    {{ ingredient.quantity }} {{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" and ingredient.unit_of_measurement|length > 1 %}s{% endif %}
+                                    {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
                                 {% endif %}
                                 {{ ingredient.food }}</td>
                             <td class="recipe_detail_ingredient_notes">{{ ingredient.notes }}</td>
