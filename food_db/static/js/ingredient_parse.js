@@ -43,7 +43,9 @@ async function hideIngredientParserOnClick(){
     }
 
     for (let i = 0; i <= newIngredCountBaseZero; i++) {
-        console.log(response[i])
+        if ( 'errors' in response[i] ) {
+            console.log(response[i])
+        }
         document.getElementById(`id_ingred_${i}_quantity`).value = response[i].quantity
         document.getElementById(`id_ingred_${i}_unit_of_measurement`).value = response[i].unit_of_measurement
         document.getElementById(`id_ingred_${i}_food`).value = response[i].food
