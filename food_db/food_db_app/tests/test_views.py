@@ -54,11 +54,11 @@ class ViewTests(TestCase):
         # I had this dynamic method of doing this ^ but my functions were being equated to the same thing (shallow copies overwriting each other somehow) so screw it, here's the manual way
         
         def recipe_detail(self, param_value):
-                return reverse('recipe_detail', kwargs={'title': param_value})
+                return reverse('recipe_detail', kwargs={'key': param_value})
         cls.recipe_detail = recipe_detail
         
         def edit_recipe(self, param_value):
-                return reverse('edit_recipe', kwargs={'title': param_value})
+                return reverse('edit_recipe', kwargs={'key': param_value})
         cls.edit_recipe = edit_recipe
         
 

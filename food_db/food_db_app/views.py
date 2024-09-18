@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 
 from collections import defaultdict
@@ -14,14 +15,21 @@ from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
 
+def sanitize_string(raw_string: str):
+    trimmed = raw_string.lower().strip()
+    remove_common_chars = re.sub(r'''[:,'!"&\(\)]''', '', trimmed)
+    clean_string = re.sub(r'[^a-z0-9]', '-', remove_common_chars)
+
+    return clean_string
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
 
-def recipe_detail(request, title):
+def recipe_detail(request, key):
     # assert isinstance(multiplier, float) and multiplier > 0, "Multiplier must be a positive number"
     
-    recipe = get_object_or_404(Recipe, title=title)
+    recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
     if recipe.servings_min:
         recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
@@ -98,6 +106,7 @@ def add_recipe(request):
             create_recipe_form.cleaned_data['servings_max'] = servings_max
             
             recipe_instance = Recipe(
+                clean_key=sanitize_string(create_recipe_form.cleaned_data['title']),
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
                 recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page', ''),
@@ -222,8 +231,8 @@ def search(request):
 
 
 
-def edit_recipe(request, title):
-    recipe_instance = get_object_or_404(Recipe, title=title)
+def edit_recipe(request, key):
+    recipe_instance = get_object_or_404(Recipe, clean_key=key)
 
     # If this is a POST request then process the Form data similarly to an add_recipe request, 
     if request.method == 'POST':
@@ -254,6 +263,7 @@ def edit_recipe(request, title):
             create_recipe_form.cleaned_data['servings_max'] = servings_max
 
             # Update the recipe instance with the new data
+            recipe_instance.clean_key=sanitize_string(create_recipe_form.cleaned_data['title'])
             recipe_instance.title=create_recipe_form.cleaned_data['title']
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')

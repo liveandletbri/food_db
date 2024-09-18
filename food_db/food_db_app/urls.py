@@ -23,7 +23,7 @@ urlpatterns = [
     path('add/', views.add_recipe, name='add_recipe'),
     path('cook/', views.cook_meal, name='cook_meal'),
     path('ingred_parse', views.ingredient_parse_api, name='ingred_parse'),
-    path('recipe/<str:title>', views.recipe_detail, name='recipe_detail'),
-    path('recipe/<str:title>/edit', views.edit_recipe, name='edit_recipe'),
+    path('recipe/<str:key>', views.recipe_detail, name='recipe_detail'),
+    path('recipe/<str:key>/edit', views.edit_recipe, name='edit_recipe'),
     path('search/', views.search, name='search'),
 ]
