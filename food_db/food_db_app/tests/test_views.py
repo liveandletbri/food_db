@@ -202,3 +202,40 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, self.add_recipe)
         self.assertEqual(Tag.objects.all().count(), 1)
+
+    def test_add_recipe_sanitize_units_and_foods_POST(self):
+        Food.objects.create(name='garlic', clean_key='garlic')
+        UnitOfMeasurement.objects.create(name='kilogram', clean_key='kilogram')
+
+        number_existing_foods_before = Food.objects.all().count()
+        number_existing_units_before = UnitOfMeasurement.objects.all().count()
+
+        clean_key = 'clever-recipe-name'
+
+        post_data = {
+            'clean_key': clean_key,
+            'title': 'Clever Recipe Name!',
+            'servings': '',
+            'extra_ingred_count': 0,
+            'ingred_0_quantity': 1,
+            'ingred_0_unit_of_measurement': 'KiloGrams',  # extra capital letters, ends in S
+            'ingred_0_food': 'gArLiC',  # extra capital letters
+            'extra_step_count': 0,
+            'step_0_description': 'Eat the garlic',
+        }
+        self.client.post(
+            self.add_recipe,
+            data=post_data,
+        )
+
+        number_existing_foods_after = Food.objects.all().count()
+        number_existing_units_after = UnitOfMeasurement.objects.all().count()
+
+        self.assertEqual(number_existing_foods_before, number_existing_foods_after)
+        self.assertEqual(number_existing_units_before, number_existing_units_after)
+
+        new_recipe = Recipe.objects.get(clean_key=clean_key)
+        ingred = Ingredient.objects.get(recipe=new_recipe)
+
+        self.assertEqual(ingred.food.name, 'garlic')
+        self.assertEqual(ingred.unit_of_measurement.name, 'kilogram')

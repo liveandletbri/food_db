@@ -145,24 +145,33 @@ def add_recipe(request):
                     ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                     # Check if food specified in ingredient already exists. If not, create it.
-                    existing_foods = [food.name for food in Food.objects.all()]
-                    selected_food = ingred['food']
+                    existing_foods = [food.clean_key for food in Food.objects.all()]
+                    selected_food = sanitize_string(ingred['food'])
                     if selected_food not in existing_foods:
-                        new_food = Food(name=selected_food)
+                        new_food = Food(
+                            name=ingred['food'],
+                            clean_key=selected_food,
+                        )
                         new_food.save()
                     
                     # Same for unit of measurement
-                    existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
-                    selected_unit = ingred['unit_of_measurement']
+                    existing_units = [unit.clean_key for unit in UnitOfMeasurement.objects.all()]
+                    raw_unit = ingred['unit_of_measurement']
+                    if raw_unit.endswith('s'):
+                        raw_unit = raw_unit[:-1]
+                    selected_unit = sanitize_string(raw_unit)
                     if selected_unit not in existing_units:
-                        new_unit = UnitOfMeasurement(name=selected_unit)
+                        new_unit = UnitOfMeasurement(
+                            name=raw_unit,
+                            clean_key=selected_unit,
+                        )
                         new_unit.save()
                     
                     # Save ingredient
                     ingredient_instance = Ingredient(
-                        food=Food.objects.get(name=selected_food),
+                        food=Food.objects.get(clean_key=selected_food),
                         recipe=recipe_instance,
-                        unit_of_measurement=UnitOfMeasurement.objects.get(name=selected_unit),
+                        unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
                         ingredient_category=ingred.get('ingredient_category', ''),
                         notes=ingred.get('notes', ''),
@@ -319,24 +328,33 @@ def edit_recipe(request, key):
                 ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
-                existing_foods = [food.name for food in Food.objects.all()]
-                selected_food = ingred['food']
+                existing_foods = [food.clean_key for food in Food.objects.all()]
+                selected_food = sanitize_string(ingred['food'])
                 if selected_food not in existing_foods:
-                    new_food = Food(name=selected_food)
+                    new_food = Food(
+                        name=ingred['food'],
+                        clean_key=selected_food,
+                    )
                     new_food.save()
                 
                 # Same for unit of measurement
-                existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
-                selected_unit = ingred['unit_of_measurement']
+                existing_units = [unit.clean_key for unit in UnitOfMeasurement.objects.all()]
+                raw_unit = ingred['unit_of_measurement']
+                if raw_unit.endswith('s'):
+                    raw_unit = raw_unit[:-1]
+                selected_unit = sanitize_string(raw_unit)
                 if selected_unit not in existing_units:
-                    new_unit = UnitOfMeasurement(name=selected_unit)
+                    new_unit = UnitOfMeasurement(
+                        name=raw_unit,
+                        clean_key=selected_unit,
+                    )
                     new_unit.save()
                 
                 # Save ingredient
                 ingredient_instance = Ingredient(
-                    food=Food.objects.get(name=selected_food),
+                    food=Food.objects.get(clean_key=selected_food),
                     recipe=recipe_instance,
-                    unit_of_measurement=UnitOfMeasurement.objects.get(name=selected_unit),
+                    unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
                     ingredient_category=ingred.get('ingredient_category', ''),
                     notes=ingred.get('notes', ''),
