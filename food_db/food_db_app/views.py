@@ -105,8 +105,10 @@ def add_recipe(request):
             create_recipe_form.cleaned_data['servings_min'] = servings_min
             create_recipe_form.cleaned_data['servings_max'] = servings_max
             
+            clean_key = sanitize_string(create_recipe_form.cleaned_data['title'])
+
             recipe_instance = Recipe(
-                clean_key=sanitize_string(create_recipe_form.cleaned_data['title']),
+                clean_key=clean_key,
                 title=create_recipe_form.cleaned_data['title'],
                 url=create_recipe_form.cleaned_data.get('url'),
                 recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page', ''),
@@ -179,7 +181,7 @@ def add_recipe(request):
                     step_instance.save()
 
             # redirect to a new URL:
-            return redirect('recipe_detail', title=create_recipe_form.cleaned_data['title'])
+            return redirect('recipe_detail', key=clean_key)
         else:
             # import pdb; pdb.set_trace()
             print(create_recipe_form.errors)
@@ -263,7 +265,8 @@ def edit_recipe(request, key):
             create_recipe_form.cleaned_data['servings_max'] = servings_max
 
             # Update the recipe instance with the new data
-            recipe_instance.clean_key=sanitize_string(create_recipe_form.cleaned_data['title'])
+            clean_key=sanitize_string(create_recipe_form.cleaned_data['title'])
+            recipe_instance.clean_key=clean_key
             recipe_instance.title=create_recipe_form.cleaned_data['title']
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
@@ -351,7 +354,7 @@ def edit_recipe(request, key):
                 step_instance.save()
 
             # redirect to a new URL:
-            return redirect('recipe_detail', title=create_recipe_form.cleaned_data['title'])
+            return redirect('recipe_detail', key=clean_key)
 
         else:
             # import pdb; pdb.set_trace()
