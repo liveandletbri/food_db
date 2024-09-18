@@ -9,7 +9,7 @@
             </h1>
         </td>
         <td class="recipe_detail_header_buttons">
-            <a href="{% url 'edit_recipe' recipe.title %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
+            <a href="{% url 'edit_recipe' recipe.clean_key %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
         </td>
         <td id="upvote_button_td" class="recipe_detail_header_buttons">    
             <div id="upvote_button_div">
