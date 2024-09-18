@@ -206,3 +206,6 @@ input[type="url"] {
     cursor: pointer;
     color: blue;
 }
+.step_description_text {
+    white-space: pre-wrap;
+}
