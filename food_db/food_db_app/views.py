@@ -147,6 +147,8 @@ def add_recipe(request):
                     # Check if food specified in ingredient already exists. If not, create it.
                     existing_foods = [food.clean_key for food in Food.objects.all()]
                     selected_food = sanitize_string(ingred['food'])
+                    if 'salt' in selected_food and 'pepper' in selected_food:
+                        selected_food = 'salt-and-pepper'
                     if selected_food not in existing_foods:
                         new_food = Food(
                             name=ingred['food'],
@@ -331,6 +333,8 @@ def edit_recipe(request, key):
                 # Check if food specified in ingredient already exists. If not, create it.
                 existing_foods = [food.clean_key for food in Food.objects.all()]
                 selected_food = sanitize_string(ingred['food'])
+                if 'salt' in selected_food and 'pepper' in selected_food:
+                    selected_food = 'salt-and-pepper'
                 if selected_food not in existing_foods:
                     new_food = Food(
                         name=ingred['food'],
