@@ -2383,18 +2383,22 @@ input::-moz-focus-inner {
 		padding: 0.75rem 1rem;
 	}
 
-	input[type="checkbox"],
-	input[type="radio"] {
-		-moz-appearance: none;
-		/* -webkit-appearance: none; */
-		-ms-appearance: none;
-		/* appearance: none; */
-		display: block;
-		float: left;
-		/* margin-right: -2rem; */
-		/* opacity: 0; */
-		width: 1rem;
-		z-index: -1;
+	/* When screen is at least 600 px wide */
+	@media screen and (min-width: 600px) {
+		
+		input[type="checkbox"],
+		input[type="radio"] {
+			-moz-appearance: none;
+			/* -webkit-appearance: none; */
+			-ms-appearance: none;
+			/* appearance: none; */
+			display: block;
+			float: left;
+			/* margin-right: -2rem; */
+			/* opacity: 0; */
+			width: 1rem;
+			z-index: -1;
+		}
 	}
 
 		input[type="checkbox"] + label,

@@ -59,7 +59,7 @@ span.tag_display_label.small {
 }
 
 #tags_cell {
-    min-width: 120px;
+    min-width: 150px;
 }
 .recipe_summary_label {
     max-width: 50px;
@@ -208,4 +208,11 @@ input[type="url"] {
 }
 .step_description_text {
     white-space: pre-wrap;
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    #ingred-form {
+        overflow-x: auto;
+        width: 700px;
+    }
 }

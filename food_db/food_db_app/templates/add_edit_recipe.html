@@ -110,24 +110,24 @@
         {{create_recipe_form.extra_ingred_count}}
         <table id="ingred-table" class="form-table">
             <tr>
-                <th width="5%">Quantity</th>
-                <th width="20%">Unit</th>
-                <th width="35%">Food</th>
-                <th width="20%">Category</th>
-                <th width="20%">Notes</th>
+                <th class="ingred_header_quantity" width="5%">Quantity</th>
+                <th class="ingred_header_unit" width="20%">Unit</th>
+                <th class="ingred_header_food" width="35%">Food</th>
+                <th class="ingred_header_category" width="20%">Category</th>
+                <th class="ingred_header_notes" width="20%">Notes</th>
                 <th> </th>
             </tr>
             {% for ingred in ingredient_list %}
             <tr name="ingred_{{ forloop.counter0 }}_row">
-                <td width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
+                <td class="ingred_body_quantity" width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
+                <td class="ingred_body_unit_of_measurement" width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
                     <datalist id="list__unit-list">
                         {% for unit in unit_list %}
                         <option value="{{ unit }}">
                         {% endfor %}
                     </datalist>
                 </td>
-                <td width="35%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
+                <td class="ingred_body_food" width="35%"><input type="text" name="ingred_{{ forloop.counter0 }}_food" list="list__food-list" id="id_ingred_{{ forloop.counter0 }}_food" value="{{ ingred.food }}">
                     <datalist id="list__food-list">
                         {% for food in food_list %}
                         <option value="{{ food }}">
@@ -135,8 +135,8 @@
                     </datalist>
                     <span id="ingred_{{ forloop.counter0 }}_food_tooltip" class="form_validate_tooltip">You must specify at least one ingredient</span>
                 </td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
-                <td width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
+                <td class="ingred_body_ingredient_category" width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
+                <td class="ingred_body_notes" width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
                 <td><a style="cursor: pointer;" onmouseover="">
                     <img class="delete_ingred_button" src="{% static 'img/x-icon.svg' %}" width="20" height="20" title="Delete row"/>
                 </a></td>
@@ -144,7 +144,7 @@
             {% endfor %}
         </table>
 
-    <button class="form_mod_button" id="add-ingred-form" type="button">Add ingredient</button>
+    <button class="form_mod_button" id="add-ingred-form" type="button">Add another ingredient</button>
     <button class="form_mod_button" id="delete-ingred-form" type="button">Remove last ingredient</button>
     </div>
     <div id="ingred-parser" class="hide">
