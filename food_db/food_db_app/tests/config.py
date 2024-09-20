@@ -1,4 +1,4 @@
-from ..models import Ingredient, Food, Recipe, RecipeBook, UnitOfMeasurement
+from ..models import Ingredient, Food, Recipe, RecipeBook, UnitOfMeasurement, Tag
 from ..views import sanitize_string
 
 def create_base_data(cls):
@@ -12,3 +12,4 @@ def create_base_data(cls):
     )
     cls.unit = UnitOfMeasurement.objects.create(name = 'cup')
     cls.food = Food.objects.create(name='banana')
+    Tag.objects.create(name='Pasta')

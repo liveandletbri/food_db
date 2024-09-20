@@ -87,6 +87,7 @@ class ViewTests(TestCase):
             'duration_minutes': 60,
             'servings': '4-6',
             'calories_per_serving': 200,
+            'tag': ['Pasta'],
             'extra_ingred_count': 0,
             'ingred_0_quantity': 1,
             'ingred_0_unit_of_measurement': 'pound',
@@ -95,27 +96,41 @@ class ViewTests(TestCase):
             'step_0_description': 'Eat the garlic',
         }
 
+        # First, post and verify response code
         post_response = self.client.post(
             self.add_recipe,
             data=post_data,
         )
-        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        status_code_msg = 'Did not get 302 redirect code from recipe creation POST. A 400 likely indicates an invalid form.'
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND, msg=status_code_msg)
 
+        # Confirm redirect URL
         recipe_page_redirect_url = post_response.url
         recipe_detail_url = self.recipe_detail(sanitize_string(post_data['title']))
         self.assertEqual(recipe_page_redirect_url, recipe_detail_url)
 
+        # Confirm recipe detail page works
         get_response = self.client.get(recipe_detail_url)
-
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 
+        # Confirm all new objects were created
         self.assertEqual(Recipe.objects.all().count(), 2)
         self.assertEqual(Food.objects.all().count(), 2)
         self.assertEqual(UnitOfMeasurement.objects.all().count(), 2)
 
+        # Confirm all attributes match
+        (serv_min, serv_max) = post_data['servings'].split('-')
+
         new_recipe_instance = Recipe.objects.get(title=post_data['title'])
+        self.assertEqual(new_recipe_instance.duration_minutes, post_data['duration_minutes'])
+        self.assertEqual(new_recipe_instance.servings_min, int(serv_min))
+        self.assertEqual(new_recipe_instance.servings_max, int(serv_max))
+        self.assertEqual(new_recipe_instance.calories_per_serving, post_data['calories_per_serving'])
+
+        # Confirm all model relations are established
         self.assertEqual(Ingredient.objects.filter(recipe=new_recipe_instance).count(), 1)
         self.assertEqual(RecipeStep.objects.filter(recipe=new_recipe_instance).count(), 1)
+        self.assertEqual(Tag.objects.filter(recipes=new_recipe_instance).count(), 1)
 
     def test_edit_recipe_POST(self):
         title = 'My recipe'
@@ -188,8 +203,8 @@ class ViewTests(TestCase):
         self.assertEqual(Tag.objects.filter(recipes=recipe_instance).count(), 1)
         self.assertEqual(Tag.objects.get(recipes=recipe_instance).name, 'winter')
 
-    def test_new_tag_POST(self):
-        self.assertEqual(Tag.objects.all().count(), 0)
+    def test_add_recipe_new_tag_POST(self):
+        starting_tag_count = Tag.objects.all().count()
         post_data = {
             'new_tag': 'winter',
             'extra_ingred_count': 0,
@@ -201,7 +216,7 @@ class ViewTests(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, self.add_recipe)
-        self.assertEqual(Tag.objects.all().count(), 1)
+        self.assertEqual(Tag.objects.all().count(), starting_tag_count + 1)
 
     def test_add_recipe_sanitize_units_and_foods_POST(self):
         Food.objects.create(name='garlic', clean_key='garlic')

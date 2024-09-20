@@ -5,7 +5,7 @@ import requests
 from collections import defaultdict
 from decimal import Decimal
 from django.forms import formset_factory
-from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -130,7 +130,7 @@ def add_recipe(request):
             recipe_instance.save()
 
             # Extract tags from form data and create the relationship from tag -> recipe
-            tags = create_recipe_form.cleaned_data['tags']
+            tags = request.POST.getlist('tag')
             
             if tags:
                 for tag in tags:
@@ -194,8 +194,7 @@ def add_recipe(request):
             # redirect to a new URL:
             return redirect('recipe_detail', key=clean_key)
         else:
-            # import pdb; pdb.set_trace()
-            print(create_recipe_form.errors)
+           return(HttpResponseBadRequest(create_recipe_form.errors))
 
     # If this is a GET (or any other method) create the default form.
     else:
@@ -380,8 +379,7 @@ def edit_recipe(request, key):
             return redirect('recipe_detail', key=clean_key)
 
         else:
-            # import pdb; pdb.set_trace()
-            print(create_recipe_form.errors)
+            return HttpResponseBadRequest(create_recipe_form.errors)
 
     # If this is a GET (or any other method), populate the form with the recipe's existing info.
     else:
