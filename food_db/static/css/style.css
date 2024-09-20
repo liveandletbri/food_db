@@ -209,3 +209,10 @@ input[type="url"] {
 .step_description_text {
     white-space: pre-wrap;
 }
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    #ingred-form {
+        overflow-x: auto;
+        width: 700px;
+    }
+}
