@@ -59,7 +59,7 @@ span.tag_display_label.small {
 }
 
 #tags_cell {
-    min-width: 120px;
+    min-width: 150px;
 }
 .recipe_summary_label {
     max-width: 50px;
