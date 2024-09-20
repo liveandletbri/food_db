@@ -1,6 +1,8 @@
 ## Wut
 Food DB is a small Django project to help store, tag, and query your recipes. It is run inside a Docker container, storing the SQLite database file on your computer.
 
+A second container runs a teeny Flask app to host an ingredient parsing service, which the Django app reaches out to.
+
 ## Getting started
 The only absolutely required prerequisite is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need.
 
