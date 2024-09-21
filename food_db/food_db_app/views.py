@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import CreateView
+from math import floor
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
@@ -36,6 +37,17 @@ def recipe_detail(request, key):
         
     if recipe.servings_max:
         recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
+
+    if recipe.duration_minutes:
+        hours = floor(float(recipe.duration_minutes)/60.0)
+        minutes = recipe.duration_minutes % 60
+        duration_str = ''
+        if hours == 1:
+            duration_str += f'{hours} hour '
+        elif hours > 1:
+            duration_str += f'{hours} hours '
+        duration_str += f'{minutes} minutes'
+        recipe.duration_minutes = duration_str
 
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
