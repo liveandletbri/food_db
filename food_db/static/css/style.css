@@ -11,6 +11,67 @@
     padding-bottom: 0.3rem;
     padding-left: 0.5rem;
 }
+
+
+/* Tag formatting! */
+
+span.tag_display_label {
+    /* border:2px solid  #3cc382; */
+    background-color: #3cc382;
+    color: white;
+    border-radius: 15px;
+    font-size: 1rem;
+    padding: 9px;
+    font-weight: normal;
+    margin-left: 10px;
+}
+span.tag_display_label.small {
+    border-radius: 10px;
+    font-size: 0.7rem;
+    padding: 6px;
+}
+span.tag_display_label.Asian {
+    background-color: #ae000f;
+}
+span.tag_display_label.Dessert {
+    background-color: #ffa7b2;
+    color: black;
+}
+span.tag_display_label.FATBUTTWORTH {
+    background-color: #000000;
+}
+span.tag_display_label.Fall {
+    background-color: #b74600;
+}
+span.tag_display_label.Healthy {
+    background-color: #00e500;
+}
+span.tag_display_label.Middle.Eastern {
+    background-color: #502100;
+}
+span.tag_display_label.Pasta {
+    background-color: #e6d367;
+    color: black;
+}
+span.tag_display_label.Side.dish {
+    background-color: #730096;
+}
+span.tag_display_label.Soup {
+    background-color: #6a0507;
+}
+span.tag_display_label.Spring {
+    background-color: #7ae35d;
+    color: black;
+}
+span.tag_display_label.Summer {
+    background-color: #ffd000;
+}
+span.tag_display_label.Winter {
+    background-color: #1100ff;
+}
+
+
+
 .hide{
     display:none;
 }
@@ -48,21 +109,6 @@ input[id*='step_'][id$='description']{
 }
 td.step_number {
     width: 30px;
-}
-span.tag_display_label {
-    /* border:2px solid  #3cc382; */
-    background-color: #3cc382;
-    color: white;
-    border-radius: 15px;
-    font-size: 1rem;
-    padding: 9px;
-    font-weight: normal;
-    margin-left: 10px;
-}
-span.tag_display_label.small {
-    border-radius: 10px;
-    font-size: 0.7rem;
-    padding: 6px;
 }
 .search_result {
     margin-bottom: 5px;

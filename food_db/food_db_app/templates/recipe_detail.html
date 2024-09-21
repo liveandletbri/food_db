@@ -37,7 +37,7 @@
 {% if recipe.tags.all %}
     <h4>Tags:
     {% for tag in recipe.tags.all %}
-        <span class="tag_display_label">{{ tag }}</span>
+        <span class="tag_display_label {{ tag }}">{{ tag }}</span>
     {% endfor %}
     </h4>
     <hr>
