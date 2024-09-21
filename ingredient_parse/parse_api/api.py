@@ -1,5 +1,6 @@
 import json
 
+from decimal import Decimal
 from flask import Flask, jsonify, request
 from ingredient_parser import parse_ingredient
 
@@ -24,6 +25,15 @@ def get_users():
                         notes_list.append('Amount is approximate')
                     quantity = amount.quantity
                     unit = str(amount.unit)
+
+                    # Put additional quantities in the notes
+                    if len(parsed_ingredient.amount) > 1:
+                        for extra_amount in parsed_ingredient.amount[1:]:
+                            if extra_amount.APPROXIMATE:
+                                notes_list.append('Amount is approximate')
+                            extra_quantity = Decimal(extra_amount.quantity)
+                            extra_unit = str(extra_amount.unit)
+                            notes_list.append(f'({extra_quantity} {extra_unit})')
                 else:
                     quantity = ''
                     unit = ''
