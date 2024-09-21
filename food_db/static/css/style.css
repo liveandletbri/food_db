@@ -275,4 +275,8 @@ input[type="url"] {
         overflow-x: auto;
         width: 700px;
     }
+    #search_results_table {
+        overflow-x: auto;
+        width: 800px;
+    }
 }
