@@ -327,14 +327,10 @@ def edit_recipe(request, key):
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
 
-            # Remove any existing ingredients and steps from the recipe
+            # Remove any existing ingredients from the recipe
             existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance)
             for ingred in existing_ingreds:
                 ingred.delete()
-
-            existing_steps = RecipeStep.objects.filter(recipe=recipe_instance)
-            for step in existing_steps:
-                step.delete()
 
             # For each ingredient in the form
             for i in range(total_ingred_count):
@@ -376,6 +372,11 @@ def edit_recipe(request, key):
                     notes=ingred.get('notes', ''),
                 )
                 ingredient_instance.save()
+
+            # Remove any existing steps from the recipe
+            existing_steps = RecipeStep.objects.filter(recipe=recipe_instance)
+            for step in existing_steps:
+                step.delete()
 
             # Now, for each step in the form
             for i in range(total_step_count):
