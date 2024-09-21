@@ -46,7 +46,8 @@ def recipe_detail(request, key):
             duration_str += f'{hours} hour '
         elif hours > 1:
             duration_str += f'{hours} hours '
-        duration_str += f'{minutes} minutes'
+        if minutes > 0:
+            duration_str += f'{minutes} minutes'
         recipe.duration_minutes = duration_str
 
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
