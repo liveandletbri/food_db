@@ -1,4 +1,9 @@
-<h1>Food DB, biiiitch</h1>
+{% load static %}
+<div id="logo_header">
+    <img id="logo_img" src="{% static 'img/logo.png' %}"></img>
+    <h1 id="logo_title">Food DB, biiiitch</h1>
+</div>
+<br>
+<br style="clear:both" />
 <a class="left_side_of_page" href="{% url 'add_recipe' %}">Add a new recipe</a> | <a href="{% url 'search' %}">Search</a>
-<!-- Add curly braces around the percent signs when ready! -->
 <hr>
