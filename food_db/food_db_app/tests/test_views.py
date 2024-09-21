@@ -142,6 +142,7 @@ class ViewTests(TestCase):
         self.assertEqual(UnitOfMeasurement.objects.all().count(), 1)
         self.assertEqual(Ingredient.objects.filter(recipe=recipe_instance).count(), 0)
         self.assertEqual(RecipeStep.objects.filter(recipe=recipe_instance).count(), 0)
+        self.assertEqual(Tag.objects.filter(recipes=recipe_instance).count(), 0)
 
         # this removes the link between recipe book and the recipe, and adds ingredients, steps, foods, and units
         post_data = {
@@ -149,6 +150,7 @@ class ViewTests(TestCase):
             'duration_minutes': 300,
             'servings': '4-6',
             'calories_per_serving': 200,
+            'tag': ['Pasta'],
             'extra_ingred_count': 1,
             'ingred_0_quantity': 2,
             'ingred_0_unit_of_measurement': 'pound',
@@ -175,6 +177,7 @@ class ViewTests(TestCase):
         self.assertEqual(UnitOfMeasurement.objects.all().count(), 3)
         self.assertEqual(Ingredient.objects.filter(recipe=recipe_instance).count(), 2)
         self.assertEqual(RecipeStep.objects.filter(recipe=recipe_instance).count(), 2)
+        self.assertEqual(Tag.objects.filter(recipes=recipe_instance).count(), 1)
 
     def test_edit_recipe_add_tag_POST(self):
         title = 'My recipe'
