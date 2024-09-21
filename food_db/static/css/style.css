@@ -61,11 +61,13 @@ span.tag_display_label.Soup {
     background-color: #6a0507;
 }
 span.tag_display_label.Spring {
-    background-color: #2ff682;
+    background-color: #ffff87;
     color: black;
+    outline: 2px solid #f9b7da;
 }
 span.tag_display_label.Summer {
     background-color: #ffd000;
+    color: black;
 }
 span.tag_display_label.Winter {
     background-color: #1100ff;
