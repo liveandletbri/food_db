@@ -9,8 +9,10 @@ let durationInput = document.querySelector("#id_duration_minutes")
 let servingsInput = document.querySelector("#id_servings")
 let caloriesInput = document.querySelector("#id_calories_per_serving")
 let notesInput = document.querySelector("#id_notes")
-let ingredFoodInput = document.querySelector("#id_ingred_0_food")
-let stepInput = document.querySelector("#id_step_0_description")
+
+// These are declared in other scripts loaded in the same page
+// let ingredTable = document.querySelector("#ingred-table")
+// let stepTable = document.querySelector("#step_table")
 
 let titleTooltip = document.querySelector("#title_tooltip")
 let urlTooltip = document.querySelector("#url_tooltip")
@@ -50,8 +52,8 @@ async function validateAddRecipe(e) {
     let servings = servingsInput.value
     let calories = caloriesInput.value
     let notes = notesInput.value
-    let ingredFood = ingredFoodInput.value
-    let step = stepInput.value
+    let ingredFood = ingredTable.rows[1].querySelector(`input[name$='_food']`).value
+    let step = stepTable.rows[0].querySelector('textarea').textContent
     
     // Title must be unique
     let currentUrl = window.location.href
@@ -87,7 +89,7 @@ async function validateAddRecipe(e) {
 
     // Recipe book and page OR ingredient and step
     if (
-        (recipeBook == '' || recipeBookPage == '') && (ingredFood == '' || step == '') ||
+        ((recipeBook == '' || recipeBookPage == '') && (ingredFood == '' || step == '')) ||
         (recipeBook == '' && recipeBookPage != '') ||
         (recipeBook != '' && recipeBookPage == '')
     ) {
@@ -127,6 +129,45 @@ async function validateAddRecipe(e) {
             invalid = true
         }
     }
+
+    // Rename rows so the ID numbers are ordered the same as what's visible on the page
+    let ingredTableArray = Array.from(ingredTable.rows) // convert HTMLCollection into Array, so we can...
+    let ingredRows = ingredTableArray.slice(1) // Remove header row
+    for (var i = 0, row; row = ingredRows[i]; i++) {
+        row.setAttribute('name', `ingred_${i}_row`)
+        row.innerHTML = row.innerHTML.replaceAll(/ingred_(\d+)_/g, `ingred_${i}_`)
+    }
+
+    let textArea
+    for (var i = 0, row; row = stepTable.rows[i]; i++) {
+        row.setAttribute('name', `step_${i}_row`)
+        textArea = row.querySelector('textarea')
+        // the textContent appears to be what is submitted to the form, but the value is what
+        // we see in the textbox that we type in. Suppose you are editing a recipe. When the page
+        // loads, the steps are pre-populated. The textarea elements are set such that their
+        // value and textContent are the same. Now you clone one of these rows, one that says
+        // "blah", then delete "blah" and write "foo". Now the value is "foo" but the textContent,
+        // is still "blah". If you submit the form without this next step, you'll submit "blah",
+        // despite seeing "foo" in front of you.
+        textArea.innerHTML = textArea.value 
+        row.innerHTML = row.innerHTML.replaceAll(/step_(\d+)_/g, `step_${i}_`)
+    }
+
+    // If there is no ingredient_0, because that row has been removed, take the highest number and rename it to 0
+    // if ( ingredTable.querySelector('#id_ingred_0_food') == null) {
+    //     let highestIngredNumber = getHighestIngredientNumber() // defined in add_ingredients_and_steps.js
+    //     let highestIngredRow = document.querySelector(`[name=ingred_${highestIngredNumber}_row]`)
+    //     highestIngredRow.setAttribute('name', `ingred_0_row`)
+    //     highestIngredRow.innerHTML = highestIngredRow.innerHTML.replaceAll(`_${highestIngredNumber}_`, '_0_')
+    // }
+
+    // // If there is no step_0, because that row has been removed, take the highest number and rename it to 0
+    // if ( stepTable.querySelector('#id_step_0_description') == null) {
+    //     let highestStepNumber = getHighestStepNumber() // defined in add_ingredients_and_steps.js
+    //     let highestStepRow = document.querySelector(`[name=step_${highestStepNumber}_row]`)
+    //     highestStepRow.setAttribute('name', `step_0_row`)
+    //     highestStepRow.innerHTML = highestStepRow.innerHTML.replaceAll(`_${highestStepNumber}_`, '_0_')
+    // }
     
     // Submit if all clear!
     if (invalid == false) {

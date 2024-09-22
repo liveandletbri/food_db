@@ -161,7 +161,7 @@
     {{create_recipe_form.extra_step_count}}
     <table id="step_table" class="form-table">
         {% for step in step_list %}
-        <tr>
+        <tr name="step_{{ forloop.counter0 }}_row">
             <div class="step-form">
                 <td class="step-textbox">
                     <textarea name="step_{{ forloop.counter0 }}_description" id="id_step_{{ forloop.counter0 }}_description">{{ step.description }}</textarea>

@@ -24,23 +24,28 @@ window.onload = function() {
     addListenersToRowButtons()
 }
 
+function getHighestIngredientNumber () {
+    // Since you can delete and add rows in the middle of the table, we need to find the highest ingredient ID number and increment that for the new row
+    let ingredTableArray = Array.from(ingredTable.rows) // convert HTMLCollection into Array, so we can...
+    let ingredRows = ingredTableArray.slice(1) // Remove header row
+    
+    return Math.max(...
+        ingredRows.map(row => row.querySelector("td:first-child > input").name) // iterate over ingredient rows and strip the name of each row
+        .map(name =>  Number(name.replace('ingred_','').split('_')[0])) // strip number out of name
+    )
+}
+
 function addIngredientRow(e, rowToInsertAfter = null) {
     e.preventDefault()
 
     let newRow = ingredTable.rows[1].cloneNode(true) // Clone the first ingredient row
     let idRegex = RegExp(`ingred_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
-    // Since you can delete and add rows in the middle of the table, we need to find the highest ingredient ID number and increment that for the new row
-    let ingredTableArray = Array.from(ingredTable.rows) // convert HTMLCollection into Array, so we can...
-    let ingredRows = ingredTableArray.slice(1) // Remove header row
-    
-    let highestRowNumber = Math.max(...
-        ingredRows.map(row => row.querySelector("td:first-child > input").name) // iterate over ingredient rows and strip the name of each row
-        .map(name =>  Number(name.replace('ingred_','').split('_')[0])) // strip number out of name
-    )
+    let highestRowNumber = getHighestIngredientNumber()
     let newRowNumber = highestRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `ingred_${newRowNumber}`) // Update the new row to have the correct row number
+    newRow.setAttribute('name', `ingred_${newRowNumber}_row`)
     newRow.querySelectorAll('input').forEach(x => x.value = '') // Blank out text in new row
 
     // If specified, insert this row after another row. Otherwise, append to bottom
@@ -91,21 +96,27 @@ let deleteLastStepButton = document.querySelector("#delete-step-form")
 let extraStepRowCountField = document.querySelector("#id_extra_step_count")
 let extraStepRowNum = Number(extraStepRowCountField.value);
 
+function getHighestStepNumber () {
+    // Since you can delete and add rows in the middle of the table, we need to find the highest step ID number and increment that for the new row
+    return Math.max(...
+        Array.from(stepTable.rows, // convert HTMLCollection into Array, so we can...
+        (row) => row.querySelector("td:first-child > textarea").name) // iterate over it and strip the name of each row
+        .map(name =>  Number(name.replace('step_','').split('_')[0])) // strip number out of name
+    )
+}
+
 function addStepRow(e, rowToInsertAfter = null) {
     e.preventDefault()
 
     let newRow = stepTable.rows[0].cloneNode(true) // Clone the first step row
     let idRegex = RegExp(`step_(\\d){1}`,'g') // Regex to find all instances of the ID number
 
-    // Since you can delete and add rows in the middle of the table, we need to find the highest step ID number and increment that for the new row
-    let highestRowNumber = Math.max(...
-        Array.from(stepTable.rows, // convert HTMLCollection into Array, so we can...
-        (row) => row.querySelector("td:first-child > textarea").name) // iterate over it and strip the name of each row
-        .map(name =>  Number(name.replace('step_','').split('_')[0])) // strip number out of name
-    )
+    let highestRowNumber = getHighestStepNumber()
     let newRowNumber = highestRowNumber + 1
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `step_${newRowNumber}`) // Update the new row to have the correct row number
+    newRow.setAttribute('name', `step_${newRowNumber}_row`)
+    newRow.querySelector('textarea').textContent = '' // Blank out text in new row
     newRow.querySelector('textarea').value = '' // Blank out text in new row
 
     // If specified, insert this row after another row. Otherwise, append to bottom

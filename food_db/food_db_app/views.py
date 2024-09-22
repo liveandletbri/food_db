@@ -151,11 +151,12 @@ def add_recipe(request):
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
 
-            # For each ingredient
-            for i in range(total_ingred_count):
+            # For each ingredient in the form
+            ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
+            for ingred_id_prefix in sorted(ingredient_ids):
                 if create_recipe_form.cleaned_data['ingred_0_food'] != '':  # ingredients were entered for this recipe
                     # Gather ingredients fields together
-                    ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
+                    ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                     # Check if food specified in ingredient already exists. If not, create it.
                     existing_foods = [food.clean_key for food in Food.objects.all()]
@@ -194,15 +195,17 @@ def add_recipe(request):
                     ingredient_instance.save()
 
             # Now, for each step
-            for i in range(total_step_count):
+            step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
+            for i, step_id_prefix in enumerate(sorted(step_ids)):
                 if create_recipe_form.cleaned_data['step_0_description'] != '':  # steps were entered for this recipe
-                    step_description = create_recipe_form.cleaned_data[f'step_{i}_description']
+                    step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                     step_instance = RecipeStep(
                         recipe=recipe_instance,
                         order_number=i,
                         description=step_description,
                     )
                     step_instance.save()
+
 
             # redirect to a new URL:
             return redirect('recipe_detail', key=clean_key)
@@ -334,9 +337,10 @@ def edit_recipe(request, key):
                 ingred.delete()
 
             # For each ingredient in the form
-            for i in range(total_ingred_count):
+            ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
+            for ingred_id_prefix in sorted(ingredient_ids):
                 # Gather ingredients fields together
-                ingred = {field: create_recipe_form.cleaned_data[f'ingred_{i}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
+                ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
                 existing_foods = [food.clean_key for food in Food.objects.all()]
@@ -380,8 +384,9 @@ def edit_recipe(request, key):
                 step.delete()
 
             # Now, for each step in the form
-            for i in range(total_step_count):
-                step_description = create_recipe_form.cleaned_data[f'step_{i}_description']
+            step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
+            for i, step_id_prefix in enumerate(sorted(step_ids)):
+                step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                 step_instance = RecipeStep(
                     recipe=recipe_instance,
                     order_number=i,
