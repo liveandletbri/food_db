@@ -135,40 +135,29 @@ async function validateAddRecipe(e) {
     let ingredRows = ingredTableArray.slice(1) // Remove header row
     for (var i = 0, row; row = ingredRows[i]; i++) {
         row.setAttribute('name', `ingred_${i}_row`)
-        row.innerHTML = row.innerHTML.replaceAll(/ingred_(\d+)_/g, `ingred_${i}_`)
+        // Update names and IDs of inputs
+        row.querySelectorAll('[id^=id_ingred]').forEach(
+            input => input.setAttribute(
+                'id',
+                input.getAttribute('id').replace(/\d+/,i)
+            )
+        )
+        row.querySelectorAll('[id^=id_ingred]').forEach(
+            input => input.setAttribute(
+                'name',
+                input.getAttribute('name').replace(/\d+/,i)
+            )
+        )
     }
 
     let textArea
     for (var i = 0, row; row = stepTable.rows[i]; i++) {
         row.setAttribute('name', `step_${i}_row`)
         textArea = row.querySelector('textarea')
-        // the textContent appears to be what is submitted to the form, but the value is what
-        // we see in the textbox that we type in. Suppose you are editing a recipe. When the page
-        // loads, the steps are pre-populated. The textarea elements are set such that their
-        // value and textContent are the same. Now you clone one of these rows, one that says
-        // "blah", then delete "blah" and write "foo". Now the value is "foo" but the textContent,
-        // is still "blah". If you submit the form without this next step, you'll submit "blah",
-        // despite seeing "foo" in front of you.
-        textArea.innerHTML = textArea.value 
-        row.innerHTML = row.innerHTML.replaceAll(/step_(\d+)_/g, `step_${i}_`)
+        textArea.setAttribute('id', textArea.getAttribute('id').replace(/\d+/,i))
+        textArea.setAttribute('name', textArea.getAttribute('name').replace(/\d+/,i))
     }
 
-    // If there is no ingredient_0, because that row has been removed, take the highest number and rename it to 0
-    // if ( ingredTable.querySelector('#id_ingred_0_food') == null) {
-    //     let highestIngredNumber = getHighestIngredientNumber() // defined in add_ingredients_and_steps.js
-    //     let highestIngredRow = document.querySelector(`[name=ingred_${highestIngredNumber}_row]`)
-    //     highestIngredRow.setAttribute('name', `ingred_0_row`)
-    //     highestIngredRow.innerHTML = highestIngredRow.innerHTML.replaceAll(`_${highestIngredNumber}_`, '_0_')
-    // }
-
-    // // If there is no step_0, because that row has been removed, take the highest number and rename it to 0
-    // if ( stepTable.querySelector('#id_step_0_description') == null) {
-    //     let highestStepNumber = getHighestStepNumber() // defined in add_ingredients_and_steps.js
-    //     let highestStepRow = document.querySelector(`[name=step_${highestStepNumber}_row]`)
-    //     highestStepRow.setAttribute('name', `step_0_row`)
-    //     highestStepRow.innerHTML = highestStepRow.innerHTML.replaceAll(`_${highestStepNumber}_`, '_0_')
-    // }
-    
     // Submit if all clear!
     if (invalid == false) {
         form.submit()
