@@ -53,7 +53,7 @@ async function validateAddRecipe(e) {
     let calories = caloriesInput.value
     let notes = notesInput.value
     let ingredFood = ingredTable.rows[1].querySelector(`input[name$='_food']`).value
-    let step = stepTable.rows[0].querySelector('textarea').textContent
+    let step = stepTable.rows[0].querySelector('textarea').value
     
     // Title must be unique
     let currentUrl = window.location.href

@@ -116,7 +116,7 @@ function addStepRow(e, rowToInsertAfter = null) {
     
     newRow.innerHTML = newRow.innerHTML.replace(idRegex, `step_${newRowNumber}`) // Update the new row to have the correct row number
     newRow.setAttribute('name', `step_${newRowNumber}_row`)
-    newRow.querySelector('textarea').textContent = '' // Blank out text in new row
+    newRow.querySelector('textarea').textContent = '' // Blank out text in new row's HTML
     newRow.querySelector('textarea').value = '' // Blank out text in new row
 
     // If specified, insert this row after another row. Otherwise, append to bottom
