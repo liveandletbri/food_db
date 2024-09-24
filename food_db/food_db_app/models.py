@@ -1,5 +1,6 @@
-import datetime
+import pytz
 from django.db import models
+from django.utils import timezone
 
 class Recipe(models.Model):
     def __str__(self):
@@ -29,8 +30,8 @@ class Recipe(models.Model):
     # def get_foo(self):
     #     return json.loads(self.foo)
 
-    _date_created = models.DateTimeField(auto_now_add=True)
-    _date_modified = models.DateTimeField(auto_now=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
 
 class RecipeStep(models.Model):
     class Meta:
@@ -43,8 +44,8 @@ class RecipeStep(models.Model):
     )
     order_number = models.PositiveSmallIntegerField()
     description = models.TextField()
-    _date_created = models.DateTimeField(auto_now_add=True)
-    _date_modified = models.DateTimeField(auto_now=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
 
 class Ingredient(models.Model):
     def __str__(self):
@@ -67,15 +68,15 @@ class Ingredient(models.Model):
     quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     ingredient_category = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
-    _date_created = models.DateTimeField(auto_now_add=True)
-    _date_modified = models.DateTimeField(auto_now=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
 
 class Tag(models.Model):
     def __str__(self):
         return self.name
     # clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
-    _date_created = models.DateTimeField(auto_now_add=True)
+    _date_created = models.DateTimeField(default=timezone.now)
 
 class Food(models.Model):
     def __str__(self):
@@ -83,7 +84,7 @@ class Food(models.Model):
     clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     qfc_aisle = models.CharField(max_length=255, blank=True)
-    _date_created = models.DateTimeField(auto_now_add=True)
+    _date_created = models.DateTimeField(default=timezone.now)
 
     def clean_name(self, raw_name):
         return raw_name.lower()
@@ -109,8 +110,8 @@ class UnitOfMeasurement(models.Model):
         return self.name
     clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
-    _date_created = models.DateTimeField(auto_now_add=True)
-    _date_modified = models.DateTimeField(auto_now=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
 
     def clean_name(self, raw_name):
         clean_name = raw_name.lower()
@@ -136,13 +137,13 @@ class UnitOfMeasurement(models.Model):
 
 class CookedMeal(models.Model):
     def __str__(self):
-        return self.recipe.title + ' - ' + self.date_cooked.strftime('%Y/%m/%d')
+        return self.recipe.title + ' - ' + self.date_cooked.astimezone(pytz.timezone('US/Pacific')).strftime('%Y/%m/%d')
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
     )
-    date_cooked = models.DateField(default=datetime.datetime.now)
-    _date_created = models.DateField(auto_now_add=True)
+    date_cooked = models.DateTimeField(default=timezone.now)
+    _date_created = models.DateTimeField(default=timezone.now)
 
 class RecipeBook(models.Model):
     def __str__(self):
@@ -150,5 +151,5 @@ class RecipeBook(models.Model):
     clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     author = models.CharField(max_length=255, blank=True)
-    _date_created = models.DateTimeField(auto_now_add=True)
-    _date_modified = models.DateTimeField(auto_now=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)

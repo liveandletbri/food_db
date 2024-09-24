@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import CreateView
 from math import floor
+from pytz import timezone
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
@@ -70,7 +71,7 @@ def recipe_detail(request, key):
 
     last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
     if last_cooked_meal:
-        last_cooked_date = last_cooked_meal.date_cooked.strftime('%b %d, %Y')
+        last_cooked_date = last_cooked_meal.date_cooked.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
     else:
         last_cooked_date = ''
 
@@ -238,13 +239,13 @@ def search(request):
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
         recipe_data[recipe.title]['tags'] = [tag.name for tag in Tag.objects.filter(recipes=recipe)]
-        recipe_data[recipe.title]['date_created'] = recipe._date_created.strftime('%b %d, %Y')
+        recipe_data[recipe.title]['date_created'] = recipe._date_created.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
         recipe_data[recipe.title]['clean_key'] = recipe.clean_key
         cooked_count = CookedMeal.objects.filter(recipe=recipe).count()
         last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
         if cooked_count > 0:
             recipe_data[recipe.title]['times_cooked'] = str(cooked_count)
-            recipe_data[recipe.title]['last_cooked'] = last_cooked_meal.date_cooked.strftime('%b %d, %Y')
+            recipe_data[recipe.title]['last_cooked'] = last_cooked_meal.date_cooked.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
         else:
             recipe_data[recipe.title]['times_cooked'] = ''
             recipe_data[recipe.title]['last_cooked'] = ''

@@ -30,6 +30,8 @@ You should be up and running at this point. You'll want to create a super user i
 
 Set up a super user by running `docker compose exec backend sh -c 'python manage.py createsuperuser'`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
 
+Also, to get the app running in your timezone, search this repo for `US/Pacific` and update each instance accordingly.
+
 ### Port forwarding
 You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises (search the repo for `csrf_exempt` 😅) in my Django security.
 
