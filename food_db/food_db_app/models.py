@@ -1,5 +1,7 @@
 import datetime
+import functools
 from django.db import models
+from pytz import timezone
 
 class Recipe(models.Model):
     def __str__(self):
@@ -141,7 +143,7 @@ class CookedMeal(models.Model):
         Recipe,
         on_delete=models.CASCADE,
     )
-    date_cooked = models.DateField(default=datetime.datetime.now().date())
+    date_cooked = models.DateField(default=datetime.datetime.now)
     _date_created = models.DateField(auto_now_add=True)
 
 class RecipeBook(models.Model):
