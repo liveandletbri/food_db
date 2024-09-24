@@ -48,14 +48,14 @@ span.tag_display_label.Healthy {
     background-color: #00e500;
 }
 span.tag_display_label.Mexican {
-    background-color: #ca0000;
+    background-color: #d7083c;
     color: #00ff04;
 }
 span.tag_display_label.Middle.Eastern {
-    background-color: #502100;
+    background-color: #fa9303;
 }
 span.tag_display_label.One.pot {
-    background-color: #00c0ca;
+    background-color: #98dfff;
     color: black;
 }
 span.tag_display_label.Pasta {
@@ -63,7 +63,7 @@ span.tag_display_label.Pasta {
     color: black;
 }
 span.tag_display_label.Side.dish {
-    background-color: #730096;
+    background-color: #b104e5;
 }
 span.tag_display_label.Soup {
     background-color: #6a0507;

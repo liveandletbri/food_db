@@ -1,9 +1,9 @@
 {% load static %}
 <div id="logo_header">
-    <img id="logo_img" src="{% static 'img/logo.png' %}"></img>
+    <a href="{% url 'index' %}"><img id="logo_img" src="{% static 'img/logo.png' %}"></img></a>
     <h1 id="logo_title">Food DB, biiiitch</h1>
 </div>
 <br>
 <br style="clear:both" />
-<a class="left_side_of_page" href="{% url 'add_recipe' %}">Add a new recipe</a> | <a href="{% url 'search' %}">Search</a>
+<a class="left_side_of_page" href="{% url 'index' %}">Home</a> | <a href="{% url 'add_recipe' %}">Add a new recipe</a> | <a href="{% url 'search' %}">Search</a>
 <hr>
