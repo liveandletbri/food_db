@@ -34,15 +34,15 @@ span.tag_display_label.small {
 span.tag_display_label.Asian {
     background-color: #ae000f;
 }
+span.tag_display_label.Cold.weather {
+    background-color: #1100ff;
+}
 span.tag_display_label.Dessert {
     background-color: #ffa7b2;
     color: black;
 }
 span.tag_display_label.FATBUTTWORTH {
     background-color: #000000;
-}
-span.tag_display_label.Fall {
-    background-color: #b74600;
 }
 span.tag_display_label.Healthy {
     background-color: #00e500;
@@ -68,17 +68,10 @@ span.tag_display_label.Side.dish {
 span.tag_display_label.Soup {
     background-color: #6a0507;
 }
-span.tag_display_label.Spring {
+span.tag_display_label.Warm.weather {
     background-color: #ffff87;
     color: black;
     outline: 2px solid #f9b7da;
-}
-span.tag_display_label.Summer {
-    background-color: #ffd000;
-    color: black;
-}
-span.tag_display_label.Winter {
-    background-color: #1100ff;
 }
 
 
