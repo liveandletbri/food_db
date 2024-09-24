@@ -43,7 +43,7 @@
                 </tr>
             </table>
         <!-- Using formnovalidate on this input means the in-browser form validation doesn't run on the form only for this button. The other button triggers browser-side validation -->
-        <input type="submit" name="submittag" onclick="hideTagFormOnClick()" value="Add tag" formnovalidate="formnovalidate">
+        <input id="add_tag_button" type="submit" name="submittag" value="Add tag" formnovalidate="formnovalidate">
         <hr>
     </div>
     <table>
@@ -185,7 +185,7 @@
 
 
 <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
-<script src="{% static 'js/create_tag.js' %}"></script>
 <script src="{% static 'js/ingredient_parse.js' %}"></script>
 <script src="{% static 'js/recipe_add_form_validate.js' %}"></script>
+<script src="{% static 'js/create_tag.js' %}"></script>
 {% endblock content %}
