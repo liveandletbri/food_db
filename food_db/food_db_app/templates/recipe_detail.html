@@ -55,7 +55,7 @@
         <td>{{ recipe.servings_min }}{% if recipe.servings_max %} - {{ recipe.servings_max }}{% endif %}</td>
     </tr>
     {% endif %}
-    {% if recipe.calories %}
+    {% if recipe.calories_per_serving %}
     <tr>
         <td class="recipe_summary_label">Calories per serving:</td>
         <td>{{ recipe.calories_per_serving }}</td>

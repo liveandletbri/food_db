@@ -125,7 +125,7 @@ td.step_number {
     min-width: 150px;
 }
 .recipe_summary_label {
-    max-width: 50px;
+    max-width: 60px;
 }
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
