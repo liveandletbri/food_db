@@ -118,7 +118,7 @@
             </tr>
             {% for ingred in ingredient_list %}
             <tr name="ingred_{{ forloop.counter0 }}_row">
-                <td class="ingred_body_quantity" width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{{ ingred.quantity }}"></td>
+                <td class="ingred_body_quantity" width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{% if ingred.quantity %}{{ ingred.quantity }}{% endif %}"></td>
                 <td class="ingred_body_unit_of_measurement" width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_unit_of_measurement" list="list__unit-list" id="id_ingred_{{ forloop.counter0 }}_unit_of_measurement" value="{{ ingred.unit_of_measurement }}">
                     <datalist id="list__unit-list">
                         {% for unit in unit_list %}
