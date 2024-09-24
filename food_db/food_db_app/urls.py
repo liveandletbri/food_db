@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     path('recipe/<str:key>', views.recipe_detail, name='recipe_detail'),
     path('recipe/<str:key>/edit', views.edit_recipe, name='edit_recipe'),
     path('search/', views.search, name='search'),
+    path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.png')),
 ]
