@@ -1,7 +1,5 @@
 import datetime
-import functools
 from django.db import models
-from pytz import timezone
 
 class Recipe(models.Model):
     def __str__(self):

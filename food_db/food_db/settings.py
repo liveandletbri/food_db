@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '192.168.1.12',  # my computer in my local network - this can potentially change as your computer disconnects and connects to your wifi!
+    'msi',  # my computer's name, so I can use http://msi:8000 instead of my IP. Also handy to have set up given that my IP can change
 ]
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None

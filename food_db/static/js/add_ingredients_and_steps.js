@@ -68,11 +68,13 @@ function addIngredientRow(e, rowToInsertAfter = null) {
 function removeBottomIngredientRow(e) {
     e.preventDefault()
 
-    let lastRowNum = ingredTable.rows.length - 1
-    ingredTable.deleteRow(lastRowNum)
+    if (ingredTable.rows.length > 2) {
+        let lastRowNum = ingredTable.rows.length - 1
+        ingredTable.deleteRow(lastRowNum)
 
-    extraIngredRowNum--
-    extraIngredRowCountField.value = extraIngredRowNum
+        extraIngredRowNum--
+        extraIngredRowCountField.value = extraIngredRowNum
+    }
 }
 
 function removeThisIngredientRow(e) {
@@ -139,11 +141,13 @@ function addStepRow(e, rowToInsertAfter = null) {
 function removeBottomStepRow(e) {
     e.preventDefault()
 
-    let lastRowNum = stepTable.rows.length - 1
-    stepTable.deleteRow(lastRowNum)
+    if (stepTable.rows.length > 1) {
+        let lastRowNum = stepTable.rows.length - 1
+        stepTable.deleteRow(lastRowNum)
 
-    extraStepRowNum--
-    extraStepRowCountField.value = extraStepRowNum
+        extraStepRowNum--
+        extraStepRowCountField.value = extraStepRowNum
+    }
 }
 
 function removeThisStepRow(e) {
