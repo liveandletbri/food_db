@@ -47,8 +47,16 @@ span.tag_display_label.Fall {
 span.tag_display_label.Healthy {
     background-color: #00e500;
 }
+span.tag_display_label.Mexican {
+    background-color: #ca0000;
+    color: #00ff04;
+}
 span.tag_display_label.Middle.Eastern {
     background-color: #502100;
+}
+span.tag_display_label.One.pot {
+    background-color: #00c0ca;
+    color: black;
 }
 span.tag_display_label.Pasta {
     background-color: #e6d367;
