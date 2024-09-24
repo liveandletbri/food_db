@@ -141,7 +141,7 @@ class CookedMeal(models.Model):
         Recipe,
         on_delete=models.CASCADE,
     )
-    date_cooked = models.DateField(default=datetime.date.today)
+    date_cooked = models.DateField(default=datetime.datetime.now().date())
     _date_created = models.DateField(auto_now_add=True)
 
 class RecipeBook(models.Model):
