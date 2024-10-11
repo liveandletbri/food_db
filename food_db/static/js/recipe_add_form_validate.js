@@ -77,6 +77,13 @@ async function validateAddRecipe(e) {
         )
     }
 
+    // Title must have valid characters
+    let titleAlphaNumOnly = title.replace(/[^\w\d]/,'')
+    if ( titleAlphaNumOnly.length < 4 ) {
+        invalid = true
+        showAndHideTooltip(titleTooltip)
+    }
+
     // URL must be valid URL
     if ( url != '') {
         try {
