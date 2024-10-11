@@ -3,8 +3,16 @@ from django import forms
 from .models import Recipe, Tag
 
 class RecipeTextFilter(filters.FilterSet):
-    title = filters.CharFilter(lookup_expr='icontains')  # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#field-lookups
-    ingredient = filters.CharFilter(label='Ingredient contains', field_name='ingredient__food__name', lookup_expr='icontains')
+    title = filters.CharFilter(
+        lookup_expr='icontains',
+        distinct = True
+    )  # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#field-lookups
+    ingredient = filters.CharFilter(
+        label='Ingredient contains',
+        field_name='ingredient__food__name',
+        lookup_expr='icontains',
+        distinct = True,
+    )
     tag = filters.ModelMultipleChoiceFilter(
         label='Tagged with',
         field_name='tags__name',
@@ -12,8 +20,10 @@ class RecipeTextFilter(filters.FilterSet):
         queryset=Tag.objects.all().order_by('name'),
         widget=forms.CheckboxSelectMultiple(),
         conjoined=True,
+        distinct = True,
     )
 
     class Meta:
         model = Recipe
         fields = ['title', 'ingredient', 'tags']
+        distinct = True

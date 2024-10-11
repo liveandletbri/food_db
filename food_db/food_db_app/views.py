@@ -235,7 +235,7 @@ def add_recipe(request):
 
 def search(request):
     text_search_form = RecipeTextFilter(request.GET, queryset=Recipe.objects.all().order_by('-_date_created'))
-    found_recipes = text_search_form.qs
+    found_recipes = text_search_form.qs.distinct()
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
         recipe_data[recipe.title]['tags'] = [tag.name for tag in Tag.objects.filter(recipes=recipe)]
