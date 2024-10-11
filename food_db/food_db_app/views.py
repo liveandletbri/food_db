@@ -423,24 +423,39 @@ def edit_recipe(request, key):
                 create_recipe_form.fields['servings'].initial+= " - " + str(recipe_instance.servings_max)
         else:
             create_recipe_form.fields['servings'].initial = ''
+        
+        if recipe_instance.recipe_book:
+            create_recipe_form.fields['recipe_book'].initial = recipe_instance.recipe_book.name
 
         # Prepping ingredients and steps as dictionaries to be passed to the template, rather than setting inital fields,
         # because the template cannot dyanmically access dictionary keys (i.e. cannot do this: create_recipe_form['ingred_' + number + '_food'].value)
         ingredient_list = []
+        ingredient_fields = ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']
         for i, ingredient in enumerate(related_ingredients):
             ingredient_data = {}
-            for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']:
+            for field in ingredient_fields:
                 # create_recipe_form.fields[f'ingred_{i}_{field}'].initial = getattr(ingredient, field)  # what you would set if using initial values
                 ingredient_data[field] = getattr(ingredient, field)
             ingredient_list.append(ingredient_data)
+        
+        # If the recipe is from a recipe book, it may have no ingredients. Populate a blank one for the form.
+        if len(ingredient_list) == 0:
+            ingredient_list = [{key: '' for key in ingredient_fields}]
 
         step_list = []
+        step_fields = ['description']
         for step in related_steps:
             step_data = {}
-            for field in ['description']:
+            for field in step_fields:
                 # create_recipe_form.fields[f'step_{i}_{field}'].initial = getattr(step, field)
                 step_data[field] = getattr(step, field)
             step_list.append(step_data)
+        
+        # If the recipe is from a recipe book, it may have no steps. Populate a blank one for the form.
+        if len(step_list) == 0:
+            step_list = [{key: '' for key in step_fields}]
+
+        # import pdb; pdb.set_trace()
         
 
 
