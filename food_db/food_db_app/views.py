@@ -454,8 +454,6 @@ def edit_recipe(request, key):
         # If the recipe is from a recipe book, it may have no steps. Populate a blank one for the form.
         if len(step_list) == 0:
             step_list = [{key: '' for key in step_fields}]
-
-        # import pdb; pdb.set_trace()
         
 
 
