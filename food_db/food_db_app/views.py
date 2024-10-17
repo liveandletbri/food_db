@@ -78,7 +78,7 @@ def recipe_detail(request, key):
     context = {
         'recipe': recipe,
         'ingredients_have_categories': ingredients_have_categories,
-        'ingredient_categories': ingredient_categories,
+        'ingredient_categories': sorted(list(ingredient_categories)),
         'ingredients': dict(ingreds_by_category),
         'steps': steps,
         'multiplier': multiplier,
