@@ -18,7 +18,7 @@ class Recipe(models.Model):
     duration_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_min = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_max = models.PositiveSmallIntegerField(null=True, blank=True)
-    calories_per_serving = models.PositiveSmallIntegerField(null=True, blank=True)
+    calories_per_recipe = models.PositiveSmallIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
 

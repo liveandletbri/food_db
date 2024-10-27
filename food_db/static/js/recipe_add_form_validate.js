@@ -7,7 +7,7 @@ let recipeBookInput = document.querySelector("#id_recipe_book")
 let recipeBookPageInput = document.querySelector("#id_recipe_book_page")
 let durationInput = document.querySelector("#id_duration_minutes")
 let servingsInput = document.querySelector("#id_servings")
-let caloriesInput = document.querySelector("#id_calories_per_serving")
+let caloriesInput = document.querySelector("#id_calories_per_recipe")
 let notesInput = document.querySelector("#id_notes")
 
 // These are declared in other scripts loaded in the same page
@@ -20,7 +20,7 @@ let recipeBookTooltip = document.querySelector("#recipe_book_tooltip")
 let recipeBookPageTooltip = document.querySelector("#recipe_book_page_tooltip")
 let durationTooltip = document.querySelector("#duration_minutes_tooltip")
 let servingsTooltip = document.querySelector("#servings_tooltip")
-let caloriesTooltip = document.querySelector("#calories_per_serving_tooltip")
+let caloriesTooltip = document.querySelector("#calories_per_recipe_tooltip")
 let ingredFoodTooltip = document.querySelector("#ingred_0_food_tooltip")
 let stepTooltip = document.querySelector("#step_0_description_tooltip")
 

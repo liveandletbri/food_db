@@ -86,7 +86,7 @@ class ViewTests(TestCase):
             'title': 'The recipe\'s fancy name goes here',
             'duration_minutes': 60,
             'servings': '4-6',
-            'calories_per_serving': 200,
+            'calories_per_recipe': 200,
             'tag': ['Pasta'],
             'extra_ingred_count': 0,
             'ingred_0_quantity': 1,
@@ -125,7 +125,7 @@ class ViewTests(TestCase):
         self.assertEqual(new_recipe_instance.duration_minutes, post_data['duration_minutes'])
         self.assertEqual(new_recipe_instance.servings_min, int(serv_min))
         self.assertEqual(new_recipe_instance.servings_max, int(serv_max))
-        self.assertEqual(new_recipe_instance.calories_per_serving, post_data['calories_per_serving'])
+        self.assertEqual(new_recipe_instance.calories_per_recipe, post_data['calories_per_recipe'])
 
         # Confirm all model relations are established
         self.assertEqual(Ingredient.objects.filter(recipe=new_recipe_instance).count(), 1)
@@ -149,7 +149,7 @@ class ViewTests(TestCase):
             'title': title,
             'duration_minutes': 300,
             'servings': '4-6',
-            'calories_per_serving': 200,
+            'calories_per_recipe': 200,
             'tag': ['Pasta'],
             'extra_ingred_count': 1,
             'ingred_0_quantity': 2,
