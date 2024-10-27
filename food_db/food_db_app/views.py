@@ -129,7 +129,7 @@ def add_recipe(request):
                 duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
                 servings_min=servings_min,
                 servings_max=servings_max,
-                calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving'),
+                calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
             )
 
@@ -299,7 +299,7 @@ def edit_recipe(request, key):
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
-            recipe_instance.calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving')
+            recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
 
             if servings_min:
