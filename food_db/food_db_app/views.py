@@ -33,12 +33,35 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
+    
+    # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
+    if recipe.servings_min and recipe.calories_per_recipe:
+        calories_max = round(recipe.calories_per_recipe / recipe.servings_min)
+    else:
+        calories_max = None
+    
+    if recipe.servings_max and recipe.calories_per_recipe:
+        calories_min = round(recipe.calories_per_recipe / recipe.servings_max)
+    else:
+        calories_min = None
+
+    if calories_min and calories_max:
+        calorie_string = f'{calories_min} - {calories_max} per serving'
+    elif calories_max:
+        calorie_string = f'{calories_max} per serving'
+    elif recipe.calories_per_recipe:
+        calorie_string = f'{recipe.calories_per_recipe} total calories in recipe'
+    else:
+        calorie_string = ''
+
+    # Apply multipliers to serving counts
     if recipe.servings_min:
         recipe.servings_min = str(Decimal(recipe.servings_min * multiplier))  # using Decimal will show decimal point when needed but hides the .0 when the value is an integer
         
     if recipe.servings_max:
         recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
 
+    # Convert minutes into string with hours and minutes
     if recipe.duration_minutes:
         hours = floor(float(recipe.duration_minutes)/60.0)
         minutes = recipe.duration_minutes % 60
@@ -53,15 +76,18 @@ def recipe_detail(request, key):
 
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
+    # Get list of ingredient categories
     ingredient_categories = set(ingred.ingredient_category for ingred in ingredients)
     ingredients_have_categories = ingredient_categories != {''}
 
+    # Apply multiplier to ingredient quantities and store ingredients in ingreds_by_category, where keys are the ingredient category
     ingreds_by_category = defaultdict(list)
     for ingredient in ingredients:
         if ingredient.quantity:
             ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
         ingreds_by_category[ingredient.ingredient_category].append(ingredient)
     
+    # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     for step in steps:
         # increment by one to make the base-zero index look human-friendly
@@ -77,6 +103,7 @@ def recipe_detail(request, key):
 
     context = {
         'recipe': recipe,
+        'calorie_string': calorie_string,
         'ingredients_have_categories': ingredients_have_categories,
         'ingredient_categories': sorted(list(ingredient_categories)),
         'ingredients': dict(ingreds_by_category),
@@ -129,7 +156,7 @@ def add_recipe(request):
                 duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
                 servings_min=servings_min,
                 servings_max=servings_max,
-                calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving'),
+                calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
             )
 
@@ -299,7 +326,7 @@ def edit_recipe(request, key):
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
-            recipe_instance.calories_per_serving=create_recipe_form.cleaned_data.get('calories_per_serving')
+            recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
 
             if servings_min:

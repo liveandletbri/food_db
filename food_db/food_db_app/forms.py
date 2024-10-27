@@ -80,7 +80,7 @@ class CreateRecipeForm(forms.Form):
     recipe_book_page = forms.IntegerField(required=False)
     duration_minutes = forms.IntegerField(required=False)
     servings = forms.CharField(required=False)
-    calories_per_serving = forms.IntegerField(required=False)
+    calories_per_recipe = forms.IntegerField(required=False)
     notes = forms.CharField(required=False)
     tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple())
     
