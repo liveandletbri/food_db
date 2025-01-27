@@ -22,12 +22,30 @@ var comparer = function(idx, asc) {
         // This is a transient function, that is called straight away. 
         // It allows passing in different order of args, based on 
         // the ascending/descending order.
-        return function(v1, v2) {
+        return function(rawVar1, rawVar2) {
 
-            // sort based on a numeric or localeCompare, based on type...
-            return (v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2)) 
-                ? v1 - v2 
-                : v1.toString().localeCompare(v2);
+            // Sort based on subtraction or localeCompare, based on type.
+            // Comparisons return a positive number of var1 is larger/later than var2,
+            // negative if the opposite, and zero if they are equivalent.
+
+            // Try converting dates to numbers first
+            let parsedDateVar1 = Date.parse(rawVar1)
+            let parsedDateVar2 = Date.parse(rawVar2)
+
+            let var1
+            let var2
+
+            if (isNaN(parsedDateVar1) || isNaN(parsedDateVar2)) {  // at least one value is not a valid date 
+                var1 = rawVar1
+                var2 = rawVar2 
+            } else {  // Both are valid dates, so we can use their numerical forms
+                var1 = parsedDateVar1
+                var2 = parsedDateVar2
+            }
+
+            return (var1 !== '' && var2 !== '' && !isNaN(var1) && !isNaN(var2))  // if values are numeric
+                ? var1 - var2  // numeric comparison
+                : var1.toString().localeCompare(var2);  // localeCompare for string comparison
         }(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
     }
 };
