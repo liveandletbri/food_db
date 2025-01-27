@@ -11,12 +11,8 @@ For use on Windows, I recommend installing [Git Bash](https://git-scm.com/downlo
 winpty docker docker exec -it...
 ```
 
-### Ignoring the database
-I have included a database file to make cloning and getting started easy. But since it's now a tracked file, you'll have to tell git to ignore changes on it. Do that with this command:
-```
-git rm --cached food_db/db_data/db.sqlite3
-```
-As far as git is concerned, this is the same as deleting it, but it leaves a local copy on your computer. Now though, you'll have its deletion as a potential change to commit, so... Be careful :) I'd say sorry for this but I'm the only one using it 🤷‍♂️
+### Renaming the database
+I have included a database file, `starter-db.sqlite3`, to make cloning this repo and getting started easy. The rest of the app is looking for a file named `db.sqlite3`. Copy the starter file and paste it in the same directory, naming the new file `db.sqlite3`. Your app will store its data in this one. The file by this name is ignored by git, so you can store changes in your local DB without worrying about checking it into the repo.
 
 ### Docker
 Docker compose is nice because you can run this regardless of if the image is built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build`. If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running `docker logs food-db-django` and look for `Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)` (this is the Mac-specific flavor of the error).
