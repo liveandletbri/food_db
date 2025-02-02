@@ -54,3 +54,4 @@ if __name__ == '__main__':
             all_recipes = Recipe.objects.all()
             for recipe in all_recipes:
                 s3.upload_recipe(recipe)
+            s3.upload_index()
