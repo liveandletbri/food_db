@@ -6,14 +6,12 @@ If you're interested, read on. First you'll set your S3 bucket up, then configur
 ## Setting up your S3 bucket
 
 ## Setting environment variables
-Create a `.env` file at the root of this repo. Its contents should look like this:
+Create the `.env` file at the root directory of this project if you haven't already. Add these lines inside it, filling in the correct URL:
 
 ```
 S3_SYNC=true
-S3_BUCKET_NAME=<your-s3-bucket-name>
+S3_BUCKET_URL=https://your-bucket-name.region.amazonaws.com
 ```
-
-This will be sourced during your Docker build, so run make sure to run `docker compose up --build` if there are changes. 
 
 ## AWS authentication
 

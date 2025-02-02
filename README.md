@@ -11,6 +11,9 @@ For use on Windows, I recommend installing [Git Bash](https://git-scm.com/downlo
 winpty docker docker exec -it...
 ```
 
+### Create a .env file
+For now, you can create an empty file called `.env`. As you read below, you may decide you want to enable [cloud sync](food_db/food_db_app/cloud_sync/README.md), in which case you'll put variables into this file. 
+
 ### Renaming the database
 I have included a database file, `starter-db.sqlite3`, to make cloning this repo and getting started easy. The rest of the app is looking for a file named `db.sqlite3`. Copy the starter file and paste it in the same directory, naming the new file `db.sqlite3`. Your app will store its data in this one. The file by this name is ignored by git, so you can store changes in your local DB without worrying about checking it into the repo.
 

@@ -5,12 +5,6 @@ WORKDIR /app
 # Copy the application code
 COPY . .
 
-# Create .env file if it doesn't exist
-CMD touch /.env
-
-# Pull variables into environment
-CMD source /.env
-
 # Install Python dependencies
 RUN pip install --no-cache-dir -r django-requirements.txt
 
