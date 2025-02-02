@@ -31,12 +31,20 @@ A few code changes to get things personalized to you:
 - Check out `style.css` and look for `span.tag_display_label.<name>`. I've customized the styles for each of my tags. When you create tags, you can replace mine with your own tag names and color scheme, or delete it all and let tags be the default color.
 - Check out the port forwarding section below, which must be concluded with a trip to `settings.py`
 
+## Accessing your site
+First and foremost, as long as the Docker images are running, you can access your website from your local computer by visiting http://127.0.0.1:8000 in your browser. But that's not the most convenient thing. You have a few options for accessing the Food DB remotely:
+
+- With port forwarding configured on your computer, any device on your wifi network can access the site
+- With port forwarding on your router, anyone can access the site on the public internet (read below about security if you're considering this)
+
+Another option is [cloud sync](food_db/food_db_app/cloud_sync/README.md). When enabled, your recipes are backed up to a read-only site hosted in S3. Though you lose basically all the functionality of FoodDB, it's a nice compromise to be able to securely access your recipes when away from home and even when FoodDB is taken offline.
+
 ### Port forwarding
 You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises (search the repo for `csrf_exempt` 😅) in my Django security.
 
-That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little resarch on how to secure your setup. I'm not a security expert and am not using port forwarding myself.
+That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little resarch on how to secure your setup. I'm not a security expert and my own site is not open to the public internet.
 
-If, after all that, you're interested, you'll need to configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) for internal sharing. Then, if you want to expose to the open internet, configure port forwarding on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
+To open your site to just your wifi network, configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) for internal sharing. Then, if you want to expose to the open internet, configure port forwarding on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
 
 Now on a different device, use your browser to visit your IP address at port 8000. If only sharing internally, use your private IP address (default router setup would give you `http://192.168.1.x:8000`). If sharing externally, use your public IP address. 
 
