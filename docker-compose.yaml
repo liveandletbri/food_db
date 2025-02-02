@@ -13,6 +13,7 @@ services:
       - "8000:8000"
     stdin_open: true # docker run -i
     tty: true        # docker run -t
+    env_file: .env
     # healthcheck:
     #   test: ["CMD", "mysql", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1"]
     #   timeout: 20s
