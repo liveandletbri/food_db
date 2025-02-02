@@ -73,5 +73,8 @@ This file is included in the repo and will create an absolute, bare-bones HTML p
 
 Should you modify `index.html`, you'll need to manually re-upload it to S3, as I avoided automating that to reduce cost (gotta save that 500th of a cent!). But I did include a script: run `docker compose exec backend sh -c 'python food_db_app/cloud_sync/s3.py index'` to trigger it.
 
+## (Re-)Upload all recipes
+The first time you set this up - or if something goes wrong and you want to re-upload your cloud recipes - you can trigger an upload of all recipes using `docker compose exec backend sh -c 'python food_db_app/cloud_sync/s3.py all'`.
+
 ## Accessing your site
 You can find the URL for your website on the `Properties` page under `Static website hosting`, but generally you can access it with a URL like this: `http://<bucket-name>.s3-website-<region>.amazonaws.com`.

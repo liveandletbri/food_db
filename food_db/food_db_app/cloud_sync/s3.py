@@ -1,4 +1,5 @@
 import boto3
+import django
 import os
 import sys
 
@@ -10,7 +11,7 @@ class S3Sync():
         self.s3 = boto3.resource('s3').Bucket(self.bucket_name)
         self.cloud_sync_dir = os.path.dirname(os.path.realpath(__file__))
 
-    def upload_object(self):
+    def upload_recipe(self):
         pass
 
     def upload_index(self):
@@ -21,7 +22,11 @@ class S3Sync():
 if __name__ == '__main__':
     if S3_SYNC_ENABLED:
         s3 = S3Sync()
-        
+
+        # Must set Django up before you can import from it
+        django.setup()
+        from food_db_app.models import Recipe, Ingredient, RecipeStep
+
         # Check for argument passed
         try:
             arg = sys.argv[1].lower()
@@ -32,4 +37,7 @@ if __name__ == '__main__':
         
         if arg == 'index':
             s3.upload_index()
-            
+
+        if arg == 'all':
+            all_recipes = Recipe.objects.all()
+            print(all_recipes)
