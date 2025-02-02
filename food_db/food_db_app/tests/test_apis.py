@@ -32,8 +32,8 @@ class APITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_cook_meal_janky_recipe_title(self):
-        disgusting_title = """
-        \n\nThis recipe's ;janky-title: a F$#ckin! `${shart_show}`
+        disgusting_title = f"""
+        \n\nThis recipe's ;janky-title: is {chr(1000)}{chr(919)}{chr(938)}{chr(964)}
         """
         Recipe.objects.create(title=disgusting_title)
         post_data = {
