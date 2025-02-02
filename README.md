@@ -1,14 +1,14 @@
 ## Wut
 Food DB is a small Django project to help store, tag, and query your recipes. It is run inside a Docker container, storing the SQLite database file on your computer.
 
-A second container runs a teeny Flask app to host an ingredient parsing service, which the Django app reaches out to.
+A second container runs a teeny Flask app to host an [ingredient parsing](https://github.com/strangetom/ingredient-parser) service, which the Django app reaches out to.
 
 ## Getting started
 The only absolutely required prerequisite is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need.
 
 For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker attach` or `docker exec` (not `docker compose` though) commands, prepend `winpty`, like this:
 ```
-winpty docker docker exec -it...
+winpty docker exec -it...
 ```
 
 ### Create a .env file
@@ -63,7 +63,7 @@ To debug, you can keep running the containers with `docker compose up`. Insert `
 You can debug the ingredient parser similarly, using `docker attach food-db-ingred`.
 
 ### Python
-If you want to run code locally, I used `pyenv` to get the virtual environment set up. However, I prefer to run everything inside the Docker container.
+If you want to run code locally, I recommend [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) to get the virtual environment set up. However, I prefer to run everything inside the Docker container using something like `docker exec -it food-db-django bash`.
 ```
 cd food_db/food_db
 pyenv install 3.11.9
@@ -79,6 +79,6 @@ pip install --upgrade pip
 pip install -r ingred-requirements.txt
 ```
 
-When returning later, run `pyenv activate food-db-3.11.9`
+When returning later, activate the environment with `pyenv activate food-db-3.11.9`
 
 Check out the docs for the ingredient parser [here](https://ingredient-parser.readthedocs.io/en/latest/start/index.html#optional-parameters), and the code [here](https://github.com/strangetom/ingredient-parser).
