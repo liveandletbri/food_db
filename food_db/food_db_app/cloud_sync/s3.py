@@ -3,8 +3,6 @@ import django
 import os
 import sys
 
-from food_db_app.cloud_sync.parse import convert_recipe_to_html
-
 S3_SYNC_ENABLED = os.getenv('S3_SYNC', 'false').lower() == 'true'
 
 class S3Sync():
@@ -16,6 +14,9 @@ class S3Sync():
         self.bucket_url = f'{self.bucket_name}.s3-website-{self.aws_region}.amazonaws.com'
 
     def upload_recipe(self, recipe):
+        # Import happens here, not at top of page, so it's after Django is set up
+        from food_db_app.cloud_sync.parse import convert_recipe_to_html
+
         title = recipe.title
         print(f'Converting recipe "{title}" to HTML')
         recipe_html = convert_recipe_to_html(recipe, self.bucket_url)
@@ -38,7 +39,7 @@ if __name__ == '__main__':
 
         # Must set Django up before you can import from it
         django.setup()
-        from food_db_app.models import Recipe, Ingredient, RecipeStep
+        from food_db_app.models import Recipe
 
         # Check for argument passed
         try:

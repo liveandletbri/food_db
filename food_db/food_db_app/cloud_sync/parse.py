@@ -1,4 +1,5 @@
 def convert_recipe_to_html(recipe_instance, bucket_url):
+    # Import happens here, not at top of page, so it's after Django is set up
     from food_db_app.models import Ingredient, RecipeStep
     
     related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category')
