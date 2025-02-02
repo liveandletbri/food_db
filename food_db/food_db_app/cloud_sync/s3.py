@@ -6,14 +6,17 @@ S3_SYNC_ENABLED = os.getenv('S3_SYNC', 'false').lower() == 'true'
 
 class S3Sync():
     def __init__(self):
-        self.bucket_url = os.getenv('S3_BUCKET_URL')
-        self.s3 = boto3.client('s3', region=os.getenv('AWS_REGION'))
+        self.bucket_name = os.getenv('S3_BUCKET_NAME')
+        self.s3 = boto3.resource('s3').Bucket(self.bucket_name)
+        self.cloud_sync_dir = os.path.dirname(os.path.realpath(__file__))
 
     def upload_object(self):
         pass
 
     def upload_index(self):
-        pass
+        print(f'Attempting to upload index.html to S3 bucket {self.bucket_name}')
+        self.s3.upload_file(f'{self.cloud_sync_dir}/index.html', 'index.html', ExtraArgs={'ContentType':'text/html'})
+        print('Successfully uploaded index.html')
 
 if __name__ == '__main__':
     if S3_SYNC_ENABLED:
@@ -25,7 +28,8 @@ if __name__ == '__main__':
         except IndexError:
             arg = None
         
-        print(s3.bucket_url)
+        print(s3.bucket_name)
         
         if arg == 'index':
             s3.upload_index()
+            
