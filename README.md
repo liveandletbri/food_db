@@ -1,15 +1,18 @@
 ## Wut
 Food DB is a small Django project to help store, tag, and query your recipes. It is run inside a Docker container, storing the SQLite database file on your computer.
 
-A second container runs a teeny Flask app to host an ingredient parsing service, which the Django app reaches out to.
+A second container runs a teeny Flask app to host an [ingredient parsing](https://github.com/strangetom/ingredient-parser) service, which the Django app reaches out to.
 
 ## Getting started
 The only absolutely required prerequisite is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need.
 
 For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker attach` or `docker exec` (not `docker compose` though) commands, prepend `winpty`, like this:
 ```
-winpty docker docker exec -it...
+winpty docker exec -it...
 ```
+
+### Create a .env file
+For now, you can create an empty file called `.env`. As you read below, you may decide you want to enable [cloud sync](food_db/food_db_app/cloud_sync/README.md), in which case you'll put variables into this file. 
 
 ### Renaming the database
 I have included a database file, `starter-db.sqlite3`, to make cloning this repo and getting started easy. The rest of the app is looking for a file named `db.sqlite3`. Copy the starter file and paste it in the same directory, naming the new file `db.sqlite3`. Your app will store its data in this one. The file by this name is ignored by git, so you can store changes in your local DB without worrying about checking it into the repo.
@@ -31,12 +34,20 @@ A few code changes to get things personalized to you:
 - Check out `style.css` and look for `span.tag_display_label.<name>`. I've customized the styles for each of my tags. When you create tags, you can replace mine with your own tag names and color scheme, or delete it all and let tags be the default color.
 - Check out the port forwarding section below, which must be concluded with a trip to `settings.py`
 
+## Accessing your site
+First and foremost, as long as the Docker images are running, you can access your website from your local computer by visiting http://127.0.0.1:8000 in your browser. But that's not the most convenient thing. You have a few options for accessing the Food DB remotely:
+
+- With port forwarding configured on your computer, any device on your wifi network can access the site
+- With port forwarding on your router, anyone can access the site on the public internet (read below about security if you're considering this)
+
+Another option is [cloud sync](food_db/food_db_app/cloud_sync/README.md). When enabled, your recipes are backed up to a read-only site hosted in S3. Though you lose basically all the functionality of FoodDB, it's a nice compromise to be able to securely access your recipes when away from home and even when FoodDB is taken offline.
+
 ### Port forwarding
 You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises (search the repo for `csrf_exempt` 😅) in my Django security.
 
-That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little resarch on how to secure your setup. I'm not a security expert and am not using port forwarding myself.
+That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little resarch on how to secure your setup. I'm not a security expert and my own site is not open to the public internet.
 
-If, after all that, you're interested, you'll need to configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) for internal sharing. Then, if you want to expose to the open internet, configure port forwarding on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
+To open your site to just your wifi network, configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) for internal sharing. Then, if you want to expose to the open internet, configure port forwarding on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
 
 Now on a different device, use your browser to visit your IP address at port 8000. If only sharing internally, use your private IP address (default router setup would give you `http://192.168.1.x:8000`). If sharing externally, use your public IP address. 
 
@@ -52,7 +63,7 @@ To debug, you can keep running the containers with `docker compose up`. Insert `
 You can debug the ingredient parser similarly, using `docker attach food-db-ingred`.
 
 ### Python
-If you want to run code locally, I used `pyenv` to get the virtual environment set up. However, I prefer to run everything inside the Docker container.
+If you want to run code locally, I recommend [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) to get the virtual environment set up. However, I prefer to run everything inside the Docker container using something like `docker exec -it food-db-django bash`.
 ```
 cd food_db/food_db
 pyenv install 3.11.9
@@ -68,6 +79,6 @@ pip install --upgrade pip
 pip install -r ingred-requirements.txt
 ```
 
-When returning later, run `pyenv activate food-db-3.11.9`
+When returning later, activate the environment with `pyenv activate food-db-3.11.9`
 
 Check out the docs for the ingredient parser [here](https://ingredient-parser.readthedocs.io/en/latest/start/index.html#optional-parameters), and the code [here](https://github.com/strangetom/ingredient-parser).

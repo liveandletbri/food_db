@@ -16,6 +16,7 @@ from pytz import timezone
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
+from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 def sanitize_string(raw_string: str):
     trimmed = raw_string.lower().strip()
@@ -234,6 +235,10 @@ def add_recipe(request):
                     )
                     step_instance.save()
 
+            # if cloud sync is enabled, sync now
+            if S3_SYNC_ENABLED:
+                s3 = S3Sync()
+                s3.upload_recipe(recipe_instance)
 
             # redirect to a new URL:
             return redirect('recipe_detail', key=clean_key)
@@ -421,6 +426,11 @@ def edit_recipe(request, key):
                     description=step_description,
                 )
                 step_instance.save()
+
+            # if cloud sync is enabled, sync now
+            if S3_SYNC_ENABLED:
+                s3 = S3Sync()
+                s3.upload_recipe(recipe_instance)
 
             # redirect to a new URL:
             return redirect('recipe_detail', key=clean_key)

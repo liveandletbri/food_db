@@ -28,10 +28,14 @@ class ViewTests(TestCase):
     @classmethod
     def setUp(cls):
         cls.client = Client()
+
+        excluded_patterns = ['favicon.ico']
+        patterns = [pat for pat in urlpatterns if pat.pattern._route not in excluded_patterns]
         
-        patterns_without_params = [pattern for pattern in urlpatterns if ':' not in str(pattern.pattern)]
-        patterns_with_params = [pattern for pattern in urlpatterns if pattern not in patterns_without_params]
+        patterns_without_params = [pattern for pattern in patterns if ':' not in str(pattern.pattern)]
+        patterns_with_params = [pattern for pattern in patterns if pattern not in patterns_without_params]
         # Set cls.index = reverse('index'), for example. This first loop is for the URLs that don't need params
+        # import pdb; pdb.set_trace()   
         for pattern in patterns_without_params:
             page_name = pattern.name
             setattr(cls, page_name, reverse(page_name)) 
