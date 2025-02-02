@@ -9,6 +9,7 @@ services:
       - ./food_db/db_data:/app/db_data
       - ./food_db/food_db_app:/app/food_db_app
       - ./food_db/static:/app/static
+      - $HOME/.aws/credentials:/.aws/credentials:ro
     ports:
       - "8000:8000"
     stdin_open: true # docker run -i

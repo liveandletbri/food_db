@@ -6,15 +6,27 @@ If you're interested, read on. First you'll set your S3 bucket up, then configur
 ## Setting up your S3 bucket
 
 ## Setting environment variables
-Create the `.env` file at the root directory of this project if you haven't already. Add these lines inside it, filling in the correct URL:
+Create the `.env` file at the root directory of this project if you haven't already. Add these lines inside it, filling in the values in `<brackets>`:
 
 ```
 S3_SYNC=true
-S3_BUCKET_URL=https://your-bucket-name.region.amazonaws.com
+AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials
+
+S3_BUCKET_URL=<https://your-bucket-name.region.amazonaws.com>
+AWS_REGION=<region>
 ```
 
 ## AWS authentication
+> Disclaimer and note to future me: Right now I have the AWS credentials mounted as a volume in the docker compose file. This assumes that anyone running this has that file already and does not make it conditional. I didn't find a way I liked to make that conditional without wrapping docker commands in a shell script.
 
+Anyway, make sure you've got your AWS credentials file set up like this:
+
+```
+blah
+region
+keys
+blah
+```
 
 ## index.html
 This file is included in the repo and will create an absolute, bare-bones HTML page that lists your recipes. Clicking a recipe will show the plainest text page you've ever seen. You are welcome to improve the visuals but I have invested all my web-design-interest on the Django site. 

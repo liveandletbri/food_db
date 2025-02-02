@@ -7,7 +7,7 @@ S3_SYNC_ENABLED = os.getenv('S3_SYNC', 'false').lower() == 'true'
 class S3Sync():
     def __init__(self):
         self.bucket_url = os.getenv('S3_BUCKET_URL')
-        self.s3 = boto3.client('s3')
+        self.s3 = boto3.client('s3', region=os.getenv('AWS_REGION'))
 
     def upload_object(self):
         pass
