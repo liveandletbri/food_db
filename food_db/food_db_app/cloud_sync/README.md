@@ -19,14 +19,15 @@ AWS_REGION=<region>
 ## AWS authentication
 > Disclaimer and note to future me: Right now I have the AWS credentials mounted as a volume in the docker compose file. This assumes that anyone running this has that file already and does not make it conditional. I didn't find a way I liked to make that conditional without wrapping docker commands in a shell script.
 
-Anyway, make sure you've got your AWS credentials file set up like this:
+Anyway, make sure you've got your AWS credentials file set up. For example:
 
 ```
-blah
-region
-keys
-blah
+[default]
+aws_access_key_id=foo
+aws_secret_access_key=bar
 ```
+
+If you want to use a different profile name, make sure to configure that by adding `AWS_PROFILE=<your_profile_name>` to `.env`.
 
 ## index.html
 This file is included in the repo and will create an absolute, bare-bones HTML page that lists your recipes. Clicking a recipe will show the plainest text page you've ever seen. You are welcome to improve the visuals but I have invested all my web-design-interest on the Django site. 
