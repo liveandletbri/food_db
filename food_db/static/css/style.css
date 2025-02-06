@@ -34,6 +34,13 @@ span.tag_display_label.small {
 span.tag_display_label.Asian {
     background-color: #ff0000;
 }
+span.tag_display_label.Bread {
+    background-color: #ebad61;
+}
+span.tag_display_label.Breakfast {
+    background-color: #eb619f;
+    outline: 2px solid #5c2000;
+}
 span.tag_display_label.Cold.weather {
     background-color: #1100ff;
 }
