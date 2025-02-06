@@ -8,7 +8,7 @@ class RecipeTextFilter(filters.FilterSet):
         distinct = True
     )  # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#field-lookups
     ingredient = filters.CharFilter(
-        label='Ingredient contains',
+        label='Ingredient names contain',
         field_name='ingredient__food__name',
         lookup_expr='icontains',
         distinct = True,
