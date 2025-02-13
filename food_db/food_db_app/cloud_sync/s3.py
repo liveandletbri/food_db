@@ -55,3 +55,11 @@ if __name__ == '__main__':
             for recipe in all_recipes:
                 s3.upload_recipe(recipe)
             s3.upload_index()
+        
+        if arg == 'recipe':
+            try:
+                recipe_key = sys.argv[2]
+            except IndexError:
+                raise IndexError('Please provide a recipe key to upload')
+            recipe = Recipe.objects.get(clean_key=recipe_key)
+            s3.upload_recipe(recipe)
