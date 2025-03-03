@@ -3,6 +3,7 @@ let searchResults = document.querySelector("#search_results")
 let titleSearch = document.querySelector("#id_title")
 let ingredientSearch = document.querySelector("#id_ingredient")
 let tags = document.querySelectorAll('[id^=id_tag_]')
+let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 
 async function stealthSubmit(e) {
     // An async 'form submission' rather than an actual form submission that loads
@@ -16,6 +17,9 @@ async function stealthSubmit(e) {
     let selectedTags = Array.from(tags)
         .filter(tag => tag.checked)
         .map(tag => tag.value)
+    let excludedTags = Array.from(tagExclusions)
+        .filter(tag => tag.checked)
+        .map(tag => tag.value)
 
     let params = {
         title: titleSearchValue,
@@ -26,10 +30,18 @@ async function stealthSubmit(e) {
     let param_string = Object.entries(params)
         .map(([k, v]) => (`${k}=${v}`))
         .join('&')
-    param_string += '&'    
-    param_string += Array.from(selectedTags)
-        .map(tag => `tag=${tag.replace(' ', '+')}`)
-        .join('&')
+    if (selectedTags.length > 0) {
+        param_string += '&'
+        param_string += Array.from(selectedTags)
+            .map(tag => `tag=${tag.replace(' ', '+')}`)
+            .join('&')
+    }
+    if (excludedTags.length > 0) {
+        param_string += '&'
+        param_string += Array.from(excludedTags)
+            .map(tag => `tag_exclusion=${tag.replace(' ', '+')}`)
+            .join('&')
+    }
 
     console.log(`Performing GET with params: ${param_string}`)
 
@@ -53,3 +65,4 @@ async function stealthSubmit(e) {
 titleSearch.addEventListener("input", stealthSubmit);
 ingredientSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
+tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));

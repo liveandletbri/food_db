@@ -22,6 +22,16 @@ class RecipeTextFilter(filters.FilterSet):
         conjoined=True,
         distinct = True,
     )
+    tag_exclusion = filters.ModelMultipleChoiceFilter(
+        label='Not tagged with',
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Tag.objects.all().order_by('name'),
+        widget=forms.CheckboxSelectMultiple(),
+        conjoined=True,
+        distinct = True,
+        exclude = True,
+    )
 
     class Meta:
         model = Recipe

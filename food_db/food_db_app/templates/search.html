@@ -10,15 +10,31 @@
         <label>{{ text_search.form.ingredient.label }}:</label>
         {{ text_search.form.ingredient }}
         <br>
-        <label>{{ text_search.form.tag.label }}:</label>
-        <label class="tags_row"><ul>
-            {% for tag in tags %}
-                <div class="ui slider checkbox tag_check">
-                    <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}">
-                    {{ tag.name }}
-                </div>
-            {% endfor %}
-        </ul></label>
+        <table><tr style="background-color: #ffffff;">
+            <td>
+                <label>{{ text_search.form.tag.label }}:</label>
+                <label class="tags_row"><ul>
+                    {% for tag in tags %}
+                        <div class="ui slider checkbox tag_check">
+                            <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}">
+                            {{ tag.name }}
+                        </div>
+                    {% endfor %}
+                </ul></label>
+            </td>
+            <td>
+                <label>{{ text_search.form.tag_exclusion.label }}:</label>
+                <label class="tags_row"><ul>
+                    {% for tag in tags %}
+                        <div class="ui slider checkbox tag_check">
+                            <input id="id_excluded_tag_{{ forloop.counter0 }}" name="excluded_tag" type="checkbox" value="{{ tag.name }}">
+                            {{ tag.name }}
+                        </div>
+                    {% endfor %}
+                </ul></label>
+            </td>
+        </tr></table>
+        
     <!-- <input id="search_button" type="submit" /> -->
     </div>
 </form>
