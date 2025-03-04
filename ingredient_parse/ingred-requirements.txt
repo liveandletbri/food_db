@@ -1,2 +1,2 @@
 flask==3.0.3
-ingredient-parser-nlp
+ingredient-parser-nlp==1.3.2
