@@ -28,7 +28,13 @@
 <script src="{% static 'js/cook_meal.js' %}"></script>
 <script src="{% static 'js/multiply_ingredients.js' %}"></script>
 {% if recipe.url != "" %}
-    <h3><a href="{{ recipe.url }}">Original recipe link</a></h3>
+    <div style="display: flex;vertical-align: top;">
+        <h3><a href="{{ recipe.url }}" target=”_blank”>Original recipe link</a></h3>
+        <span>&#160;&#160;&#160;</span>
+        <a href="{{ recipe.url }}" target=”_blank”>
+            <i class="fa-solid fa-arrow-up-right-from-square fa-xs" data-fa-transform="down-4"></i>
+        </a>
+    </div>
     <br><br>
 {% endif %}
 {% if recipe.recipe_book %}
