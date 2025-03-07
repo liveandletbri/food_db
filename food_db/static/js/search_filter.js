@@ -16,8 +16,8 @@ async function stealthSubmit(e) {
 
     let titleSearchValue = titleSearch.value
     let ingredientSearchValue = ingredientSearch.value
-    let durationHoursSearchValue = durationHoursSearch.value
-    let durationMinutesSearchValue = durationMinutesSearch.value
+    let durationHoursSearchValue = parseInt(durationHoursSearch.value)
+    let durationMinutesSearchValue = parseInt(durationMinutesSearch.value)
     let selectedTags = Array.from(tags)
         .filter(tag => tag.checked)
         .map(tag => tag.value)
@@ -26,6 +26,12 @@ async function stealthSubmit(e) {
         .map(tag => tag.value)
 
     // Calculate total duration in minutes
+    if (isNaN(durationHoursSearchValue)) {
+        durationHoursSearchValue = 0
+    }
+    if (isNaN(durationMinutesSearchValue)) {
+        durationMinutesSearchValue = 0
+    }
     let durationSearchValue = parseInt(durationHoursSearchValue) * 60 + parseInt(durationMinutesSearchValue)
 
     let params = {
