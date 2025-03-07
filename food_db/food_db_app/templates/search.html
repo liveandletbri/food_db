@@ -10,6 +10,14 @@
         <label>{{ text_search.form.ingredient.label }}:</label>
         {{ text_search.form.ingredient }}
         <br>
+        <label>{{ text_search.form.duration_lt.label }}:</label>
+        <span id="duration_span" style="display: flex;">
+            <input type="number" name="duration_lt_hours" step="1" id="id_duration_lt_hours" style="width: 70px;">
+            <span>&#160;hours&#160;&#160;&#160;</span>
+            <input type="number" name="duration_lt_minutes" step="15" id="id_duration_lt_minutes" style="width: 70px;">
+            <span>&#160;minutes</span>
+        </span>
+        <br>
         <table><tr style="background-color: #ffffff;">
             <td>
                 <label>{{ text_search.form.tag.label }}:</label>
@@ -51,6 +59,12 @@
                 <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
             </th>
             <th>
+                <a>Duration</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="duration_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="duration_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
                 <a>Times cooked</a>
                 <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
                 <i id="times_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
@@ -74,6 +88,9 @@
             <tr>
                 <td>
                     <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>{% for tag in data.tags %}<span class="tag_display_label small {{ tag }}">{{ tag }}</span>{% endfor %}<br /></p>
+                </td>
+                <td value="{{ data.duration_minutes }}">
+                    {{ data.duration_string }}
                 </td>
                 <td>
                     {{ data.times_cooked }}

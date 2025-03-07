@@ -18,6 +18,19 @@ from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
+def convert_minutes_to_string(minutes: int):
+    '''Convert minutes into string with hours and minutes'''
+    hours = floor(float(minutes)/60.0)
+    minutes = minutes % 60
+    duration_str = ''
+    if hours == 1:
+        duration_str += f'{hours} hour '
+    elif hours > 1:
+        duration_str += f'{hours} hours '
+    if minutes > 0:
+        duration_str += f'{minutes} minutes'
+    return duration_str
+
 def sanitize_string(raw_string: str):
     trimmed = raw_string.lower().strip()
     remove_common_chars = re.sub(r'''[:,'!"&\(\)]''', '', trimmed)
@@ -62,18 +75,8 @@ def recipe_detail(request, key):
     if recipe.servings_max:
         recipe.servings_max = str(Decimal(recipe.servings_max * multiplier))
 
-    # Convert minutes into string with hours and minutes
     if recipe.duration_minutes:
-        hours = floor(float(recipe.duration_minutes)/60.0)
-        minutes = recipe.duration_minutes % 60
-        duration_str = ''
-        if hours == 1:
-            duration_str += f'{hours} hour '
-        elif hours > 1:
-            duration_str += f'{hours} hours '
-        if minutes > 0:
-            duration_str += f'{minutes} minutes'
-        recipe.duration_minutes = duration_str
+        recipe.duration_minutes = convert_minutes_to_string(recipe.duration_minutes)
 
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
@@ -273,6 +276,8 @@ def search(request):
         recipe_data[recipe.title]['tags'] = [tag.name for tag in Tag.objects.filter(recipes=recipe)]
         recipe_data[recipe.title]['date_created'] = recipe._date_created.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
         recipe_data[recipe.title]['clean_key'] = recipe.clean_key
+        recipe_data[recipe.title]['duration_minutes'] = recipe.duration_minutes or 0
+        recipe_data[recipe.title]['duration_string'] = convert_minutes_to_string(recipe.duration_minutes) if recipe.duration_minutes else ''
         cooked_count = CookedMeal.objects.filter(recipe=recipe).count()
         last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
         if cooked_count > 0:
