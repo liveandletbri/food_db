@@ -26,13 +26,18 @@ async function stealthSubmit(e) {
         .map(tag => tag.value)
 
     // Calculate total duration in minutes
-    if (isNaN(durationHoursSearchValue)) {
-        durationHoursSearchValue = 0
+    let durationSearchValue
+    if (durationHoursSearchValue || durationMinutesSearchValue) {
+        if (isNaN(durationHoursSearchValue)) {
+            durationHoursSearchValue = 0
+        }
+        if (isNaN(durationMinutesSearchValue)) {
+            durationMinutesSearchValue = 0
+        }
+        durationSearchValue = parseInt(durationHoursSearchValue) * 60 + parseInt(durationMinutesSearchValue)
+    } else {
+        durationSearchValue = ''
     }
-    if (isNaN(durationMinutesSearchValue)) {
-        durationMinutesSearchValue = 0
-    }
-    let durationSearchValue = parseInt(durationHoursSearchValue) * 60 + parseInt(durationMinutesSearchValue)
 
     let params = {
         title: titleSearchValue,
