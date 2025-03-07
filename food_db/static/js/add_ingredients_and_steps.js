@@ -79,10 +79,25 @@ function removeBottomIngredientRow(e) {
 
 function removeThisIngredientRow(e) {
     let row = e.currentTarget.closest('tr')
-    ingredTableBody.removeChild(row)
+    if (row.rowIndex > 1) {  // Don't delete the first ingredient row, always leave at least one ingredient (or other stuff breaks)
+        ingredTableBody.removeChild(row)
 
-    extraIngredRowNum--
-    extraIngredRowCountField.value = extraIngredRowNum
+        extraIngredRowNum--
+        extraIngredRowCountField.value = extraIngredRowNum
+    } else {
+        // If you try to delete the first row, just clear the values instead
+        // Each row has multiple children, a <td> for each field of an ingredient
+        // Each <td> has just one child, an <input> element. This is what we clear.
+
+        Array.from(row.children).forEach(td => {
+            let input = td.querySelector('input')
+            // There is also a <td> for the delete button, but it doesn't have an <input> element
+            if (input) {
+                input.value = ''
+            }
+        })
+    }
+
 }
 
 addIngredientButton.addEventListener('click', addIngredientRow)
