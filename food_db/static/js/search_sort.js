@@ -10,7 +10,7 @@ function toggleSortIcon(thElement, asc) {
 
 // Sorting logic is from this answer https://stackoverflow.com/a/49041392, modified slightly to insert into tbody
 
-const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+const getCellValue = (tr, idx) => tr.children[idx].getAttribute('value') || tr.children[idx].textContent;
 
 // Returns a function responsible for sorting a specific column index 
 // (idx = columnIndex, asc = ascending order?).
@@ -28,19 +28,22 @@ var comparer = function(idx, asc) {
             // Comparisons return a positive number if var1 is larger/later than var2,
             // negative if the opposite, and zero if they are equivalent.
 
-            // Try converting dates to numbers first
+            // Try assuming string is a Date, and converting to numbers first
             let parsedDateVar1 = Date.parse(rawVar1)
             let parsedDateVar2 = Date.parse(rawVar2)
 
             let var1
             let var2
 
-            if (isNaN(parsedDateVar1) || isNaN(parsedDateVar2)) {  // at least one value is not a valid date 
+            if (/^[0-9]+$/.test(rawVar1) && /^[0-9]+$/.test(rawVar2)) {  // Both strings represent integers
+                var1 = parseInt(rawVar1)
+                var2 = parseInt(rawVar2)
+            } else if (Number.isInteger(parsedDateVar1) && Number.isInteger(parsedDateVar2)) {  // Both are valid dates, so we can use their numerical forms
+                var1 = parsedDateVar1
+                var2 = parsedDateVar2 
+            } else {  // at least one value is not a valid integer or date, so treat them as strings
                 var1 = rawVar1
                 var2 = rawVar2 
-            } else {  // Both are valid dates, so we can use their numerical forms
-                var1 = parsedDateVar1
-                var2 = parsedDateVar2
             }
 
             return (var1 !== '' && var2 !== '' && !isNaN(var1) && !isNaN(var2))  // if values are numeric

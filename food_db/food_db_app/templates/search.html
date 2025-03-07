@@ -51,6 +51,12 @@
                 <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
             </th>
             <th>
+                <a>Duration</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="duration_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="duration_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
                 <a>Times cooked</a>
                 <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
                 <i id="times_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
@@ -74,6 +80,9 @@
             <tr>
                 <td>
                     <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>{% for tag in data.tags %}<span class="tag_display_label small {{ tag }}">{{ tag }}</span>{% endfor %}<br /></p>
+                </td>
+                <td value="{{ data.duration_minutes }}">
+                    {{ data.duration_string }}
                 </td>
                 <td>
                     {{ data.times_cooked }}
