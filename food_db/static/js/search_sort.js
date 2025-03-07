@@ -25,7 +25,7 @@ var comparer = function(idx, asc) {
         return function(rawVar1, rawVar2) {
 
             // Sort based on subtraction or localeCompare, based on type.
-            // Comparisons return a positive number of var1 is larger/later than var2,
+            // Comparisons return a positive number if var1 is larger/later than var2,
             // negative if the opposite, and zero if they are equivalent.
 
             // Try converting dates to numbers first
@@ -50,12 +50,15 @@ var comparer = function(idx, asc) {
     }
 };
 
-// do the work...
-document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
-    let table = th.closest('table')
-    let tableBody = table.querySelector('tbody')
-    toggleSortIcon(th, this.asc)
-    Array.from(tableBody.querySelectorAll('tr'))
-        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-        .forEach(tr => tableBody.appendChild(tr) )
-})))
+function addListenersToTableHeaders() {
+    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+        let table = th.closest('table')
+        let tableBody = table.querySelector('tbody')
+        toggleSortIcon(th, this.asc)
+        Array.from(tableBody.querySelectorAll('tr'))
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+            .forEach(tr => tableBody.appendChild(tr) )
+    })))
+}
+
+addListenersToTableHeaders()

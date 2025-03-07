@@ -60,6 +60,9 @@ async function stealthSubmit(e) {
 
     // Frankenstein it right into our existing page
     searchResults.innerHTML = responseSearchResults.innerHTML
+
+    // This function is defined in search_sort.js
+    addListenersToTableHeaders()
 }
 
 titleSearch.addEventListener("input", stealthSubmit);
