@@ -2,7 +2,8 @@ let searchForm = document.querySelector("#search_form")
 let searchResults = document.querySelector("#search_results")
 let titleSearch = document.querySelector("#id_title")
 let ingredientSearch = document.querySelector("#id_ingredient")
-let durationSearch = document.querySelector("#id_duration_lt")
+let durationHoursSearch = document.querySelector("#id_duration_lt_hours")
+let durationMinutesSearch = document.querySelector("#id_duration_lt_minutes")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 
@@ -15,13 +16,17 @@ async function stealthSubmit(e) {
 
     let titleSearchValue = titleSearch.value
     let ingredientSearchValue = ingredientSearch.value
-    let durationSearchValue = durationSearch.value
+    let durationHoursSearchValue = durationHoursSearch.value
+    let durationMinutesSearchValue = durationMinutesSearch.value
     let selectedTags = Array.from(tags)
         .filter(tag => tag.checked)
         .map(tag => tag.value)
     let excludedTags = Array.from(tagExclusions)
         .filter(tag => tag.checked)
         .map(tag => tag.value)
+
+    // Calculate total duration in minutes
+    let durationSearchValue = parseInt(durationHoursSearchValue) * 60 + parseInt(durationMinutesSearchValue)
 
     let params = {
         title: titleSearchValue,
@@ -70,6 +75,29 @@ async function stealthSubmit(e) {
 
 titleSearch.addEventListener("input", stealthSubmit);
 ingredientSearch.addEventListener("input", stealthSubmit);
-durationSearch.addEventListener("input", stealthSubmit);
+durationHoursSearch.addEventListener("input", stealthSubmit);
+durationMinutesSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));
+
+function incrementHoursFromMinutes() {
+    let hours = parseInt(durationHoursSearch.value)
+    if (isNaN(hours)) {
+        hours = 0
+    }
+    let minutes = parseInt(durationMinutesSearch.value)
+    if (minutes >= 60) {
+        durationHoursSearch.value = hours + 1
+        durationMinutesSearch.value = minutes - 60
+    } else if (minutes < 0) {
+        durationHoursSearch.value = hours - 1
+        durationMinutesSearch.value = minutes + 60
+    }
+    // Check if they entered a minute value that represented more than one hour, e.g. 150 minutes
+    minutes = parseInt(durationMinutesSearch.value)
+    if (minutes >= 60 || minutes < 0) {
+        incrementHoursFromMinutes()
+    }
+}
+
+durationMinutesSearch.addEventListener("blur", incrementHoursFromMinutes);

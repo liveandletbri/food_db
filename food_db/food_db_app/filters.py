@@ -14,7 +14,7 @@ class RecipeTextFilter(filters.FilterSet):
         distinct = True,
     )
     duration_lt = filters.NumberFilter(
-        label='Duration less than (minutes)',
+        label='Duration less than',
         field_name='duration_minutes',
         lookup_expr='lt',
     )

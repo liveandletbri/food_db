@@ -11,7 +11,12 @@
         {{ text_search.form.ingredient }}
         <br>
         <label>{{ text_search.form.duration_lt.label }}:</label>
-        <input type="number" name="duration_lt" step="15" id="id_duration_lt" style="width: 100px;">
+        <span id="duration_span" style="display: flex;">
+            <input type="number" name="duration_lt_hours" step="1" id="id_duration_lt_hours" style="width: 70px;">
+            <span>&#160;hours&#160;&#160;&#160;</span>
+            <input type="number" name="duration_lt_minutes" step="15" id="id_duration_lt_minutes" style="width: 70px;">
+            <span>&#160;minutes</span>
+        </span>
         <br>
         <table><tr style="background-color: #ffffff;">
             <td>
