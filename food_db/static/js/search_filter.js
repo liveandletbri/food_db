@@ -2,6 +2,7 @@ let searchForm = document.querySelector("#search_form")
 let searchResults = document.querySelector("#search_results")
 let titleSearch = document.querySelector("#id_title")
 let ingredientSearch = document.querySelector("#id_ingredient")
+let durationSearch = document.querySelector("#id_duration_lt")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 
@@ -14,6 +15,7 @@ async function stealthSubmit(e) {
 
     let titleSearchValue = titleSearch.value
     let ingredientSearchValue = ingredientSearch.value
+    let durationSearchValue = durationSearch.value
     let selectedTags = Array.from(tags)
         .filter(tag => tag.checked)
         .map(tag => tag.value)
@@ -24,6 +26,7 @@ async function stealthSubmit(e) {
     let params = {
         title: titleSearchValue,
         ingredient: ingredientSearchValue,
+        duration_lt: durationSearchValue,
     }
 
     // Format params as URL query string
@@ -67,5 +70,6 @@ async function stealthSubmit(e) {
 
 titleSearch.addEventListener("input", stealthSubmit);
 ingredientSearch.addEventListener("input", stealthSubmit);
+durationSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));

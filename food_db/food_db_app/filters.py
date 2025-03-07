@@ -13,6 +13,11 @@ class RecipeTextFilter(filters.FilterSet):
         lookup_expr='icontains',
         distinct = True,
     )
+    duration_lt = filters.NumberFilter(
+        label='Duration less than (minutes)',
+        field_name='duration_minutes',
+        lookup_expr='lt',
+    )
     tag = filters.ModelMultipleChoiceFilter(
         label='Tagged with',
         field_name='tags__name',
@@ -35,5 +40,5 @@ class RecipeTextFilter(filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['title', 'ingredient', 'tags']
+        fields = ['title', 'ingredient', 'duration_minutes', 'tags']
         distinct = True
