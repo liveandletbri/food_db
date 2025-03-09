@@ -42,7 +42,7 @@ def capitalize_title(raw_title: str):
     raw_parts = raw_title.split(' ')
     capital_parts = []
     for i, word in enumerate(raw_parts):
-        if i == 0 or word not in ['and', 'or', 'the', 'a', 'an', 'but', 'nor', 'for', 'yet', 'so', 'in', 'on', 'at', 'to', 'of', 'with', 'by', 'as', 'from']:
+        if i == 0 or word not in ['and', 'or', 'the', 'a', 'an', 'but', 'nor', 'for', 'yet', 'so', 'in', 'on', 'at', 'to', 'of', 'with', 'by', 'as', 'from', 'aka']:
             capital_parts.append(word.capitalize())
         else:
             capital_parts.append(word)

@@ -82,3 +82,16 @@ pip install -r ingred-requirements.txt
 When returning later, activate the environment with `pyenv activate food-db-3.11.9`
 
 Check out the docs for the ingredient parser [here](https://ingredient-parser.readthedocs.io/en/latest/start/index.html#optional-parameters), and the code [here](https://github.com/strangetom/ingredient-parser).
+
+### Bulk edits
+You can open an interactive shell with access to your FoodDB by running `docker compose exec backend sh -c 'python manage.py shell'`. You can then run commands like this:
+
+```
+from food_db_app.models import *
+from food_db_app.views import capitalize_title
+
+all_recipes = Recipe.objects.all()
+for recipe in all_recipes:
+    recipe.title = capitalize_title(recipe.title)
+    recipe.save()
+```
