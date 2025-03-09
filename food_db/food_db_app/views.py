@@ -38,6 +38,16 @@ def sanitize_string(raw_string: str):
 
     return clean_string
 
+def capitalize_title(raw_title: str):
+    raw_parts = raw_title.split(' ')
+    capital_parts = []
+    for i, word in enumerate(raw_parts):
+        if i == 0 or word not in ['and', 'or', 'the', 'a', 'an', 'but', 'nor', 'for', 'yet', 'so', 'in', 'on', 'at', 'to', 'of', 'with', 'by', 'as', 'from']:
+            capital_parts.append(word.capitalize())
+        else:
+            capital_parts.append(word)
+    return ' '.join(capital_parts)
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -151,10 +161,11 @@ def add_recipe(request):
             create_recipe_form.cleaned_data['servings_max'] = servings_max
             
             clean_key = sanitize_string(create_recipe_form.cleaned_data['title'])
+            capital_title = capitalize_title(create_recipe_form.cleaned_data['title'])
 
             recipe_instance = Recipe(
                 clean_key=clean_key,
-                title=create_recipe_form.cleaned_data['title'],
+                title=capital_title,
                 url=create_recipe_form.cleaned_data.get('url'),
                 recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page', ''),
                 duration_minutes=create_recipe_form.cleaned_data['duration_minutes'],
@@ -344,8 +355,10 @@ def edit_recipe(request, key):
 
             # Update the recipe instance with the new data
             clean_key=sanitize_string(create_recipe_form.cleaned_data['title'])
+            capital_title = capitalize_title(create_recipe_form.cleaned_data['title'])
+
             recipe_instance.clean_key=clean_key
-            recipe_instance.title=create_recipe_form.cleaned_data['title']
+            recipe_instance.title=capital_title
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
