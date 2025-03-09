@@ -29,7 +29,8 @@
               if (value2.localName === 'Key' && value2.textContent !== 'index.html') {
                 var fileName = value2.textContent
                 var url = window.location + fileName
-                document.writeln("<a href='" + url + "'>" + fileName + "</a> <br>")
+                var urlCleaned = url.replace("'", "%27")
+                document.writeln("<a href='" + urlCleaned + "'>" + fileName + "</a> <br>")
               }
             })
           })
