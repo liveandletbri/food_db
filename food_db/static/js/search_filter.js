@@ -4,6 +4,7 @@ let titleSearch = document.querySelector("#id_title")
 let ingredientSearch = document.querySelector("#id_ingredient")
 let durationHoursSearch = document.querySelector("#id_duration_lt_hours")
 let durationMinutesSearch = document.querySelector("#id_duration_lt_minutes")
+let durationClearButton = document.querySelector(".clear_duration_search_button")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 
@@ -112,3 +113,11 @@ function incrementHoursFromMinutes() {
 }
 
 durationMinutesSearch.addEventListener("blur", incrementHoursFromMinutes);
+
+function clearDuration() {
+    durationHoursSearch.value = ''
+    durationMinutesSearch.value = ''
+    stealthSubmit()
+}
+
+durationClearButton.addEventListener("click", clearDuration);

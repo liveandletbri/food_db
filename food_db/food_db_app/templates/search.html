@@ -13,9 +13,10 @@
         <label>{{ text_search.form.duration_lt.label }}:</label>
         <span id="duration_span" style="display: flex;">
             <input type="number" name="duration_lt_hours" step="1" id="id_duration_lt_hours" style="width: 70px;">
-            <span>&#160;hours&#160;&#160;&#160;</span>
+            <label class="duration_search_label">&#160;hours&#160;&#160;&#160;</label class="duration_search_label">
             <input type="number" name="duration_lt_minutes" step="15" id="id_duration_lt_minutes" style="width: 70px;">
-            <span>&#160;minutes</span>
+            <label class="duration_search_label">&#160;minutes</label class="duration_search_label">
+            <img class="clear_duration_search_button" src="{% static 'img/x-icon.svg' %}" width="25" height="25" title="Clear duration filters"/>
         </span>
         <br>
         <table><tr style="background-color: #ffffff;">
