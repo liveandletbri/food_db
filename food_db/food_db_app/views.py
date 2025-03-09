@@ -288,7 +288,20 @@ def search(request):
             recipe_data[recipe.title]['last_cooked'] = ''
     
     # Separate out the list of tags from the form so we have more control over them in the HTML
-    tags = text_search_form.filters['tag'].extra['queryset']
+    tags = [
+        {
+            'name': tag  ,
+            'checked': tag in request.GET.getlist('tag'),
+        }
+        for tag 
+        in [
+            tag.name 
+            for tag
+            in text_search_form.filters['tag'].extra['queryset']
+        ]
+    ]
+    # import pdb; pdb.set_trace()
+
     context = {
         'text_search': text_search_form,
         'recipe_data': recipe_data,

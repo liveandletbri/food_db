@@ -43,7 +43,9 @@
 {% if recipe.tags.all %}
     <h4>Tags:
     {% for tag in recipe.tags.all %}
-        <span class="tag_display_label {{ tag }}">{{ tag }}</span>
+        <a href="{% url 'search' %}?tag={{ tag.name }}" style="text-decoration: none;">
+            <span class="tag_display_label {{ tag }}">{{ tag }}</span>
+        </a>
     {% endfor %}
     </h4>
     <hr>

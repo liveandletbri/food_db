@@ -24,7 +24,7 @@
                 <label class="tags_row"><ul>
                     {% for tag in tags %}
                         <div class="ui slider checkbox tag_check">
-                            <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}">
+                            <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}" {% if tag.checked %}checked{% endif %}>
                             {{ tag.name }}
                         </div>
                     {% endfor %}
