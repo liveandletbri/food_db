@@ -175,11 +175,15 @@ def add_recipe(request):
                 notes=create_recipe_form.cleaned_data.get('notes'),
             )
 
-            if create_recipe_form.cleaned_data['recipe_book'] != '':
+            recipe_book_title = create_recipe_form.cleaned_data['recipe_book']
+            if recipe_book_title != '':
                 try:
-                    book_instance = RecipeBook.objects.get(name=create_recipe_form.cleaned_data['recipe_book'])
+                    book_instance = RecipeBook.objects.get(name=recipe_book_title)
                 except RecipeBook.DoesNotExist:
-                    book_instance = RecipeBook(name=create_recipe_form.cleaned_data['recipe_book'])
+                    book_instance = RecipeBook(
+                        name=recipe_book_title,
+                        clean_key=sanitize_string(recipe_book_title)
+                    )
                     book_instance.save()
                 recipe_instance.recipe_book = book_instance
                 
