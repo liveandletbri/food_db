@@ -43,9 +43,14 @@ First and foremost, as long as the Docker images are running, you can access you
 Another option is [cloud sync](food_db/food_db_app/cloud_sync/README.md). When enabled, your recipes are backed up to a read-only site hosted in S3. Though you lose basically all the functionality of FoodDB, it's a nice compromise to be able to securely access your recipes when away from home and even when FoodDB is taken offline.
 
 ### Port forwarding
-You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. I am not a security expert and I know I have made a few compromises (search the repo for `csrf_exempt` or check out the use of `| safe` on a user input on the recipe detail page 😅) in my Django security.
+You have two options when port forwarding - open up to any computer/phone/dog that's connected to your wifi network, or open up to _anyone, anywhere_. Obviously, the latter is more dangerous. If you are going to open up to the public internet, I recommend making quite a few changes to what I've done here first. I have knowingly taken shortcuts that compromise security because I am not opening my own Food DB to the public internet. Here are the vulnerabilities _that I know of_:
 
-That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little resarch on how to secure your setup. I'm not a security expert and my own site is not open to the public internet.
+- I've left `DEBUG` set to `True`
+- My secret key is committed right here in this repo
+- My use of `csrf_exempt` to expose my APIs
+- Using `| safe` on a user input on the recipe detail page 😅
+
+That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little (ok, a lot) resarch on how to secure your setup, maybe starting [here](https://docs.djangoproject.com/en/5.1/topics/security).
 
 To open your site to just your wifi network, configure port forwarding rules in your OS ([link for Windows instructions](https://redfishiaven.medium.com/port-forwarding-in-windows-and-ways-to-set-it-up-c337e171086f)) for internal sharing. Then, if you want to expose to the open internet, configure port forwarding on your router. Every router is different, so you'll have to look up yours. In both cases, use TCP and open port 8000.
 
