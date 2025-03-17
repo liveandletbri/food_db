@@ -153,3 +153,13 @@ class RecipeBook(models.Model):
     author = models.CharField(max_length=255, blank=True)
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
+
+class RecipeImage(models.Model):
+    def __str__(self):
+        return self.recipe.clean_key + '__' + self._date_created.astimezone(pytz.timezone('US/Pacific')).strftime('%Y/%m/%d-%H:%M:%S.%f')
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+    )
+    image = models.ImageField(upload_to='images/recipes/')
+    _date_created = models.DateTimeField(default=timezone.now)
