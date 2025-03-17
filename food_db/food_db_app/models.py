@@ -1,6 +1,7 @@
 import os
 import pytz
 from django.db import models
+from django.dispatch.dispatcher import receiver
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 
@@ -202,3 +203,10 @@ class RecipeImage(models.Model):
     image = models.ImageField(upload_to=rename_image_recipe)
     _file_name = models.CharField(max_length=300, null=True, blank=True)
     _date_created = models.DateTimeField(default=timezone.now)
+
+@receiver(models.signals.pre_delete, sender=RecipeImage)
+def recipe_image_delete(sender, instance, **kwargs):
+    '''Deletes the image file from the media folder when a
+    RecipeImage instance is deleted from the database'''
+    # Pass false so FileField doesn't save the model.
+    instance.image.delete(False)
