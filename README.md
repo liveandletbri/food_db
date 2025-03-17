@@ -1,10 +1,10 @@
 ## Wut
-Food DB is a small Django project to help store, tag, and query your recipes. It is run inside a Docker container, storing the SQLite database file on your computer.
+Food DB is a small Django project to help store, tag, and query your recipes. You can attach custom tags and images to recipes, and view/modify your recipes on any device connected to your wifi network. Your recipes can be backed up to S3, which runs a simple read-only site allowing access to your recipes from anywhere.
 
-A second container runs a teeny Flask app to host an [ingredient parsing](https://github.com/strangetom/ingredient-parser) service, which the Django app reaches out to.
+Food DB is run inside a Docker container, storing the SQLite database file on your computer. A second container runs a teeny Flask app to host an [ingredient parsing](https://github.com/strangetom/ingredient-parser) service, which the primary Django app reaches out to.
 
 ## Getting started
-The only absolutely required prerequisite is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need.
+The only prerequisite you have to have installed is Docker. If you want to run Python locally, I included pyenv setup steps, and you can use the requirements files in here to get what you need, but that isn't strictly necessary.
 
 For use on Windows, I recommend installing [Git Bash](https://git-scm.com/download/win) and running all these commands there. When running any of the below `docker attach` or `docker exec` (not `docker compose` though) commands, prepend `winpty`, like this:
 ```
