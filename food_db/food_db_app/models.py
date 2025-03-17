@@ -1,6 +1,32 @@
+import os
 import pytz
 from django.db import models
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
+
+@deconstructible
+class PathAndRename(object):
+    def __init__(self, sub_path='media/'):
+        self.path = sub_path
+
+    def __call__(self, instance, filename):
+        ext = filename.split('.')[-1]
+        new_name = instance._file_name + '.' + ext
+        # return the whole path to the file
+        return os.path.join(self.path, new_name)
+    
+    def __eq__(self, other):
+        return self.path == other
+
+    # def deconstruct(self):
+    #     name = 'PathAndRename'
+    #     path = 'food_db_app.models.PathAndRename'
+    #     args = (self.path,)
+    #     kwargs = {}
+    #     return name, path, args, kwargs
+
+
+rename_image_recipe = PathAndRename("images/recipes/")
 
 class Recipe(models.Model):
     def __str__(self):
@@ -156,10 +182,23 @@ class RecipeBook(models.Model):
 
 class RecipeImage(models.Model):
     def __str__(self):
-        return self.recipe.clean_key + '__' + self._date_created.astimezone(pytz.timezone('US/Pacific')).strftime('%Y/%m/%d-%H:%M:%S.%f')
+        return self._file_name
+    
+    def save(self, **kwargs):
+        self._file_name = self.recipe.clean_key + '__' + self._date_created.astimezone(pytz.timezone('US/Pacific')).strftime('%Y-%m-%d-%H%M%S.%f')
+
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "_file_name" in update_fields:
+            kwargs["update_fields"] = {"_file_name"}.union(update_fields)
+
+        super().save(**kwargs)
+    
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
     )
-    image = models.ImageField(upload_to='images/recipes/')
+
+    image = models.ImageField(upload_to=rename_image_recipe)
+    _file_name = models.CharField(max_length=300, null=True, blank=True)
     _date_created = models.DateTimeField(default=timezone.now)
