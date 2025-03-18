@@ -88,6 +88,8 @@ def recipe_detail(request, key):
     if recipe.duration_minutes:
         recipe.duration_minutes = convert_minutes_to_string(recipe.duration_minutes)
 
+    images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
+
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
     # Get list of ingredient categories
@@ -118,6 +120,7 @@ def recipe_detail(request, key):
     context = {
         'recipe': recipe,
         'calorie_string': calorie_string,
+        'images': images,
         'ingredients_have_categories': ingredients_have_categories,
         'ingredient_categories': sorted(list(ingredient_categories)),
         'ingredients': dict(ingreds_by_category),
@@ -198,13 +201,14 @@ def add_recipe(request):
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
 
-            recipe_image = create_recipe_form.cleaned_data.get('images')
-            if recipe_image:
-                recipe_image_instance = RecipeImage(
-                    recipe=recipe_instance,
-                    image=recipe_image,
-                )
-                recipe_image_instance.save()
+            recipe_images = create_recipe_form.cleaned_data.get('images')
+            if recipe_images:
+                for recipe_image in recipe_images:
+                    recipe_image_instance = RecipeImage(
+                        recipe=recipe_instance,
+                        image=recipe_image,
+                    )
+                    recipe_image_instance.save()
 
             # For each ingredient in the form
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
