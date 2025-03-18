@@ -15,7 +15,7 @@ from pytz import timezone
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
-from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement
+from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 def convert_minutes_to_string(minutes: int):
@@ -88,6 +88,8 @@ def recipe_detail(request, key):
     if recipe.duration_minutes:
         recipe.duration_minutes = convert_minutes_to_string(recipe.duration_minutes)
 
+    images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
+
     ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
 
     # Get list of ingredient categories
@@ -118,6 +120,7 @@ def recipe_detail(request, key):
     context = {
         'recipe': recipe,
         'calorie_string': calorie_string,
+        'images': images,
         'ingredients_have_categories': ingredients_have_categories,
         'ingredient_categories': sorted(list(ingredient_categories)),
         'ingredients': dict(ingreds_by_category),
@@ -141,7 +144,7 @@ def add_recipe(request):
 
         extra_step_count = int(request.POST.get('extra_step_count'))
         total_step_count = extra_step_count + 1
-        create_recipe_form = CreateRecipeForm(request.POST, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
+        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
 
         # Adding a new tag does not require the form to be valid
         if create_recipe_form.data.get('new_tag'):
@@ -197,6 +200,15 @@ def add_recipe(request):
                     tag_instance = Tag.objects.get(name=tag)
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
+
+            recipe_images = create_recipe_form.cleaned_data.get('images')
+            if recipe_images:
+                for recipe_image in recipe_images:
+                    recipe_image_instance = RecipeImage(
+                        recipe=recipe_instance,
+                        image=recipe_image,
+                    )
+                    recipe_image_instance.save()
 
             # For each ingredient in the form
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
@@ -315,7 +327,6 @@ def search(request):
             in text_search_form.filters['tag'].extra['queryset']
         ]
     ]
-    # import pdb; pdb.set_trace()
 
     context = {
         'text_search': text_search_form,
@@ -337,7 +348,7 @@ def edit_recipe(request, key):
 
         extra_step_count = int(request.POST.get('extra_step_count'))
         total_step_count = extra_step_count + 1
-        create_recipe_form = CreateRecipeForm(request.POST, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
+        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
 
         # Adding a new tag does not require the form to be valid
         if create_recipe_form.data.get('new_tag'):
@@ -398,6 +409,14 @@ def edit_recipe(request, key):
                     tag_instance = Tag.objects.get(name=tag)
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
+
+            recipe_image = create_recipe_form.cleaned_data.get('images')
+            if recipe_image:
+                recipe_image_instance = RecipeImage(
+                    recipe=recipe_instance,
+                    image=recipe_image,
+                )
+                recipe_image_instance.save()
 
             # Remove any existing ingredients from the recipe
             existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance)

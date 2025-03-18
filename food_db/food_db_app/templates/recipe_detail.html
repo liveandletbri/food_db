@@ -76,6 +76,18 @@
         <td>{{ recipe.notes }}</td>
     </tr>
     {% endif %}
+    {% if images %}
+    <tr>
+        <td class="recipe_summary_label">Pix:</td>
+        <td>
+        {% for img in images %}
+            <a href="{{ img.url }}" target="_blank">
+                <img src="{{ img.url }}" class="img-responsive" style="height: 150px; float: left; margin-right: 10px;" />
+            </a>
+        {% endfor %}
+        </td>   
+    </tr>
+    {% endif %}
 </table>
 {% if not recipe.recipe_book %}
     <h2>Ingredients</h2>
