@@ -201,7 +201,7 @@ def add_recipe(request):
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
 
-            recipe_images = create_recipe_form.cleaned_data.get('images')
+            recipe_images = request.FILES.getlist('images')
             if recipe_images:
                 for recipe_image in recipe_images:
                     recipe_image_instance = RecipeImage(
@@ -411,13 +411,14 @@ def edit_recipe(request, key):
                     tag_instance.save()
 
             # only adding images here, not deleting any
-            recipe_image = create_recipe_form.cleaned_data.get('images')
-            if recipe_image:
-                recipe_image_instance = RecipeImage(
-                    recipe=recipe_instance,
-                    image=recipe_image,
-                )
-                recipe_image_instance.save()
+            recipe_images = request.FILES.getlist('images')
+            if recipe_images:
+                for recipe_image in recipe_images:
+                    recipe_image_instance = RecipeImage(
+                        recipe=recipe_instance,
+                        image=recipe_image,
+                    )
+                    recipe_image_instance.save()
 
             # Remove any existing ingredients from the recipe
             existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance)

@@ -31,7 +31,7 @@ async function deleteRecipeImage(event) {
         console.log('Done!')
     } else {
         // User clicked Cancel
-        console.log('Crisis averted! Not deleting the image.')
+        console.log('Crisis averted! Not deleting the pic.')
     }
 }
 
