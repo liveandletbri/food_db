@@ -3002,7 +3002,7 @@ input::-moz-focus-inner {
 			table-layout: fixed;
 		}
 
-	table tbody tr:not(.offset) {
+	table tbody tr {
 		border-color: rgba(0, 0, 0, 0.2);
 	}
 
