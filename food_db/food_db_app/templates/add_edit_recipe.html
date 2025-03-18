@@ -103,9 +103,14 @@
             <td class="recipe_summary_label" rowspan="2">Pix</td>
             <td>
                 {% for img in existing_images %}
-                    <a href="{{ img.url }}" target="_blank">
-                        <img src="{{ img.url }}" class="recipe_image" />
-                    </a>
+                    <div class="recipe_image_div" id="recipe_image_div_{{ forloop.counter0 }}" data-image_file_name="{{ img.file_name }}">
+                        <a href="">
+                            <img class="delete_recipe_image_button" src="{% static 'img/x-icon.svg' %}" width="30" height="30" title="Delete image"/>
+                        </a>
+                        <a href="{{ img.url }}" target="_blank">
+                            <img src="{{ img.url }}" class="recipe_image" />
+                        </a>
+                    </div>
                 {% endfor %}
             </td>
         </tr>
@@ -203,4 +208,5 @@
 <script src="{% static 'js/ingredient_parse.js' %}"></script>
 <script src="{% static 'js/recipe_add_form_validate.js' %}"></script>
 <script src="{% static 'js/create_tag.js' %}"></script>
+<script src="{% static 'js/delete_image.js' %}"></script>
 {% endblock content %}

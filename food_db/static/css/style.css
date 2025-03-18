@@ -140,13 +140,27 @@ td.step_number {
     min-width: 150px;
 }
 .recipe_summary_label {
-    max-width: 110px;
+    max-width: 75px;
     align-content: center;
 }
 .recipe_image {
     float: left;
     margin-right: 10px;
     margin-bottom: 10px;
+}
+/* Hover over image to show X */
+div.recipe_image_div {
+    position: relative;
+    display: inline-block;
+}
+div.recipe_image_div img.delete_recipe_image_button {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: none;
+}
+div.recipe_image_div:hover img.delete_recipe_image_button {
+    display: block;
 }
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {

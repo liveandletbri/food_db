@@ -26,6 +26,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('add/', views.add_recipe, name='add_recipe'),
     path('cook/', views.cook_meal, name='cook_meal'),
+    path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
     path('ingred_parse', views.ingredient_parse_api, name='ingred_parse'),
     path('recipe/<str:key>', views.recipe_detail, name='recipe_detail'),
     path('recipe/<str:key>/edit', views.edit_recipe, name='edit_recipe'),

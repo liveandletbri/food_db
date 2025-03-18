@@ -496,7 +496,7 @@ def edit_recipe(request, key):
     # If this is a GET (or any other method), populate the form with the recipe's existing info.
     else:
         related_tags = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]
-        related_images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
+        related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
 
@@ -585,5 +585,16 @@ def cook_meal(request):
         total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
 
         return HttpResponse(str(total_cooked_meal_counts))
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def delete_recipe_image(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe_image_instance = RecipeImage.objects.get(_file_name=data['file_name'])
+        recipe_image_instance.delete()
+
+        return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
