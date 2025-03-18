@@ -141,6 +141,12 @@ td.step_number {
 }
 .recipe_summary_label {
     max-width: 110px;
+    align-content: center;
+}
+.recipe_image {
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
@@ -149,12 +155,18 @@ td.step_number {
         -webkit-columns: 2;
         -moz-columns: 2;
     }
+    .recipe_image {
+        height: 150px;
+    }
 }
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
     button.form_mod_button {
         width: 13rem;
         font-size: 0.6rem;
+    }
+    .recipe_image {
+        width: 300px;
     }
 }
 

@@ -99,10 +99,20 @@
             <td class="recipe_summary_label">{{create_recipe_form.notes.label}}</td>
             <td>{{create_recipe_form.notes}}</td>
         </tr>
-        <tr>
-            <td class="recipe_summary_label">{{create_recipe_form.images.label}}</td>
+        <tr >
+            <td class="recipe_summary_label" rowspan="2">Pix</td>
             <td>
-                <input type="file" name="images" accept="image/*" multiple id="id_images">
+                {% for img in existing_images %}
+                    <a href="{{ img.url }}" target="_blank">
+                        <img src="{{ img.url }}" class="recipe_image" />
+                    </a>
+                {% endfor %}
+            </td>
+        </tr>
+        <tr style="background-color: rgba(0, 0, 0, 0.05);">
+                <td>
+                    <input type="file" name="images" accept="image/*" multiple id="id_images">
+                </td>
             </td>
         </tr>
     </table>

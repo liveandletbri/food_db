@@ -410,6 +410,7 @@ def edit_recipe(request, key):
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
 
+            # only adding images here, not deleting any
             recipe_image = create_recipe_form.cleaned_data.get('images')
             if recipe_image:
                 recipe_image_instance = RecipeImage(
@@ -495,6 +496,7 @@ def edit_recipe(request, key):
     # If this is a GET (or any other method), populate the form with the recipe's existing info.
     else:
         related_tags = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]
+        related_images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
 
@@ -552,6 +554,7 @@ def edit_recipe(request, key):
         'mode': 'edit',
         'create_recipe_form': create_recipe_form,
         'checked_tags': related_tags,
+        'existing_images': related_images,
         'ingredient_list': ingredient_list,
         'step_list': step_list,
         'food_list': existing_foods,
