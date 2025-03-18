@@ -3002,17 +3002,28 @@ input::-moz-focus-inner {
 			table-layout: fixed;
 		}
 
-	table tbody tr {
+	table tbody tr:not(.offset) {
 		border-color: rgba(0, 0, 0, 0.2);
 	}
 
+		/* every other row in table is gray */
 		table tbody tr:nth-child(2n + 1) {
 			background-color: rgba(0, 0, 0, 0.05);
 		}
-
+		
+		/* force row to be gray with <tr class="alt"> */
 		table tbody tr.alt {
 			background-color: rgba(0, 0, 0, 0.05) !important;
 		}
+		
+		/* force row to be the opposite color compared to standard alternating pattern with <tr class="offset"> */
+		table tbody tr.offset {
+			background-color: rgba(0, 0, 0, 0.05);
+		}
+		table tbody tr.offset:nth-child(2n + 1) {
+			background-color: rgba(0, 0, 0, 0);
+		}
+
 
 	table th {
 		color: #000000;
