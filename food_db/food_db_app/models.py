@@ -92,10 +92,33 @@ class Ingredient(models.Model):
         null=True,
         blank=True,
     )
-    quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     ingredient_category = models.CharField(max_length=255, blank=True)
-    ingredient_category_order = models.PositiveSmallIntegerField()
+    ingredient_category_test = models.ForeignKey(
+        'IngredientCategory',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     notes = models.TextField(blank=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
+
+class IngredientCategory(models.Model):
+    def __str__(self):
+        friendly_name = self.name if self.name != "" else "(Blank)"
+        return f'{self.recipe.title}: {friendly_name}'
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'name'], name='unique_recipe_ingredient_category_name')
+        ]
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(max_length=255, blank=True)
+    order_number = models.PositiveSmallIntegerField()
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
 

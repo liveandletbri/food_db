@@ -48,6 +48,12 @@ def capitalize_title(raw_title: str):
             capital_parts.append(word)
     return ' '.join(capital_parts)
 
+def remove_dupes_preserve_order(sequence):
+    '''As the name implies, this removes duplicates from a list
+    while preserving the order in which they first appeared.'''
+    seen = set()
+    return [x for x in sequence if x not in seen and not seen.add(x)]
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -90,12 +96,12 @@ def recipe_detail(request, key):
 
     images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
 
-    ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
+    ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category_test__order_number')
 
     # Get list of ingredient categories
-    ingredient_categories = set(ingred.ingredient_category for ingred in ingredients)
-    ingredients_have_categories = ingredient_categories != {''}
-
+    ingredient_categories = remove_dupes_preserve_order([ingred.ingredient_category for ingred in ingredients])
+    ingredients_have_categories = ingredient_categories != ['']
+    
     # Apply multiplier to ingredient quantities and store ingredients in ingreds_by_category, where keys are the ingredient category
     ingreds_by_category = defaultdict(list)
     for ingredient in ingredients:
@@ -122,7 +128,7 @@ def recipe_detail(request, key):
         'calorie_string': calorie_string,
         'images': images,
         'ingredients_have_categories': ingredients_have_categories,
-        'ingredient_categories': sorted(list(ingredient_categories)),
+        'ingredient_categories': ingredient_categories,
         'ingredients': dict(ingreds_by_category),
         'steps': steps,
         'multiplier': multiplier,
@@ -253,7 +259,6 @@ def add_recipe(request):
                         unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
                         ingredient_category=ingred.get('ingredient_category', ''),
-                        ingredient_category_order=ingredient_category_orders[ingred.get('ingredient_category', '')],
                         notes=ingred.get('notes', ''),
                     )
                     ingredient_instance.save()
@@ -432,8 +437,7 @@ def edit_recipe(request, key):
 
             # Establish ingredient categories and assign their order values
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
-            ingredient_categories = {create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in ingredient_ids}
-            ingredient_category_orders = {category: i for i, category in enumerate(sorted(ingredient_categories))}
+            ingredient_categories = remove_dupes_preserve_order([create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in sorted(ingredient_ids)])
 
             # For each ingredient in the form
             for ingred_id_prefix in sorted(ingredient_ids):
@@ -472,7 +476,6 @@ def edit_recipe(request, key):
                     unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
                     ingredient_category=ingred.get('ingredient_category', ''),
-                    ingredient_category_order=ingredient_category_orders[ingred.get('ingredient_category', '')],
                     notes=ingred.get('notes', ''),
                 )
                 ingredient_instance.save()
