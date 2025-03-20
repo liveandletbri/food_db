@@ -96,20 +96,19 @@ def recipe_detail(request, key):
 
     images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
 
-    ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category__order_number')
-
     # Get list of ingredient categories
     ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
     ingredient_categories = remove_dupes_preserve_order([cat.name or '' for cat in ingredient_category_instances if cat])
     ingredients_have_categories = ingredient_categories != ['']
-    
-    # Apply multiplier to ingredient quantities
-    for ingredient in ingredients:
-        if ingredient.quantity:
-            ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
 
     # Store ingredients in ingreds_by_category, where keys are the ingredient category
     ingreds_by_category = {cat.name: list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat)) for cat in ingredient_category_instances}
+
+    # Apply multiplier to ingredient quantities
+    for ingredient_list in ingreds_by_category.values():
+        for ingredient in ingredient_list:
+            if ingredient.quantity:
+                ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
 
     # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
