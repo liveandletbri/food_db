@@ -96,7 +96,7 @@ def recipe_detail(request, key):
 
     images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
 
-    ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category_test__order_number')
+    ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category__order_number')
 
     # Get list of ingredient categories
     ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
@@ -109,7 +109,7 @@ def recipe_detail(request, key):
             ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
 
     # Store ingredients in ingreds_by_category, where keys are the ingredient category
-    ingreds_by_category = {cat.name: list(Ingredient.objects.filter(recipe=recipe, ingredient_category_test=cat)) for cat in ingredient_category_instances}
+    ingreds_by_category = {cat.name: list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat)) for cat in ingredient_category_instances}
 
     # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
@@ -272,8 +272,7 @@ def add_recipe(request):
                         recipe=recipe_instance,
                         unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
-                        ingredient_category=ingred.get('ingredient_category', ''),
-                        ingredient_category_test=ingredient_category_instance,
+                        ingredient_category=ingredient_category_instance,
                         notes=ingred.get('notes', ''),
                     )
                     ingredient_instance.save()
@@ -517,8 +516,7 @@ def edit_recipe(request, key):
                     recipe=recipe_instance,
                     unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
-                    ingredient_category=ingred.get('ingredient_category', ''),
-                    ingredient_category_test=ingredient_category_instance,
+                    ingredient_category=ingredient_category_instance,
                     notes=ingred.get('notes', ''),
                 )
                 ingredient_instance.save()
@@ -554,7 +552,7 @@ def edit_recipe(request, key):
     else:
         related_tags = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]
         related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
-        related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category_test__order_number')
+        related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
 
         existing_foods = [food.name for food in Food.objects.all()]
@@ -580,12 +578,16 @@ def edit_recipe(request, key):
         # Prepping ingredients and steps as dictionaries to be passed to the template, rather than setting inital fields,
         # because the template cannot dyanmically access dictionary keys (i.e. cannot do this: create_recipe_form['ingred_' + number + '_food'].value)
         ingredient_list = []
-        ingredient_fields = ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']
+        ingredient_fields = ['food', 'unit_of_measurement', 'quantity', 'notes']
         for i, ingredient in enumerate(related_ingredients):
             ingredient_data = {}
             for field in ingredient_fields:
                 # create_recipe_form.fields[f'ingred_{i}_{field}'].initial = getattr(ingredient, field)  # what you would set if using initial values
                 ingredient_data[field] = getattr(ingredient, field)
+            try:
+                ingredient_data['ingredient_category'] = ingredient.ingredient_category.name
+            except AttributeError:
+                ingredient_data['ingredient_category'] = ''
             ingredient_list.append(ingredient_data)
         
         # If the recipe is from a recipe book, it may have no ingredients. Populate a blank one for the form.

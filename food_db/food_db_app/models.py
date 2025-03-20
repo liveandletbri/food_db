@@ -19,14 +19,6 @@ class PathAndRename(object):
     def __eq__(self, other):
         return self.path == other
 
-    # def deconstruct(self):
-    #     name = 'PathAndRename'
-    #     path = 'food_db_app.models.PathAndRename'
-    #     args = (self.path,)
-    #     kwargs = {}
-    #     return name, path, args, kwargs
-
-
 rename_image_recipe = PathAndRename("images/recipes/")
 
 class Recipe(models.Model):
@@ -76,7 +68,7 @@ class RecipeStep(models.Model):
 
 class Ingredient(models.Model):
     def __str__(self):
-        return f'{self.recipe.title}: {self.ingredient_category + " - " if self.ingredient_category else ""}{self.food.name}'
+        return f'{self.recipe.title}: {self.ingredient_category.name + " - " if self.ingredient_category else ""}{self.food.name}'
     
     recipe = models.ForeignKey(
         Recipe,
@@ -92,8 +84,7 @@ class Ingredient(models.Model):
         null=True,
         blank=True,
     )
-    ingredient_category = models.CharField(max_length=255, blank=True)
-    ingredient_category_test = models.ForeignKey(
+    ingredient_category = models.ForeignKey(
         'IngredientCategory',
         on_delete=models.SET_NULL,
         null=True,
