@@ -94,6 +94,7 @@ class Ingredient(models.Model):
     )
     quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     ingredient_category = models.CharField(max_length=255, blank=True)
+    ingredient_category_order = models.PositiveSmallIntegerField()
     notes = models.TextField(blank=True)
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)

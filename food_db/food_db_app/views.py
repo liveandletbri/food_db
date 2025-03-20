@@ -210,8 +210,12 @@ def add_recipe(request):
                     )
                     recipe_image_instance.save()
 
-            # For each ingredient in the form
+            # Establish ingredient categories and assign their order values
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
+            ingredient_categories = {create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in ingredient_ids}
+            ingredient_category_orders = {category: i for i, category in enumerate(sorted(ingredient_categories))}
+
+            # For each ingredient in the form
             for ingred_id_prefix in sorted(ingredient_ids):
                 if create_recipe_form.cleaned_data['ingred_0_food'] != '':  # ingredients were entered for this recipe
                     # Gather ingredients fields together
@@ -249,6 +253,7 @@ def add_recipe(request):
                         unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
                         ingredient_category=ingred.get('ingredient_category', ''),
+                        ingredient_category_order=ingredient_category_orders[ingred.get('ingredient_category', '')],
                         notes=ingred.get('notes', ''),
                     )
                     ingredient_instance.save()
@@ -425,8 +430,12 @@ def edit_recipe(request, key):
             for ingred in existing_ingreds:
                 ingred.delete()
 
-            # For each ingredient in the form
+            # Establish ingredient categories and assign their order values
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
+            ingredient_categories = {create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in ingredient_ids}
+            ingredient_category_orders = {category: i for i, category in enumerate(sorted(ingredient_categories))}
+
+            # For each ingredient in the form
             for ingred_id_prefix in sorted(ingredient_ids):
                 # Gather ingredients fields together
                 ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
@@ -463,6 +472,7 @@ def edit_recipe(request, key):
                     unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
                     ingredient_category=ingred.get('ingredient_category', ''),
+                    ingredient_category_order=ingredient_category_orders[ingred.get('ingredient_category', '')],
                     notes=ingred.get('notes', ''),
                 )
                 ingredient_instance.save()
