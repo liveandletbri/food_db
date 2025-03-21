@@ -327,6 +327,10 @@ input[type="url"] {
 .recipe_detail_ingredient_category_td {
     font-weight: bold;
     align-content: center;
+    cursor: grab;
+}
+.recipe_detail_ingredient_category_td:active {
+    cursor: grabbing;
 }
 svg.grip-icon {
     color: lightgray;
