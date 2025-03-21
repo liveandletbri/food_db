@@ -324,3 +324,10 @@ input[type="url"] {
         width: 800px;
     }
 }
+.recipe_detail_ingredient_category_td {
+    font-weight: bold;
+    align-content: center;
+}
+svg.grip-icon {
+    color: lightgray;
+}

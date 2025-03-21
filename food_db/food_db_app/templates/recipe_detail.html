@@ -105,12 +105,16 @@
             {% for cat, ingredient_list in ingredients.items %}
                 {% if cat == category %} 
                     {% if ingredients_have_categories %}
-                        <tr draggable="true" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragstart="handleDragStart(event)">
+                        <tr draggable="true" 
+                            ondrop="handleDrop(event)" 
+                            ondragover="handleDragOver(event)" 
+                            ondragstart="handleDragStart(event)"
+                        >
                             <td 
                                 rowspan="{{ ingredient_list | length }}" 
-                                class="recipe_detail_ingredient_category"
+                                class="recipe_detail_ingredient_category_td"
                                 data-ingredient_category="{{ category }}"
-                                style="align-content: center; background-color:  {% spaceless %}
+                                style="background-color:  {% spaceless %}
                                     {% if forloop.counter|divisibleby:'2' %}
                                         white
                                     {% else %}
@@ -118,7 +122,8 @@
                                     {% endif %}
                                     {% endspaceless %};"
                             >
-                                {{ category }}
+                                <i class="fa-solid fa-grip-vertical grip-icon"></i>
+                                <span>&#160;&#160;&#160;{{ category }}</span>
                             </td>
                     {% endif %}
                     {% for ingredient in ingredient_list %}
