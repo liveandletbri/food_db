@@ -125,7 +125,11 @@ class Food(models.Model):
         return self.name
     clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
-    qfc_aisle = models.CharField(max_length=255, blank=True)
+    food_category = models.ForeignKey(
+        'FoodCategory',
+        on_delete=models.PROTECT,
+        null=True,
+    )
     _date_created = models.DateTimeField(default=timezone.now)
 
     def clean_name(self, raw_name):
@@ -225,3 +229,10 @@ def recipe_image_delete(sender, instance, **kwargs):
     RecipeImage instance is deleted from the database'''
     # Pass false so FileField doesn't save the model.
     instance.image.delete(False)
+
+class FoodCategory(models.Model):
+    def __str__(self):
+        return self.name
+    name = models.CharField(max_length=255, unique=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
