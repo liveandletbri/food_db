@@ -100,7 +100,7 @@ def recipe_detail(request, key):
 
     # Get list of ingredient categories
     ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
-    ingredient_categories = remove_dupes_preserve_order([cat.name or '' for cat in ingredient_category_instances if cat])
+    ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
     ingredients_have_categories = ingredient_categories != ['']
 
     # Store ingredients in ingreds_by_category, where keys are the ingredient category
