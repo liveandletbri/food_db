@@ -6,12 +6,10 @@ from collections import defaultdict
 from decimal import Decimal
 from django.db import transaction
 from django.db.utils import IntegrityError
-from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.edit import CreateView
 from math import floor
 from pytz import timezone
 
