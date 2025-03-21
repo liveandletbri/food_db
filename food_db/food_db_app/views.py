@@ -219,7 +219,7 @@ def add_recipe(request):
                     )
                     recipe_image_instance.save()
 
-            # Establish ingredient categories and assign their order values
+            # Establish ingredient categories
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
             ingredient_categories = remove_dupes_preserve_order([create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in sorted(ingredient_ids)])
 
