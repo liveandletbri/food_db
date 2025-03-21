@@ -4,6 +4,8 @@ import requests
 
 from collections import defaultdict
 from decimal import Decimal
+from django.db import transaction
+from django.db.utils import IntegrityError
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -652,6 +654,40 @@ def delete_recipe_image(request):
         data = json.loads(request.body)
         recipe_image_instance = RecipeImage.objects.get(_file_name=data['file_name'])
         recipe_image_instance.delete()
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def get_ingredient_category_order_number(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe = Recipe.objects.get(title=data['recipe_title'])
+        ingredient_category = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category'])
+
+        print(f'get_ingredient_category_order_number: {ingredient_category.name} = {ingredient_category.order_number}')
+        return HttpResponse(str(ingredient_category.order_number))
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def swap_ingredient_category_order_numbers(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe = Recipe.objects.get(title=data['recipe_title'])
+        ingredient_category_1 = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category_1'])
+        new_number_1 = data['order_number_1']
+        ingredient_category_2 = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category_2'])
+        new_number_2 = data['order_number_2']
+        with transaction.atomic():
+            ingredient_category_1.order_number = new_number_1
+            ingredient_category_2.order_number = new_number_2
+            try:
+                ingredient_category_1.save()
+                ingredient_category_2.save()
+            except IntegrityError:
+                return HttpResponse(status=418)
 
         return HttpResponse(status=200)
     else:

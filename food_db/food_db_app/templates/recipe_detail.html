@@ -91,7 +91,7 @@
 </table>
 {% if not recipe.recipe_book %}
     <h2>Ingredients</h2>
-    <table>
+    <table id="recipe_detail_ingredients_table">
         <thead><tr>
             {% if ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
             <th class="recipe_detail_ingredient_food">Ingredient</th>
@@ -105,15 +105,16 @@
             {% for cat, ingredient_list in ingredients.items %}
                 {% if cat == category %} 
                     {% if ingredients_have_categories %}
-                        <tr>
+                        <tr draggable="true" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragstart="handleDragStart(event)">
                             <td 
                                 rowspan="{{ ingredient_list | length }}" 
                                 class="recipe_detail_ingredient_category"
+                                data-ingredient_category="{{ category }}"
                                 style="align-content: center; background-color:  {% spaceless %}
                                     {% if forloop.counter|divisibleby:'2' %}
                                         white
                                     {% else %}
-                                        rgba(0, 0, 0, 0)
+                                        rgb(242, 242, 242)
                                     {% endif %}
                                     {% endspaceless %};"
                             >
@@ -128,13 +129,13 @@
                         {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
                             <tr>
                         {% endif %}
-                            <td class="recipe_detail_ingredient_food">
+                            <td class="recipe_detail_ingredient_food" data-ingredient_category="{{ category }}">
                                 {% if ingredient.quantity %}
                                     {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
                                 {% endif %}
                                 {{ ingredient.food }}
                             </td>
-                            <td class="recipe_detail_ingredient_notes">{{ ingredient.notes }}</td>
+                            <td class="recipe_detail_ingredient_notes" data-ingredient_category="{{ category }}">{{ ingredient.notes }}</td>
                         </tr>
                     {% endfor %}
                 {% endif %}
@@ -152,4 +153,5 @@
         {% endfor %}
     </table>
 {% endif %}
+<script src="{% static 'js/drag_ingredient_categories.js' %}"></script>
 {% endblock content %}
