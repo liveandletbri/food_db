@@ -332,6 +332,10 @@ input[type="url"] {
 .recipe_detail_ingredient_category_td:active {
     cursor: grabbing;
 }
+.ingredient_category_tbody:active {
+    cursor: grabbing;
+    box-shadow: 1px 1px 10px 10px rgb(153, 153, 153);
+}
 svg.grip-icon {
     color: lightgray;
 }

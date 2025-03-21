@@ -104,45 +104,48 @@
          while still accessing the ingredient_list -->
             {% for cat, ingredient_list in ingredients.items %}
                 {% if cat == category %} 
-                    {% if ingredients_have_categories %}
-                        <tr draggable="true" 
-                            ondrop="handleDrop(event)" 
-                            ondragover="handleDragOver(event)" 
-                            ondragstart="handleDragStart(event)"
-                        >
-                            <td 
-                                rowspan="{{ ingredient_list | length }}" 
-                                class="recipe_detail_ingredient_category_td"
-                                data-ingredient_category="{{ category }}"
-                                style="background-color:  {% spaceless %}
-                                    {% if forloop.counter|divisibleby:'2' %}
-                                        white
-                                    {% else %}
-                                        rgb(242, 242, 242)
-                                    {% endif %}
-                                    {% endspaceless %};"
+                    <tbody class="ingredient_category_tbody">
+                        {% if ingredients_have_categories %}
+                            <tr draggable="true" 
+                                ondrop="handleDrop(event)" 
+                                ondragover="handleDragOver(event)" 
+                                ondragstart="handleDragStart(event)"
+                                class="ingredient_category_row"
                             >
-                                <i class="fa-solid fa-grip-vertical grip-icon"></i>
-                                <span>&#160;&#160;&#160;{{ category }}</span>
-                            </td>
-                    {% endif %}
-                    {% for ingredient in ingredient_list %}
-                        <!-- This syntax should work as 
-                            if (ingredients_have_categories and not forloop.first)
-                            or (not ingredients_have_categories)
-                         -->
-                        {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
-                            <tr>
+                                <td 
+                                    rowspan="{{ ingredient_list | length }}" 
+                                    class="recipe_detail_ingredient_category_td"
+                                    data-ingredient_category="{{ category }}"
+                                    style="background-color:  {% spaceless %}
+                                        {% if forloop.counter|divisibleby:'2' %}
+                                            transparent
+                                        {% else %}
+                                            rgb(242, 242, 242)
+                                        {% endif %}
+                                        {% endspaceless %};"
+                                >
+                                    <i class="fa-solid fa-grip-vertical grip-icon"></i>
+                                    <span>&#160;&#160;&#160;{{ category }}</span>
+                                </td>
                         {% endif %}
-                            <td class="recipe_detail_ingredient_food" data-ingredient_category="{{ category }}">
-                                {% if ingredient.quantity %}
-                                    {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
-                                {% endif %}
-                                {{ ingredient.food }}
-                            </td>
-                            <td class="recipe_detail_ingredient_notes" data-ingredient_category="{{ category }}">{{ ingredient.notes }}</td>
-                        </tr>
-                    {% endfor %}
+                        {% for ingredient in ingredient_list %}
+                            <!-- This syntax should work as 
+                                if (ingredients_have_categories and not forloop.first)
+                                or (not ingredients_have_categories)
+                            -->
+                            {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
+                                <tr>
+                            {% endif %}
+                                <td class="recipe_detail_ingredient_food" data-ingredient_category="{{ category }}">
+                                    {% if ingredient.quantity %}
+                                        {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
+                                    {% endif %}
+                                    {{ ingredient.food }}
+                                </td>
+                                <td class="recipe_detail_ingredient_notes" data-ingredient_category="{{ category }}">{{ ingredient.notes }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 {% endif %}
             {% endfor %}
         {% endfor %}

@@ -3016,6 +3016,17 @@ input::-moz-focus-inner {
 			background-color: rgba(0, 0, 0, 0.05) !important;
 		}
 		
+		/* force first td in the tr to be white <tr class="ingredient_category_row"> */
+		table tbody tr.ingredient_category_row {
+			background-color: transparent;
+		}
+		table tbody tr.ingredient_category_row td:first-child {
+			background-color: transparent ;
+		}
+		table tbody tr.ingredient_category_row td:nth-child(n+1) {
+			background-color: rgba(0, 0, 0, 0.05);
+		}
+		
 		/* force row to be the opposite color compared to standard alternating pattern with <tr class="offset"> */
 		table tbody tr.offset {
 			background-color: rgba(0, 0, 0, 0.05);
