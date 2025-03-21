@@ -91,32 +91,51 @@
 </table>
 {% if not recipe.recipe_book %}
     <h2>Ingredients</h2>
-    <table>
+    <table id="recipe_detail_ingredients_table">
         <thead><tr>
             {% if ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
             <th class="recipe_detail_ingredient_food">Ingredient</th>
             <th class="recipe_detail_ingredient_notes">Notes</th>
         </tr></thead>
-        <!-- Print the category only on its first ingredient row, so each category is printed only once -->
         {% for category in ingredient_categories %}
-        <!-- A little hacky, would love to redo later -->
+        <!-- A little hacky, would love to redo later. Jinja can't take a variable for a dictionary key,
+         so I can't do something like ingredients[category] as I would in Python. Instead, this awkward
+         double for loop allows me to maintain the order of categories set in ingredient_categories
+         while still accessing the ingredient_list -->
             {% for cat, ingredient_list in ingredients.items %}
                 {% if cat == category %} 
+                    {% if ingredients_have_categories %}
+                        <tr draggable="true" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragstart="handleDragStart(event)">
+                            <td 
+                                rowspan="{{ ingredient_list | length }}" 
+                                class="recipe_detail_ingredient_category"
+                                data-ingredient_category="{{ category }}"
+                                style="align-content: center; background-color:  {% spaceless %}
+                                    {% if forloop.counter|divisibleby:'2' %}
+                                        white
+                                    {% else %}
+                                        rgb(242, 242, 242)
+                                    {% endif %}
+                                    {% endspaceless %};"
+                            >
+                                {{ category }}
+                            </td>
+                    {% endif %}
                     {% for ingredient in ingredient_list %}
-                        <tr>
-                            {% if ingredients_have_categories %}
-                                {% if forloop.first %}
-                                    <td class="recipe_detail_ingredient_category">{{ ingredient.ingredient_category }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif%}
-                            {% endif %}
-                            <td class="recipe_detail_ingredient_food">
+                        <!-- This syntax should work as 
+                            if (ingredients_have_categories and not forloop.first)
+                            or (not ingredients_have_categories)
+                         -->
+                        {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
+                            <tr>
+                        {% endif %}
+                            <td class="recipe_detail_ingredient_food" data-ingredient_category="{{ category }}">
                                 {% if ingredient.quantity %}
                                     {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
                                 {% endif %}
-                                {{ ingredient.food }}</td>
-                            <td class="recipe_detail_ingredient_notes">{{ ingredient.notes }}</td>
+                                {{ ingredient.food }}
+                            </td>
+                            <td class="recipe_detail_ingredient_notes" data-ingredient_category="{{ category }}">{{ ingredient.notes }}</td>
                         </tr>
                     {% endfor %}
                 {% endif %}
@@ -134,4 +153,5 @@
         {% endfor %}
     </table>
 {% endif %}
+<script src="{% static 'js/drag_ingredient_categories.js' %}"></script>
 {% endblock content %}

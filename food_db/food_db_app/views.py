@@ -4,6 +4,8 @@ import requests
 
 from collections import defaultdict
 from decimal import Decimal
+from django.db import transaction
+from django.db.utils import IntegrityError
 from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -15,7 +17,7 @@ from pytz import timezone
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
-from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage
+from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 def convert_minutes_to_string(minutes: int):
@@ -47,6 +49,12 @@ def capitalize_title(raw_title: str):
         else:
             capital_parts.append(word)
     return ' '.join(capital_parts)
+
+def remove_dupes_preserve_order(sequence):
+    '''As the name implies, this removes duplicates from a list
+    while preserving the order in which they first appeared.'''
+    seen = set()
+    return [x for x in sequence if x not in seen and not seen.add(x)]
 
 # Create your views here.
 def index(request):
@@ -90,19 +98,20 @@ def recipe_detail(request, key):
 
     images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
 
-    ingredients = Ingredient.objects.filter(recipe=recipe).order_by('ingredient_category')
-
     # Get list of ingredient categories
-    ingredient_categories = set(ingred.ingredient_category for ingred in ingredients)
-    ingredients_have_categories = ingredient_categories != {''}
+    ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
+    ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
+    ingredients_have_categories = ingredient_categories != ['']
 
-    # Apply multiplier to ingredient quantities and store ingredients in ingreds_by_category, where keys are the ingredient category
-    ingreds_by_category = defaultdict(list)
-    for ingredient in ingredients:
-        if ingredient.quantity:
-            ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
-        ingreds_by_category[ingredient.ingredient_category].append(ingredient)
-    
+    # Store ingredients in ingreds_by_category, where keys are the ingredient category
+    ingreds_by_category = {cat.name: list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat)) for cat in ingredient_category_instances}
+
+    # Apply multiplier to ingredient quantities
+    for ingredient_list in ingreds_by_category.values():
+        for ingredient in ingredient_list:
+            if ingredient.quantity:
+                ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
+
     # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     for step in steps:
@@ -122,7 +131,7 @@ def recipe_detail(request, key):
         'calorie_string': calorie_string,
         'images': images,
         'ingredients_have_categories': ingredients_have_categories,
-        'ingredient_categories': sorted(list(ingredient_categories)),
+        'ingredient_categories': ingredient_categories,
         'ingredients': dict(ingreds_by_category),
         'steps': steps,
         'multiplier': multiplier,
@@ -210,8 +219,11 @@ def add_recipe(request):
                     )
                     recipe_image_instance.save()
 
-            # For each ingredient in the form
+            # Establish ingredient categories
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
+            ingredient_categories = remove_dupes_preserve_order([create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in sorted(ingredient_ids)])
+
+            # For each ingredient in the form
             for ingred_id_prefix in sorted(ingredient_ids):
                 if create_recipe_form.cleaned_data['ingred_0_food'] != '':  # ingredients were entered for this recipe
                     # Gather ingredients fields together
@@ -241,6 +253,19 @@ def add_recipe(request):
                             clean_key=selected_unit,
                         )
                         new_unit.save()
+
+                    # Same for ingredient category
+                    existing_categories = [cat.name for cat in IngredientCategory.objects.filter(recipe=recipe_instance)]
+                    category_name = ingred['ingredient_category']
+                    if category_name not in existing_categories:
+                        ingredient_category_instance = IngredientCategory(
+                            recipe=recipe_instance,
+                            name=category_name,
+                            order_number=sorted(ingredient_categories).index(category_name),  # when adding a new recipe, categories are sorted alphabetically
+                        )
+                        ingredient_category_instance.save()
+                    else:
+                        ingredient_category_instance = IngredientCategory.objects.get(recipe=recipe_instance, name=category_name)
                     
                     # Save ingredient
                     ingredient_instance = Ingredient(
@@ -248,7 +273,7 @@ def add_recipe(request):
                         recipe=recipe_instance,
                         unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
-                        ingredient_category=ingred.get('ingredient_category', ''),
+                        ingredient_category=ingredient_category_instance,
                         notes=ingred.get('notes', ''),
                     )
                     ingredient_instance.save()
@@ -424,9 +449,26 @@ def edit_recipe(request, key):
             existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance)
             for ingred in existing_ingreds:
                 ingred.delete()
+            existing_ingred_categories = IngredientCategory.objects.filter(recipe=recipe_instance)
+            # Before deleting the ingredient categories, preserve their orders
+            existing_ingred_category_orders = {cat.name: cat.order_number for cat in existing_ingred_categories}
+            # Now we can delete them
+            for cat in existing_ingred_categories:
+                cat.delete()
+
+            # Establish ingredient categories and assign their order values
+            ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
+            new_ingredient_categories = remove_dupes_preserve_order([create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in sorted(ingredient_ids)])
+
+            # Map categories to a new order number. New categories will be added alphabetically at the end of the list.
+            ingred_category_orders = {}
+            for i, category in enumerate(new_ingredient_categories):
+                if category in existing_ingred_category_orders:
+                    ingred_category_orders[category] = existing_ingred_category_orders[category]
+                else:
+                    ingred_category_orders[category] = len(existing_ingred_category_orders) + i
 
             # For each ingredient in the form
-            ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
             for ingred_id_prefix in sorted(ingredient_ids):
                 # Gather ingredients fields together
                 ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
@@ -456,13 +498,26 @@ def edit_recipe(request, key):
                     )
                     new_unit.save()
                 
+                # Same for ingredient category
+                existing_categories = [cat.name for cat in IngredientCategory.objects.filter(recipe=recipe_instance)]
+                category_name = ingred['ingredient_category']
+                if category_name not in existing_categories:
+                    ingredient_category_instance = IngredientCategory(
+                        recipe=recipe_instance,
+                        name=category_name,
+                        order_number=ingred_category_orders[category_name],
+                    )
+                    ingredient_category_instance.save()
+                else:
+                    ingredient_category_instance = IngredientCategory.objects.get(recipe=recipe_instance, name=category_name)
+                
                 # Save ingredient
                 ingredient_instance = Ingredient(
                     food=Food.objects.get(clean_key=selected_food),
                     recipe=recipe_instance,
                     unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
-                    ingredient_category=ingred.get('ingredient_category', ''),
+                    ingredient_category=ingredient_category_instance,
                     notes=ingred.get('notes', ''),
                 )
                 ingredient_instance.save()
@@ -498,7 +553,7 @@ def edit_recipe(request, key):
     else:
         related_tags = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]
         related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
-        related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category')
+        related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
 
         existing_foods = [food.name for food in Food.objects.all()]
@@ -524,12 +579,16 @@ def edit_recipe(request, key):
         # Prepping ingredients and steps as dictionaries to be passed to the template, rather than setting inital fields,
         # because the template cannot dyanmically access dictionary keys (i.e. cannot do this: create_recipe_form['ingred_' + number + '_food'].value)
         ingredient_list = []
-        ingredient_fields = ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']
+        ingredient_fields = ['food', 'unit_of_measurement', 'quantity', 'notes']
         for i, ingredient in enumerate(related_ingredients):
             ingredient_data = {}
             for field in ingredient_fields:
                 # create_recipe_form.fields[f'ingred_{i}_{field}'].initial = getattr(ingredient, field)  # what you would set if using initial values
                 ingredient_data[field] = getattr(ingredient, field)
+            try:
+                ingredient_data['ingredient_category'] = ingredient.ingredient_category.name
+            except AttributeError:
+                ingredient_data['ingredient_category'] = ''
             ingredient_list.append(ingredient_data)
         
         # If the recipe is from a recipe book, it may have no ingredients. Populate a blank one for the form.
@@ -595,6 +654,40 @@ def delete_recipe_image(request):
         data = json.loads(request.body)
         recipe_image_instance = RecipeImage.objects.get(_file_name=data['file_name'])
         recipe_image_instance.delete()
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def get_ingredient_category_order_number(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe = Recipe.objects.get(title=data['recipe_title'])
+        ingredient_category = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category'])
+
+        print(f'get_ingredient_category_order_number: {ingredient_category.name} = {ingredient_category.order_number}')
+        return HttpResponse(str(ingredient_category.order_number))
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def swap_ingredient_category_order_numbers(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe = Recipe.objects.get(title=data['recipe_title'])
+        ingredient_category_1 = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category_1'])
+        new_number_1 = data['order_number_1']
+        ingredient_category_2 = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category_2'])
+        new_number_2 = data['order_number_2']
+        with transaction.atomic():
+            ingredient_category_1.order_number = new_number_1
+            ingredient_category_2.order_number = new_number_2
+            try:
+                ingredient_category_1.save()
+                ingredient_category_2.save()
+            except IntegrityError:
+                return HttpResponse(status=418)
 
         return HttpResponse(status=200)
     else:
