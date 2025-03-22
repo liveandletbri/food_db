@@ -359,7 +359,6 @@ def search(request):
     return render(request, 'search.html', context)
 
 
-
 def edit_recipe(request, key):
     recipe_instance = get_object_or_404(Recipe, clean_key=key)
 
@@ -621,6 +620,23 @@ def edit_recipe(request, key):
     }
 
     return render(request, 'add_edit_recipe.html', context)
+
+
+def manage_food(request):
+    food_instances = Food.objects.all().order_by('name')
+    foods = [
+        {
+            'name': food.name,
+            'category': food.food_category.name if food.food_category else '',
+            'recipes': [{'title': recipe.title, 'clean_key': recipe.clean_key} for recipe in Recipe.objects.filter(ingredient__food__name=food.name).distinct().order_by('title')],
+        }
+        for food in food_instances
+    ]
+    context = {
+        'foods': foods,
+    }
+    return render(request, 'manage_food.html', context)
+
 
 @csrf_exempt
 def ingredient_parse_api(request):
