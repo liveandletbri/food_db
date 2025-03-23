@@ -36,6 +36,7 @@ urlpatterns = [
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
     path('get_ingredient_category_order_number/', views.get_ingredient_category_order_number, name='get_ingredient_category_order_number'),
     path('ingred_parse', views.ingredient_parse_api, name='ingred_parse'),
+    path('merge_foods/', views.merge_foods, name='merge_foods'),
     path('swap_ingredient_category_order_numbers/', views.swap_ingredient_category_order_numbers, name='swap_ingredient_category_order_numbers'),
 
     # and this stupid thing to stop the console from complaining when every page loads

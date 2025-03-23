@@ -706,3 +706,31 @@ def swap_ingredient_category_order_numbers(request):
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def merge_foods(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        food_to_merge = Food.objects.get(name=data['food_to_merge'])
+        food_to_keep = Food.objects.get(name=data['food_to_keep'])
+        ingreds_to_update = Ingredient.objects.filter(food__name=food_to_merge.name)
+        for ingred in ingreds_to_update:
+            assert ingred.food == food_to_merge
+            ingred.food = food_to_keep
+            ingred.save()
+        
+        food_to_merge.delete()
+        
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+    
+@csrf_exempt
+def delete_food(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        food = Food.objects.get(name=data['food_to_merge'])
+        food.delete()
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])

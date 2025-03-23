@@ -11,6 +11,8 @@ foodData.forEach(food => {
 let highlightedStatsRow
 let highlightedMergeRow
 let mergeMode = false
+
+let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
 let mergeButton = document.getElementById('merge_food_button')
@@ -89,10 +91,35 @@ function highlightStatsRow(event){
 async function mergeFoods(event) {
     event.preventDefault()
     firstFood = highlightedStatsRow.getAttribute('data-food')
-    secondFood = highlightedMergeStatsRow.getAttribute('data-food')
+    secondFood = highlightedMergeRow.getAttribute('data-food')
     let confirmText = `Are you sure you want to merge "${firstFood}" with "${secondFood}"? All recipes using "${firstFood}" will be updated to instead use "${secondFood}", and "${firstFood}" will disappear from the database.`
     let confirmMerge = confirm(confirmText)
+    if (confirmMerge) {
+        await fetch(`${currentUrlDomain}/merge_foods/`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                food_to_merge: firstFood,
+                food_to_keep: secondFood,
+            })
+        })
+        .then(function(response) {
+            if (response.status == 200) {
+                highlightedStatsRow.remove()
+                resetMergeMode(false, '')
+            }
+            else {
+                console.log("d'oh!")
+            }
+            return response.text()
+        })
+    }
 }
+
+const mergeFoodsHandler = (event) => mergeFoods(event)
 
 function resetMergeMode(stillInMergeMode, headerText) {
     mergeMode = stillInMergeMode
@@ -109,7 +136,7 @@ function resetMergeMode(stillInMergeMode, headerText) {
     foodStatsMergeBody.innerHTML = ''
     mergeButton.classList.remove('merge_selected')
     mergeButton.innerText = defaultMergeButtonText
-    mergeButton.removeEventListener('click', mergeFoods)
+    mergeButton.removeEventListener('click', mergeFoodsHandler)
     mergeButton.addEventListener('click', enterMergeMode)
 }
 
@@ -137,7 +164,7 @@ function highlightMergeRow(event) {
         // Modify merge button to indicate we're ready to merge
         mergeButton.classList.add('merge_selected')
         mergeButton.innerText = 'Merge foods'
-        mergeButton.addEventListener('click', mergeFoods)
+        mergeButton.addEventListener('click', mergeFoodsHandler)
         
         // Highlight and set stats for this row
         targetElement.classList.add('highlight_merge')
