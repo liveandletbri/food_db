@@ -31,7 +31,10 @@
     <div class="food_stats" id="food_tab_stats">
         <h3 id="food_stats_header">Select a food</h3>
         <span id="food_stats_body"></span>
-        <div id="food_stats_buttons"></div>
+        <div id="food_stats_buttons">
+            <button id="merge_food_button" style="display: none;" class="food_stats_button" type="button">Merge with another</button>
+            <button id="cancel_merge_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetMergeMode(false, '')">Cancel Merge</button>
+        </div>
         <h3 id="food_stats_merge_header"></h3>
         <span id="food_stats_merge_body"></span>
     </div>
