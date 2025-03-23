@@ -6,12 +6,10 @@ from collections import defaultdict
 from decimal import Decimal
 from django.db import transaction
 from django.db.utils import IntegrityError
-from django.forms import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.edit import CreateView
 from math import floor
 from pytz import timezone
 
@@ -361,7 +359,6 @@ def search(request):
     return render(request, 'search.html', context)
 
 
-
 def edit_recipe(request, key):
     recipe_instance = get_object_or_404(Recipe, clean_key=key)
 
@@ -624,6 +621,23 @@ def edit_recipe(request, key):
 
     return render(request, 'add_edit_recipe.html', context)
 
+
+def manage_food(request):
+    food_instances = Food.objects.all().order_by('name')
+    foods = [
+        {
+            'name': food.name,
+            'category': food.food_category.name if food.food_category else '',
+            'recipes': [{'title': recipe.title, 'clean_key': recipe.clean_key} for recipe in Recipe.objects.filter(ingredient__food__name=food.name).distinct().order_by('title')],
+        }
+        for food in food_instances
+    ]
+    context = {
+        'foods': foods,
+    }
+    return render(request, 'manage_food.html', context)
+
+
 @csrf_exempt
 def ingredient_parse_api(request):
     if request.method == 'POST':
@@ -689,6 +703,34 @@ def swap_ingredient_category_order_numbers(request):
             except IntegrityError:
                 return HttpResponse(status=418)
 
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def merge_foods(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        food_to_merge = Food.objects.get(name=data['food_to_merge'])
+        food_to_keep = Food.objects.get(name=data['food_to_keep'])
+        ingreds_to_update = Ingredient.objects.filter(food__name=food_to_merge.name)
+        for ingred in ingreds_to_update:
+            assert ingred.food == food_to_merge
+            ingred.food = food_to_keep
+            ingred.save()
+        
+        food_to_merge.delete()
+        
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+    
+@csrf_exempt
+def delete_food(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        food = Food.objects.get(name=data['food_to_merge'])
+        food.delete()
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
