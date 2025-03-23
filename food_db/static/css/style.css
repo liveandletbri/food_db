@@ -407,21 +407,64 @@ svg.grip-icon {
  
  .tab_container h2 { margin-left: 15px;  margin-right: 15px;  margin-bottom: 10px; color: #5685bc; }
  
- .tab_container p { margin-left: 15px; margin-right: 15px;  margin-top: 10px; margin-bottom: 10px; line-height: 1.3; font-size: small; }
+ .tab_container p { margin-left: 15px; margin-right: 15px;  margin-top: 10px; margin-bottom: 10px; line-height: 1.3; }
  
- .tab_container ul { margin-left: 25px; font-size: small; line-height: 1.4; list-style-type: disc; }
+ .tab_container ul { margin-left: 25px; line-height: 1.1; list-style-type: disc; column-count: 1;}
  
- .tab_container li { padding-bottom: 5px; margin-left: 5px;}
+ .tab_container li { margin-left: 5px;}
 
 .manage_food_table {
     width: 50%;
     font-size: medium;
     float: left;
+    table-layout: fixed;
 }
 
 .food_stats {
     float: left;
     padding-left: 5%;
+    width: 50%;
+    position: sticky;
+    top: 10px;
+}
+
+.food_stats li {
+    padding-left: 0px;
+    width: 300px;
+}
+
+.food_stats span {
+    padding-bottom: 30px;
+    display: block;
+}
+
+.food_stats ul {
+    padding-left: 0px;
+}
+
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    .food_stats ul {
+        width: 350px;
+    }
+    .food_stats li {
+        width: 350px;
+    }
+    .food_stats button {
+        width: 525px;
+    }
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    .food_stats ul {
+        width: 220px;
+    }
+    .food_stats li {
+        width: 200px;
+    }
+    .food_stats button {
+        width: 225px;
+    }
 }
 
 .manage_food_row.highlight {

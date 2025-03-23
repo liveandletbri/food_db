@@ -11,14 +11,15 @@ foodData.forEach(food => {
 let highlightedRow
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
+let foodStatsButtons = document.getElementById('food_stats_buttons')
 
-let foodStatsTemplate = `Used in these recipes:
+let foodStatsTemplate = `<h4>Used in these recipes:</h4>
 <ul>
 {recipeList}
-</ul>
+</ul>`
 
-<button id="merge_food_button" class="food_stats_button" type="button" 
-onclick="showIngredientParserOnClick()">Merge food with another</button>`
+let foodStatsMergeButton = `<button id="merge_food_button" class="food_stats_button" type="button" 
+onclick="showIngredientParserOnClick()">Merge foods...</button>`
 
 function showHideTabs(){   
     $('#tabs li a:not(:first)').addClass('inactive');
@@ -53,9 +54,9 @@ function highlightRow(event){
     let category = targetElement.getAttribute('data-category')
     let recipes = Array.from(foodDataDict[food]['recipes'])
     let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
-    foodStatsHeader.innerText = `${food}: ${category}`
+    foodStatsHeader.innerText = `${category}: ${food}`
     foodStatsBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{recipeList}',recipeHTML)
-
+    foodStatsButtons.innerHTML = foodStatsMergeButton
 }
 
 let rows = document.querySelectorAll('.manage_food_row')
