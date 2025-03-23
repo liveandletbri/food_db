@@ -1,13 +1,7 @@
 let currentUrl = window.location.href
 let currentUrlDomain = currentUrl.split("/food/")[0]
-const foodData = JSON.parse(document.getElementById('foodDataRaw').textContent);  // foodDataRaw is declared in manage_food.html, passed from views.py
-let foodDataDict = {}
-foodData.forEach(food => {
-    foodDataDict[food.name] = {
-        'category': food.category,
-        'recipes': food.recipes,
-    }
-})
+let foodDataDict = getFoodData(document)
+
 let highlightedStatsRow
 let highlightedMergeRow
 let mergeMode = false
@@ -29,6 +23,20 @@ let foodStatsTemplate = `<h4>Used in these recipes:</h4>
 <ul>
 {recipeList}
 </ul>`
+
+function getFoodData(document) {
+    // foodDataRaw is declared in manage_food.html, passed from views.py
+    let foodData = JSON.parse(document.querySelector('#foodDataRaw').textContent)
+    let returnDict = {}
+    foodData.forEach((food, index) => {
+        returnDict[food.name] = {
+            'category': food.category,
+            'recipes': food.recipes,
+            'rowIndex': index,
+        }
+    })
+    return returnDict
+}
 
 function showHideTabs(){   
     $('#tabs li a:not(:first)').addClass('inactive');
@@ -88,6 +96,28 @@ function highlightStatsRow(event){
     }
 }
 
+async function reloadFoodCategoryTable() {
+    let response = await fetch('/food', {
+        method: "GET",
+    })
+    .then(function(response) {
+        // The response is a Response instance.
+        return response.text();
+    })
+    
+    // Render the response text as an html element, then extract the new search result div from its innards
+    let responseHtml = document.createElement('html')
+    responseHtml.innerHTML = response
+    foodDataDict = getFoodData(responseHtml)
+    let responseFoodCategoryTable = responseHtml.querySelector('#foods_categories_table')
+
+    // Frankenstein it right into our existing page
+    foodCategoryTable.innerHTML = responseFoodCategoryTable.innerHTML
+
+    assignRowListeners()
+}
+
+
 async function mergeFoods(event) {
     event.preventDefault()
     firstFood = highlightedStatsRow.getAttribute('data-food')
@@ -107,15 +137,25 @@ async function mergeFoods(event) {
             })
         })
         .then(function(response) {
-            if (response.status == 200) {
-                highlightedStatsRow.remove()
-                resetMergeMode(false, '')
-            }
-            else {
+            if (! response.status == 200) {
+                // Quit the function here
                 console.log("d'oh!")
+                return
             }
-            return response.text()
         })
+        // This assumes the response was 200 since it didn't return earlier
+        // Doing this so I can use await, which must be at top-level (rather than
+        // putting it under the .then function above)
+        await reloadFoodCategoryTable()
+        resetMergeMode(false, '')
+        
+        // The merge row should now be highlighted, but using the highlightedMergeRow 
+        // variable won't work since that is from before reloadFoodCategoryTable. 
+        // Instead we'll find it by index.
+        let newHighlightedRowIndex = foodDataDict[secondFood]['rowIndex']
+        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex + 1]  // + 1 because the headers are row 0
+        let fakeEvent = {'target': newHighlightedRow}
+        highlightStatsRow(fakeEvent)
     }
 }
 
@@ -187,9 +227,12 @@ function handleFoodRowClick(event) {
     }
 }
 
-let rows = document.querySelectorAll('.manage_food_row')
-rows.forEach(row => {
-    row.addEventListener('click', function(event) {handleFoodRowClick(event)})
-})
+function assignRowListeners() {
+    let rows = document.querySelectorAll('.manage_food_row')
+    rows.forEach(row => {
+        row.addEventListener('click', function(event) {handleFoodRowClick(event)})
+    })
+}
 
+assignRowListeners()
 $(document).ready(showHideTabs)
