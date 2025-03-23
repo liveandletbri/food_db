@@ -13,6 +13,7 @@ let notesInput = document.querySelector("#id_notes")
 // These are declared in other scripts loaded in the same page
 // let ingredTable = document.querySelector("#ingred-table")
 // let stepTable = document.querySelector("#step_table")
+// function showAndHideTooltip is in tooltip.js
 
 let titleTooltip = document.querySelector("#title_tooltip")
 let urlTooltip = document.querySelector("#url_tooltip")
@@ -23,20 +24,6 @@ let servingsTooltip = document.querySelector("#servings_tooltip")
 let caloriesTooltip = document.querySelector("#calories_per_recipe_tooltip")
 let ingredFoodTooltip = document.querySelector("#ingred_0_food_tooltip")
 let stepTooltip = document.querySelector("#step_0_description_tooltip")
-
-function hideToolTip(tooltip) {
-    tooltip.className = "form_validate_tooltip"
-}
-
-function showToolTip(tooltip) {
-    tooltip.className = "form_validate_tooltip visible"
-}
-
-function showAndHideTooltip(tooltip) {
-    tooltip.scrollIntoView({behavior: 'smooth', block: 'center'})
-    setTimeout(showToolTip, 300, tooltip)
-    setTimeout(hideToolTip, 3000, tooltip)
-}
 
 async function validateAddRecipe(e) {
     e.preventDefault()
