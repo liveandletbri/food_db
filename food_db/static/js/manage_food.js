@@ -26,7 +26,9 @@ let foodStatsTemplate = `<h4>Used in these recipes:</h4>
 let defaultMergeHeaderText = 'Select a food to merge with'
 let defaultMergeButtonText = 'Merge with another'
 let foodStatsMergeButton = `<button id="merge_food_button" class="food_stats_button" type="button" 
-onclick="enterMergeMode()">${defaultMergeButtonText}</button><br><br>`
+onclick="enterMergeMode()">${defaultMergeButtonText}</button>`
+let foodStatsCancelMergeButton = `<button id="cancel_merge_food_button" class="food_stats_button" type="button" 
+onclick="resetMergeMode(false, '')">Cancel Merge</button><br><br>`
 
 let badMergeTooltip = document.getElementById('cant_self_merge_tooltip')
 
@@ -82,10 +84,14 @@ function highlightStatsRow(event){
 function enterMergeMode() {
     mergeMode = true
     foodStatsMergeHeader.innerText = defaultMergeHeaderText
+    foodStatsButtons.innerHTML += foodStatsCancelMergeButton
 }
 
 function resetMergeMode(stillInMergeMode, headerText) {
     mergeMode = stillInMergeMode
+    if (!stillInMergeMode) {
+        foodStatsButtons.innerHTML = foodStatsMergeButton
+    }
     foodStatsMergeHeader.innerText = ''
     if (highlightedMergeRow) {
         highlightedMergeRow.classList.remove('highlight_merge')
@@ -93,6 +99,7 @@ function resetMergeMode(stillInMergeMode, headerText) {
     }
     foodStatsMergeHeader.innerText = headerText
     foodStatsMergeBody.innerHTML = ''
+    mergeButton = document.getElementById('merge_food_button')
     mergeButton.classList.remove('merge_selected')
     mergeButton.innerText = defaultMergeButtonText
 }
@@ -111,14 +118,8 @@ function highlightMergeRow(event) {
         // Clicked the stats row, which is highlighted blue. You can't merge into yourself!
         // showAndHideTooltip is defined in tooltip.js
 
-        // badMergeTooltip.offsetTop = targetElement.offsetTop
-        // badMergeTooltip.offsetLeft = targetElement.offsetLeft
-
-        let targetRect = targetElement.getBoundingClientRect();
-
-        console.log(targetRect.top)
-        badMergeTooltip.style.left = `${targetRect.left}px`;
-        badMergeTooltip.style.top = `${targetRect.top+80}px`;
+        badMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
+        badMergeTooltip.style.top = `${targetElement.offsetTop + 330}px`;
         showAndHideTooltip(badMergeTooltip)
     } else {
         if (highlightedMergeRow) {

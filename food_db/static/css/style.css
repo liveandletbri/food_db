@@ -420,6 +420,11 @@ svg.grip-icon {
     table-layout: fixed;
 }
 
+.mange_food_table tr {
+    position:relative;
+    transform:scale(1,1);
+}
+
 .food_stats {
     float: left;
     padding-left: 5%;
@@ -478,4 +483,7 @@ svg.grip-icon {
 button.merge_selected {
     color: #d9edf7;
     background-color: #610035;
+}
+#cancel_merge_food_button {
+    margin-top: 10px;
 }
