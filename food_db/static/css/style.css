@@ -450,8 +450,8 @@ svg.grip-icon {
 .food_stats ul {
     padding-left: 0px;
 }
-
-.food_input {
+/* Food name */
+.food_name {
     resize: none;
     line-height: 1.3;
     padding: 0px;
@@ -461,29 +461,34 @@ svg.grip-icon {
     overflow: hidden;
     min-height: 100%;
 }
-
-textarea.locked {
+.locked {
     border-color: transparent !important;
     border: 0px;
     cursor: default;
 }
-textarea.locked:focus {
+.locked:focus {
     border-color: transparent !important;
     box-shadow: none;
     border: 0px;
 }
-
-textarea.locked::selection {
+.locked::selection {
     background-color: transparent;
     display: none;
 }
-
-
 textarea.unlocked {
     border-color: white;
     box-shadow: white;
 }
-
+/* Food category */
+.food_category_label {
+    line-height: 1.3;
+    font-size: 1rem;
+    cursor: default;
+}
+.food_category {
+    line-height: 1.3;
+    font-size: 1rem;
+}
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
     .food_stats ul {

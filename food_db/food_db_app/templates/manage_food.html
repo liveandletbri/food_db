@@ -33,13 +33,12 @@
                 >{{ food.name }}</textarea>
             </td>
             <td>
-                <textarea 
-                    readonly 
-                    oncopy="return false"
-                    oncut="return false"
-                    onpaste="return false"
-                    class="food_input food_category locked"
-                >{{ food.category }}</textarea>
+                <span class="food_category_label locked">{{ food.category }}</span>
+                <select class="food_input food_category unlocked" style="display: none;">
+                    {% for category in categories %}
+                    <option value="{{ category }}" {% if category == food.category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
             </td>
         </tr>
         {% endfor %}

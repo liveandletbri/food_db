@@ -15,7 +15,7 @@ from pytz import timezone
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
-from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory
+from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory, FoodCategory
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 def convert_minutes_to_string(minutes: int):
@@ -632,8 +632,10 @@ def manage_food(request):
         }
         for food in food_instances
     ]
+    categories = [cat.name for cat in FoodCategory.objects.all().order_by('name')]
     context = {
         'foods': foods,
+        'categories': categories,
     }
     return render(request, 'manage_food.html', context)
 

@@ -79,15 +79,18 @@ function enterEditMode() {
     mergeButton.style.display = 'none'
     cancelEditButton.style.display = ''
 
-    bothInputs = highlightedStatsRow.querySelectorAll('.food_input')
-    bothInputs.forEach(input => {
-        input.classList.remove('locked')
-        input.classList.add('unlocked')
-        input.removeAttribute('readonly')
-    })
+    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    nameInput.classList.remove('locked')
+    nameInput.classList.add('unlocked')
+    nameInput.removeAttribute('readonly')
 
-    originalFoodValue = highlightedStatsRow.querySelector('.food_name').value
-    originalCategoryValue = highlightedStatsRow.querySelector('.food_category').value
+    let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
+    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+    categoryLabel.style.display = 'none'
+    categorySelect.style.display = ''
+
+    originalFoodValue = nameInput.value
+    originalCategoryValue = categoryLabel.innerText
 
     editButton.removeEventListener('click', enterEditMode)
     editButton.addEventListener('click', submitEditsHandler)
@@ -100,14 +103,17 @@ function resetEditMode(cancelEdits) {
     editButton.style.display = ''
     cancelEditButton.style.display = 'none'
 
-    let allInputs = document.querySelectorAll('.food_input')
-    allInputs.forEach(input => {
-        if (input.classList.contains('unlocked')) {
-            input.classList.remove('unlocked')
-            input.classList.add('locked')
-            input.setAttribute('readonly', true)
-        }
-    })
+    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    if (nameInput.classList.contains('unlocked')) {
+        nameInput.classList.remove('unlocked')
+        nameInput.classList.add('locked')
+        nameInput.setAttribute('readonly', true)
+    }
+
+    let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
+    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+    categoryLabel.style.display = ''
+    categorySelect.style.display = 'none'
 
     editButton.removeEventListener('click', submitEditsHandler)
     editButton.addEventListener('click', enterEditMode)
@@ -117,8 +123,8 @@ function resetEditMode(cancelEdits) {
         highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
         highlightedStatsRow.querySelector('.food_name').innerHTML = originalFoodValue
         originalFoodValue = null
-        highlightedStatsRow.querySelector('.food_category').value = originalCategoryValue
-        highlightedStatsRow.querySelector('.food_category').innerHTML = originalCategoryValue
+
+        // no need to change any values for the Category since categoryLabel still holds the original value
         originalCategoryValue = null
     }
 }
@@ -131,8 +137,9 @@ const submitEditsHandler = () => submitEdits()
 
 function highlightStatsRow(event){
     targetElement = event.target
-    if (targetElement.nodeName == "TEXTAREA" && targetElement.classList.contains('unlocked')) {
-        // Totally skip this function - do not change the highlights and stats if clicking an unlocked textbox 
+    let inputNodeNames = ['TEXTAREA', 'SELECT', 'SPAN']
+    if (inputNodeNames.includes(targetElement.nodeName) && targetElement.classList.contains('unlocked')) {
+        // Totally skip this function - do not change the highlights and stats if clicking an unlocked input 
         return
     } else if (editMode) {
         // Also skip this function while in edit mode
@@ -140,7 +147,7 @@ function highlightStatsRow(event){
     } else if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
         targetElement = targetElement.parentNode
-    } else if (targetElement.nodeName == "TEXTAREA") {
+    } else if (inputNodeNames.includes(targetElement.nodeName)) {
         targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedStatsRow == targetElement) {
@@ -314,7 +321,7 @@ function assignRowListeners() {
         row.addEventListener('click', function(event) {handleFoodRowClick(event)})
     })
 
-    let inputs = document.querySelectorAll('.food_input')
+    let inputs = document.querySelectorAll('.food_name')
     inputs.forEach(row => {
         autoTextareaHeight(row)
         row.addEventListener('change', autoTextareaHeight)
