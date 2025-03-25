@@ -43,6 +43,11 @@ function getFoodData(document) {
     return returnDict
 }
 
+function autoTextareaHeight(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight)+"px";
+}
+
 function showHideTabs(){   
     $('#tabs li a:not(:first)').addClass('inactive');
     $('.tab_container').hide();
@@ -81,8 +86,8 @@ function enterEditMode() {
         input.removeAttribute('readonly')
     })
 
-    originalFoodValue = highlightedStatsRow.querySelector('.food_name').getAttribute('value')
-    originalCategoryValue = highlightedStatsRow.querySelector('.food_category').getAttribute('value')
+    originalFoodValue = highlightedStatsRow.querySelector('.food_name').value
+    originalCategoryValue = highlightedStatsRow.querySelector('.food_category').value
 
     editButton.removeEventListener('click', enterEditMode)
     editButton.addEventListener('click', submitEditsHandler)
@@ -110,8 +115,10 @@ function resetEditMode(cancelEdits) {
 
     if (cancelEdits) {
         highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
+        highlightedStatsRow.querySelector('.food_name').innerHTML = originalFoodValue
         originalFoodValue = null
         highlightedStatsRow.querySelector('.food_category').value = originalCategoryValue
+        highlightedStatsRow.querySelector('.food_category').innerHTML = originalCategoryValue
         originalCategoryValue = null
     }
 }
@@ -124,7 +131,7 @@ const submitEditsHandler = () => submitEdits()
 
 function highlightStatsRow(event){
     targetElement = event.target
-    if (targetElement.nodeName == "INPUT" && targetElement.classList.contains('unlocked')) {
+    if (targetElement.nodeName == "TEXTAREA" && targetElement.classList.contains('unlocked')) {
         // Totally skip this function - do not change the highlights and stats if clicking an unlocked textbox 
         return
     } else if (editMode) {
@@ -133,7 +140,7 @@ function highlightStatsRow(event){
     } else if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
         targetElement = targetElement.parentNode
-    } else if (targetElement.nodeName == "INPUT") {
+    } else if (targetElement.nodeName == "TEXTAREA") {
         targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedStatsRow == targetElement) {
@@ -257,7 +264,7 @@ function highlightMergeRow(event) {
     if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
         targetElement = targetElement.parentNode
-    } else if (targetElement.nodeName == "INPUT") {
+    } else if (targetElement.nodeName == "TEXTAREA") {
         targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedMergeRow == targetElement) {
@@ -306,6 +313,14 @@ function assignRowListeners() {
     rows.forEach(row => {
         row.addEventListener('click', function(event) {handleFoodRowClick(event)})
     })
+
+    let inputs = document.querySelectorAll('.food_input')
+    inputs.forEach(row => {
+        autoTextareaHeight(row)
+        row.addEventListener('change', autoTextareaHeight)
+    })
+
+    
 }
 
 assignRowListeners()

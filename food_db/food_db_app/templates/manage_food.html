@@ -24,24 +24,22 @@
         {% for food in foods %}
         <tr class="manage_food_row" data-food="{{ food.name }}" data-category="{{ food.category }}">
             <td>
-                <input type="text" 
+                <textarea 
                     readonly 
                     oncopy="return false"
                     oncut="return false"
                     onpaste="return false"
                     class="food_input food_name locked"
-                    value="{{ food.name }}"
-                ></input>
+                >{{ food.name }}</textarea>
             </td>
             <td>
-                <input type="text" 
+                <textarea 
                     readonly 
                     oncopy="return false"
                     oncut="return false"
                     onpaste="return false"
                     class="food_input food_category locked"
-                    value="{{ food.category }}"
-                ></input>
+                >{{ food.category }}</textarea>
             </td>
         </tr>
         {% endfor %}
