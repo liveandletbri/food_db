@@ -5,15 +5,20 @@ let foodDataDict = getFoodData(document)
 let highlightedStatsRow
 let highlightedMergeRow
 let mergeMode = false
+let editMode = false
+let originalFoodValue = null
+let originalCategoryValue = null
 
 let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
 let mergeButton = document.getElementById('merge_food_button')
+let cancelMergeButton = document.getElementById('cancel_merge_food_button')
+let editButton = document.getElementById('edit_food_button')
+let cancelEditButton = document.getElementById('cancel_edit_food_button')
 
 let foodStatsMergeHeader = document.getElementById('food_stats_merge_header')
 let foodStatsMergeBody = document.getElementById('food_stats_merge_body')
-let cancelMergeButton = document.getElementById('cancel_merge_food_button')
 let badMergeTooltip = document.getElementById('cant_self_merge_tooltip')
 
 let defaultMergeHeaderText = 'Select a food to merge with'
@@ -61,13 +66,73 @@ function enterMergeMode() {
     cancelMergeButton.style.display = ''
     mergeButton = document.getElementById('merge_food_button')
     mergeButton.removeEventListener('click', enterMergeMode)
+    editButton.style.display = 'none'
 }
+
+function enterEditMode() {
+    editMode = true
+    mergeButton.style.display = 'none'
+    cancelEditButton.style.display = ''
+
+    bothInputs = highlightedStatsRow.querySelectorAll('.food_input')
+    bothInputs.forEach(input => {
+        input.classList.remove('locked')
+        input.classList.add('unlocked')
+        input.removeAttribute('readonly')
+    })
+
+    originalFoodValue = highlightedStatsRow.querySelector('.food_name').getAttribute('value')
+    originalCategoryValue = highlightedStatsRow.querySelector('.food_category').getAttribute('value')
+
+    editButton.removeEventListener('click', enterEditMode)
+    editButton.addEventListener('click', submitEditsHandler)
+    editButton.innerText = 'Save edits'
+}
+
+function resetEditMode(cancelEdits) {
+    editMode = false
+    mergeButton.style.display = ''
+    editButton.style.display = ''
+    cancelEditButton.style.display = 'none'
+
+    let allInputs = document.querySelectorAll('.food_input')
+    allInputs.forEach(input => {
+        if (input.classList.contains('unlocked')) {
+            input.classList.remove('unlocked')
+            input.classList.add('locked')
+            input.setAttribute('readonly', true)
+        }
+    })
+
+    editButton.removeEventListener('click', submitEditsHandler)
+    editButton.addEventListener('click', enterEditMode)
+    editButton.innerText = 'Edit row'
+
+    if (cancelEdits) {
+        highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
+        originalFoodValue = null
+        highlightedStatsRow.querySelector('.food_category').value = originalCategoryValue
+        originalCategoryValue = null
+    }
+}
+
+async function submitEdits() {
+    return
+}
+
+const submitEditsHandler = () => submitEdits()
 
 function highlightStatsRow(event){
     targetElement = event.target
-    if (targetElement.nodeName == "TD") {
+    if (targetElement.nodeName == "INPUT" && targetElement.classList.contains('unlocked')) {
+        // Totally skip this function - do not change the highlights and stats if clicking an unlocked textbox 
+        return
+    } else if (editMode) {
+        // Also skip this function while in edit mode
+        return
+    } else if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
-        targetElement = targetElement.parentNode;   
+        targetElement = targetElement.parentNode
     } else if (targetElement.nodeName == "INPUT") {
         targetElement = targetElement.parentNode.parentNode
     }
@@ -78,6 +143,7 @@ function highlightStatsRow(event){
         foodStatsHeader.innerText = 'Select a food'
         foodStatsBody.innerHTML = ''
         mergeButton.style.display = 'none'
+        editButton.style.display = 'none'
         resetMergeMode(false, '')
     } else {
         if (highlightedStatsRow) {
@@ -95,6 +161,7 @@ function highlightStatsRow(event){
         foodStatsBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{recipeList}',recipeHTML)
         mergeButton.style.display = ''
         mergeButton.addEventListener('click', enterMergeMode)
+        editButton.style.display = ''
     }
 }
 
@@ -166,8 +233,11 @@ const mergeFoodsHandler = (event) => mergeFoods(event)
 function resetMergeMode(stillInMergeMode, headerText) {
     mergeMode = stillInMergeMode
     if (!stillInMergeMode) {
-        // Remove cancel button
+        // Remove cancel button and show edit button again
         cancelMergeButton.style.display = 'none'
+        if (highlightedStatsRow) {
+            editButton.style.display = ''
+        }
     }
     foodStatsMergeHeader.innerText = ''
     if (highlightedMergeRow) {
@@ -222,11 +292,8 @@ function highlightMergeRow(event) {
     }
 }
 
-function handleFoodRowClick(event, preventDefault) {
-    if (preventDefault == undefined) {
-        // when this is called from handleTextInputClick, we don't need to (and can't) preventDefault again
-        event.preventDefault()
-    } 
+function handleFoodRowClick(event) {
+    event.preventDefault()
     if (mergeMode == true) {
         highlightMergeRow(event)
     } else {
@@ -243,3 +310,4 @@ function assignRowListeners() {
 
 assignRowListeners()
 $(document).ready(showHideTabs)
+editButton.addEventListener('click', enterEditMode)

@@ -29,7 +29,7 @@
                     oncopy="return false"
                     oncut="return false"
                     onpaste="return false"
-                    class="food_input locked"
+                    class="food_input food_name locked"
                     value="{{ food.name }}"
                 ></input>
             </td>
@@ -39,7 +39,7 @@
                     oncopy="return false"
                     oncut="return false"
                     onpaste="return false"
-                    class="food_input locked"
+                    class="food_input food_category locked"
                     value="{{ food.category }}"
                 ></input>
             </td>
@@ -52,6 +52,8 @@
         <div id="food_stats_buttons">
             <button id="merge_food_button" style="display: none;" class="food_stats_button" type="button">Merge with another</button>
             <button id="cancel_merge_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetMergeMode(false, '')">Cancel Merge</button>
+            <button id="edit_food_button" style="display: none;" class="food_stats_button" type="button">Edit Row</button>
+            <button id="cancel_edit_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetEditMode(true)">Cancel Edit</button>
         </div>
         <h3 id="food_stats_merge_header"></h3>
         <span id="food_stats_merge_body"></span>

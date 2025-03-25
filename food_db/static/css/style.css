@@ -463,6 +463,12 @@ input[type="text"].locked::selection {
     display: none;
 }
 
+
+input[type="text"].unlocked {
+    border-color: white;
+    box-shadow: white;
+}
+
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
     .food_stats ul {
@@ -500,7 +506,12 @@ button.merge_selected {
     color: #d9edf7;
     background-color: #610035;
 }
-#cancel_merge_food_button {
+.food_stats_button {
     margin-top: 10px;
+}
+#cancel_merge_food_button {
+    margin-bottom: 20px;
+}
+#cancel_edit_food_button {
     margin-bottom: 20px;
 }
