@@ -23,8 +23,26 @@
         </tr>
         {% for food in foods %}
         <tr class="manage_food_row" data-food="{{ food.name }}" data-category="{{ food.category }}">
-            <td class="food_name">{{ food.name }}</td>
-            <td class="food_category">{{ food.category }}</td>
+            <td>
+                <input type="text" 
+                    readonly 
+                    oncopy="return false"
+                    oncut="return false"
+                    onpaste="return false"
+                    class="food_input locked"
+                    value="{{ food.name }}"
+                ></input>
+            </td>
+            <td>
+                <input type="text" 
+                    readonly 
+                    oncopy="return false"
+                    oncut="return false"
+                    onpaste="return false"
+                    class="food_input locked"
+                    value="{{ food.category }}"
+                ></input>
+            </td>
         </tr>
         {% endfor %}
     </table>

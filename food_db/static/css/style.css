@@ -447,6 +447,22 @@ svg.grip-icon {
     padding-left: 0px;
 }
 
+input[type="text"].locked {
+    border-color: transparent !important;
+    border: 0px;
+    cursor: auto;
+}
+input[type="text"].locked:focus {
+    border-color: transparent !important;
+    box-shadow: none;
+    border: 0px;
+}
+
+input[type="text"].locked::selection {
+    background-color: transparent;
+    display: none;
+}
+
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
     .food_stats ul {
