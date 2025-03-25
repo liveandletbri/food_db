@@ -32,7 +32,7 @@ function getFoodData(document) {
         returnDict[food.name] = {
             'category': food.category,
             'recipes': food.recipes,
-            'rowIndex': index,
+            'rowIndex': index + 1,   // The headers are row 0 in the table, so starting the index at 1
         }
     })
     return returnDict
@@ -68,6 +68,8 @@ function highlightStatsRow(event){
     if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
         targetElement = targetElement.parentNode;   
+    } else if (targetElement.nodeName == "INPUT") {
+        targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedStatsRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
@@ -153,7 +155,7 @@ async function mergeFoods(event) {
         // variable won't work since that is from before reloadFoodCategoryTable. 
         // Instead we'll find it by index.
         let newHighlightedRowIndex = foodDataDict[secondFood]['rowIndex']
-        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex + 1]  // + 1 because the headers are row 0
+        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
         let fakeEvent = {'target': newHighlightedRow}
         highlightStatsRow(fakeEvent)
     }
@@ -184,7 +186,9 @@ function highlightMergeRow(event) {
     targetElement = event.target
     if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
-        targetElement = targetElement.parentNode;   
+        targetElement = targetElement.parentNode
+    } else if (targetElement.nodeName == "INPUT") {
+        targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedMergeRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
@@ -218,8 +222,11 @@ function highlightMergeRow(event) {
     }
 }
 
-function handleFoodRowClick(event) {
-    event.preventDefault()
+function handleFoodRowClick(event, preventDefault) {
+    if (preventDefault == undefined) {
+        // when this is called from handleTextInputClick, we don't need to (and can't) preventDefault again
+        event.preventDefault()
+    } 
     if (mergeMode == true) {
         highlightMergeRow(event)
     } else {
