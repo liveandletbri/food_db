@@ -43,7 +43,8 @@ function getFoodData(document) {
     return returnDict
 }
 
-function autoTextareaHeight(element) {
+function autoTextareaHeight(event) {
+    element = event.target
     element.style.height = "5px";
     element.style.height = (element.scrollHeight)+"px";
 }
@@ -126,11 +127,50 @@ function resetEditMode(cancelEdits) {
 
         // no need to change any values for the Category since categoryLabel still holds the original value
         originalCategoryValue = null
+    } else {
+        originalFoodValue = null
+        originalCategoryValue = null
+        categoryLabel.innerText = categorySelect.value
     }
 }
 
 async function submitEdits() {
-    return
+    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+    editButton.innerText = 'Saving edits...'
+    editButton.setAttribute('disabled', true)
+    await fetch(`${currentUrlDomain}/edit_food/`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            original_food_name: originalFoodValue,
+            new_food_name: nameInput.value,
+            category_name: categorySelect.value,
+        })
+    })
+    .then(function(response) {
+        if ( ! response.status == 200 ) {
+            // Quit the function here
+            console.log("d'oh!")
+            return
+        }
+    })
+    // This assumes the response was 200 since it didn't return earlier
+    // Doing this so I can use await, which must be at top-level (rather than
+    // putting it under the .then function above)
+    await reloadFoodCategoryTable()
+    editButton.removeAttribute('disabled')
+    resetEditMode(false, '')
+    
+    // Reloading the table un-highlights the row, so we re-highlight it by
+    // faking a click event.
+    let newHighlightedRowIndex = foodDataDict[nameInput.value]['rowIndex']
+    let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+    let fakeEvent = {'target': newHighlightedRow}
+    highlightStatsRow(fakeEvent)
 }
 
 const submitEditsHandler = () => submitEdits()
@@ -322,9 +362,10 @@ function assignRowListeners() {
     })
 
     let inputs = document.querySelectorAll('.food_name')
-    inputs.forEach(row => {
-        autoTextareaHeight(row)
-        row.addEventListener('change', autoTextareaHeight)
+    inputs.forEach(textarea => {
+        let fakeEvent = {'target': textarea}
+        autoTextareaHeight(fakeEvent)
+        textarea.addEventListener('change', function(event) {autoTextareaHeight(event)})
     })
 
     

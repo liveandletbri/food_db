@@ -736,3 +736,20 @@ def delete_food(request):
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
+    
+@csrf_exempt
+def edit_food(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        food = Food.objects.get(name=data['original_food_name'])
+        food.name = data['new_food_name']
+        category_name = data['category_name']
+        if category_name != '':
+            category = FoodCategory.objects.get(name=category_name)
+            food.food_category = category
+        else:
+            food.food_category = None
+        food.save()
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
