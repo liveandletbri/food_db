@@ -15,7 +15,7 @@ from pytz import timezone
 
 from .filters import RecipeTextFilter
 from .forms import CreateRecipeForm
-from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory
+from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory, FoodCategory
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 def convert_minutes_to_string(minutes: int):
@@ -632,8 +632,10 @@ def manage_food(request):
         }
         for food in food_instances
     ]
+    categories = [cat.name for cat in FoodCategory.objects.all().order_by('name')]
     context = {
         'foods': foods,
+        'categories': categories,
     }
     return render(request, 'manage_food.html', context)
 
@@ -731,6 +733,23 @@ def delete_food(request):
         data = json.loads(request.body)
         food = Food.objects.get(name=data['food_to_merge'])
         food.delete()
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+    
+@csrf_exempt
+def edit_food(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        food = Food.objects.get(name=data['original_food_name'])
+        food.name = data['new_food_name']
+        category_name = data['category_name']
+        if category_name != '':
+            category = FoodCategory.objects.get(name=category_name)
+            food.food_category = category
+        else:
+            food.food_category = None
+        food.save()
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])

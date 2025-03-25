@@ -5,15 +5,20 @@ let foodDataDict = getFoodData(document)
 let highlightedStatsRow
 let highlightedMergeRow
 let mergeMode = false
+let editMode = false
+let originalFoodValue = null
+let originalCategoryValue = null
 
 let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
 let mergeButton = document.getElementById('merge_food_button')
+let cancelMergeButton = document.getElementById('cancel_merge_food_button')
+let editButton = document.getElementById('edit_food_button')
+let cancelEditButton = document.getElementById('cancel_edit_food_button')
 
 let foodStatsMergeHeader = document.getElementById('food_stats_merge_header')
 let foodStatsMergeBody = document.getElementById('food_stats_merge_body')
-let cancelMergeButton = document.getElementById('cancel_merge_food_button')
 let badMergeTooltip = document.getElementById('cant_self_merge_tooltip')
 
 let defaultMergeHeaderText = 'Select a food to merge with'
@@ -32,10 +37,16 @@ function getFoodData(document) {
         returnDict[food.name] = {
             'category': food.category,
             'recipes': food.recipes,
-            'rowIndex': index,
+            'rowIndex': index + 1,   // The headers are row 0 in the table, so starting the index at 1
         }
     })
     return returnDict
+}
+
+function autoTextareaHeight(event) {
+    element = event.target
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight)+"px";
 }
 
 function showHideTabs(){   
@@ -61,13 +72,123 @@ function enterMergeMode() {
     cancelMergeButton.style.display = ''
     mergeButton = document.getElementById('merge_food_button')
     mergeButton.removeEventListener('click', enterMergeMode)
+    editButton.style.display = 'none'
 }
+
+function enterEditMode() {
+    editMode = true
+    mergeButton.style.display = 'none'
+    cancelEditButton.style.display = ''
+
+    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    nameInput.classList.remove('locked')
+    nameInput.classList.add('unlocked')
+    nameInput.removeAttribute('readonly')
+
+    let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
+    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+    categoryLabel.style.display = 'none'
+    categorySelect.style.display = ''
+
+    originalFoodValue = nameInput.value
+    originalCategoryValue = categoryLabel.innerText
+
+    editButton.removeEventListener('click', enterEditMode)
+    editButton.addEventListener('click', submitEditsHandler)
+    editButton.innerText = 'Save edits'
+}
+
+function resetEditMode(cancelEdits) {
+    editMode = false
+    mergeButton.style.display = ''
+    editButton.style.display = ''
+    cancelEditButton.style.display = 'none'
+
+    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    if (nameInput.classList.contains('unlocked')) {
+        nameInput.classList.remove('unlocked')
+        nameInput.classList.add('locked')
+        nameInput.setAttribute('readonly', true)
+    }
+
+    let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
+    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+    categoryLabel.style.display = ''
+    categorySelect.style.display = 'none'
+
+    editButton.removeEventListener('click', submitEditsHandler)
+    editButton.addEventListener('click', enterEditMode)
+    editButton.innerText = 'Edit row'
+
+    if (cancelEdits) {
+        highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
+        highlightedStatsRow.querySelector('.food_name').innerHTML = originalFoodValue
+        originalFoodValue = null
+
+        // no need to change any values for the Category since categoryLabel still holds the original value
+        originalCategoryValue = null
+    } else {
+        originalFoodValue = null
+        originalCategoryValue = null
+        categoryLabel.innerText = categorySelect.value
+    }
+}
+
+async function submitEdits() {
+    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+    editButton.innerText = 'Saving edits...'
+    editButton.setAttribute('disabled', true)
+    await fetch(`${currentUrlDomain}/edit_food/`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            original_food_name: originalFoodValue,
+            new_food_name: nameInput.value,
+            category_name: categorySelect.value,
+        })
+    })
+    .then(function(response) {
+        if ( ! response.status == 200 ) {
+            // Quit the function here
+            console.log("d'oh!")
+            return
+        }
+    })
+    // This assumes the response was 200 since it didn't return earlier
+    // Doing this so I can use await, which must be at top-level (rather than
+    // putting it under the .then function above)
+    await reloadFoodCategoryTable()
+    editButton.removeAttribute('disabled')
+    resetEditMode(false, '')
+    
+    // Reloading the table un-highlights the row, so we re-highlight it by
+    // faking a click event.
+    let newHighlightedRowIndex = foodDataDict[nameInput.value]['rowIndex']
+    let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+    let fakeEvent = {'target': newHighlightedRow}
+    highlightStatsRow(fakeEvent)
+}
+
+const submitEditsHandler = () => submitEdits()
 
 function highlightStatsRow(event){
     targetElement = event.target
-    if (targetElement.nodeName == "TD") {
+    let inputNodeNames = ['TEXTAREA', 'SELECT', 'SPAN']
+    if (inputNodeNames.includes(targetElement.nodeName) && targetElement.classList.contains('unlocked')) {
+        // Totally skip this function - do not change the highlights and stats if clicking an unlocked input 
+        return
+    } else if (editMode) {
+        // Also skip this function while in edit mode
+        return
+    } else if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
-        targetElement = targetElement.parentNode;   
+        targetElement = targetElement.parentNode
+    } else if (inputNodeNames.includes(targetElement.nodeName)) {
+        targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedStatsRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
@@ -76,6 +197,7 @@ function highlightStatsRow(event){
         foodStatsHeader.innerText = 'Select a food'
         foodStatsBody.innerHTML = ''
         mergeButton.style.display = 'none'
+        editButton.style.display = 'none'
         resetMergeMode(false, '')
     } else {
         if (highlightedStatsRow) {
@@ -93,6 +215,7 @@ function highlightStatsRow(event){
         foodStatsBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{recipeList}',recipeHTML)
         mergeButton.style.display = ''
         mergeButton.addEventListener('click', enterMergeMode)
+        editButton.style.display = ''
     }
 }
 
@@ -153,7 +276,7 @@ async function mergeFoods(event) {
         // variable won't work since that is from before reloadFoodCategoryTable. 
         // Instead we'll find it by index.
         let newHighlightedRowIndex = foodDataDict[secondFood]['rowIndex']
-        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex + 1]  // + 1 because the headers are row 0
+        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
         let fakeEvent = {'target': newHighlightedRow}
         highlightStatsRow(fakeEvent)
     }
@@ -164,8 +287,11 @@ const mergeFoodsHandler = (event) => mergeFoods(event)
 function resetMergeMode(stillInMergeMode, headerText) {
     mergeMode = stillInMergeMode
     if (!stillInMergeMode) {
-        // Remove cancel button
+        // Remove cancel button and show edit button again
         cancelMergeButton.style.display = 'none'
+        if (highlightedStatsRow) {
+            editButton.style.display = ''
+        }
     }
     foodStatsMergeHeader.innerText = ''
     if (highlightedMergeRow) {
@@ -184,7 +310,9 @@ function highlightMergeRow(event) {
     targetElement = event.target
     if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
-        targetElement = targetElement.parentNode;   
+        targetElement = targetElement.parentNode
+    } else if (targetElement.nodeName == "TEXTAREA") {
+        targetElement = targetElement.parentNode.parentNode
     }
     if (highlightedMergeRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
@@ -232,7 +360,17 @@ function assignRowListeners() {
     rows.forEach(row => {
         row.addEventListener('click', function(event) {handleFoodRowClick(event)})
     })
+
+    let inputs = document.querySelectorAll('.food_name')
+    inputs.forEach(textarea => {
+        let fakeEvent = {'target': textarea}
+        autoTextareaHeight(fakeEvent)
+        textarea.addEventListener('change', function(event) {autoTextareaHeight(event)})
+    })
+
+    
 }
 
 assignRowListeners()
 $(document).ready(showHideTabs)
+editButton.addEventListener('click', enterEditMode)
