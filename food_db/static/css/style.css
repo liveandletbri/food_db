@@ -413,7 +413,7 @@ a {cursor:pointer;}
 
 .tab_container li { margin-left: 5px;}
 
-.manage_food_search.input[type="text"] {
+input[type="text"].manage_food_search {
     width: 60% !important;
 }
 
