@@ -15,6 +15,7 @@ let foodStatsBody = document.getElementById('food_stats_body')
 
 let foodNameSearch = document.getElementById('food_name_search_input')
 let foodCategorySearch = document.getElementById('food_category_search_input')
+let noCategorySearch = document.getElementById('no_category_search_input')
 
 let deleteButton = document.getElementById('delete_food_button')
 let mergeButton = document.getElementById('merge_food_button')
@@ -443,10 +444,12 @@ async function searchFilter() {
 
     let foodNameSearchValue = foodNameSearch.value
     let foodCategorySearchValue = foodCategorySearch.value
+    let noCategorySearchValue = noCategorySearch.checked
 
     let params = {
         name: foodNameSearchValue,
         category: foodCategorySearchValue,
+        no_category: noCategorySearchValue,
     }
 
     // Format params as URL query string
@@ -530,3 +533,4 @@ editButton.addEventListener('click', enterEditMode)
 
 foodNameSearch.addEventListener("input", searchFilter)
 foodCategorySearch.addEventListener("input", searchFilter)
+noCategorySearch.addEventListener("input", searchFilter)

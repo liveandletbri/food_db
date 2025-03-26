@@ -45,6 +45,7 @@ class RecipeTextFilter(filters.FilterSet):
 
 class FoodTextFilter(filters.FilterSet):
     name = filters.CharFilter(
+        label='Food name contains',
         lookup_expr='icontains',
         distinct = True
     )  # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#field-lookups
@@ -54,6 +55,19 @@ class FoodTextFilter(filters.FilterSet):
         lookup_expr='icontains',
         distinct = True,
     )
+    no_category = filters.BooleanFilter(
+        method='filter_no_category',
+        label='Foods without Categories',
+        widget=forms.CheckboxInput,
+        initial=False,
+    )
+
+    def filter_no_category(self, queryset, name, value):
+        if value:
+            return queryset.filter(food_category=None)
+        else:
+            return queryset
+
     
     class Meta:
         model = Food
