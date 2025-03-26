@@ -1,6 +1,6 @@
 import django_filters as filters
 from django import forms
-from .models import Recipe, Tag
+from .models import Recipe, Tag, Food
 
 class RecipeTextFilter(filters.FilterSet):
     title = filters.CharFilter(
@@ -41,4 +41,21 @@ class RecipeTextFilter(filters.FilterSet):
     class Meta:
         model = Recipe
         fields = ['title', 'ingredient', 'duration_minutes', 'tags']
+        distinct = True
+
+class FoodTextFilter(filters.FilterSet):
+    name = filters.CharFilter(
+        lookup_expr='icontains',
+        distinct = True
+    )  # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#field-lookups
+    category = filters.CharFilter(
+        label='Category name contains',
+        field_name='food_category__name',
+        lookup_expr='icontains',
+        distinct = True,
+    )
+    
+    class Meta:
+        model = Food
+        fields = ['name', 'food_category']
         distinct = True

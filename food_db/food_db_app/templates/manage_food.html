@@ -16,6 +16,12 @@
 </ul>
 
 <div class="tab_container" id="food_tab_content">
+    <label>{{ food_search.form.name.label }}:</label>
+    <input type="text" class="manage_food_search" name="name" id="food_name_search_input">
+    <br>
+    <label>{{ food_search.form.category.label }}:</label>
+    <input type="text" class="manage_food_search" name="category" id="food_category_search_input">
+    <br>
     <table id="foods_categories_table" class="manage_food_table">
         <tr>
             <th class="food_name">Food Name</th>

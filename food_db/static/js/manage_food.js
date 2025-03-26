@@ -12,6 +12,10 @@ let originalCategoryValue = null
 let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
+
+let foodNameSearch = document.getElementById('food_name_search_input')
+let foodCategorySearch = document.getElementById('food_category_search_input')
+
 let deleteButton = document.getElementById('delete_food_button')
 let mergeButton = document.getElementById('merge_food_button')
 let cancelMergeButton = document.getElementById('cancel_merge_food_button')
@@ -83,6 +87,9 @@ function enterEditMode() {
     mergeButton.style.display = 'none'
     cancelEditButton.style.display = ''
 
+    foodNameSearch.setAttribute('disabled', true)
+    foodCategorySearch.setAttribute('disabled', true)
+
     let nameInput = highlightedStatsRow.querySelector('.food_name')
     nameInput.classList.remove('locked')
     nameInput.classList.add('unlocked')
@@ -106,6 +113,9 @@ function resetEditMode(cancelEdits) {
     mergeButton.style.display = ''
     editButton.style.display = ''
     cancelEditButton.style.display = 'none'
+
+    foodNameSearch.removeAttribute('disabled')
+    foodCategorySearch.removeAttribute('disabled')
 
     let nameInput = highlightedStatsRow.querySelector('.food_name')
     if (nameInput.classList.contains('unlocked')) {
@@ -243,8 +253,13 @@ function highlightStatsRow(event){
     }
 }
 
-async function reloadFoodCategoryTable() {
-    let response = await fetch('/food', {
+async function reloadFoodCategoryTable(params) {
+    if ( params == undefined ) {
+        params = ''
+    } else {
+        params = `?${params}`
+    }
+    let response = await fetch(`/food${params}`, {
         method: "GET",
     })
     .then(function(response) {
@@ -419,6 +434,80 @@ function handleFoodRowClick(event) {
     }
 }
 
+async function searchFilter() {
+    // An async 'form submission' rather than an actual form submission that loads
+    // a new page. Retrieves results from the /search URL (this page's URL) with a
+    // GET, then extracts HTML from the result and patches it onto the current page's
+    // HTML, rather than actually moving to a new URL. It's pretty brute force but
+    // hey, what are side projects for?
+
+    let foodNameSearchValue = foodNameSearch.value
+    let foodCategorySearchValue = foodCategorySearch.value
+
+    let params = {
+        name: foodNameSearchValue,
+        category: foodCategorySearchValue,
+    }
+
+    // Format params as URL query string
+    let param_string = Object.entries(params)
+        .map(([k, v]) => (`${k}=${v}`))
+        .join('&')
+
+    console.log(`Performing GET with params: ${param_string}`)
+
+    await reloadFoodCategoryTable(param_string)
+    
+    // If in merge mode, preserve the original highlighted row even if it's
+    // not in the search results - in other words, always show the stats and don't
+    // set highlightedStatsRow back to null. If the row disappears from the search
+    // results, its stats stay visible. When it appears back in the search results,
+    // highlight it again.
+    if ( mergeMode && highlightedStatsRow ) {
+        let oldHighlightedFoodName = highlightedStatsRow.getAttribute('data-food')
+        if ( oldHighlightedFoodName in foodDataDict ) {
+            let newHighlightedRowIndex = foodDataDict[oldHighlightedFoodName]['rowIndex']
+            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+            let fakeEvent = {'target': newHighlightedRow}
+            highlightStatsRow(fakeEvent)
+        }
+    }
+
+    // If in merge mode and have selected a merge highlight row
+    // Un-highlight the merge row if it's no longer in the search results
+    if ( mergeMode && highlightedMergeRow ) {
+        let oldHighlightedFoodName = highlightedMergeRow.getAttribute('data-food')
+        if ( oldHighlightedFoodName in foodDataDict ) {
+            let newHighlightedRowIndex = foodDataDict[oldHighlightedFoodName]['rowIndex']
+            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+            let fakeEvent = {'target': newHighlightedRow}
+            highlightMergeRow(fakeEvent)
+        } else {
+            // Un-highlight by passing the existing row into the highlight function
+            let fakeEvent = {'target': highlightedMergeRow}
+            highlightMergeRow(fakeEvent)
+        }
+    }
+
+    // If NOT in merge mode and just have a highlighted stats row
+    // Un-highlight the stats row if it's no longer in the search results
+    if ( ! mergeMode && highlightedStatsRow ) {
+        let oldHighlightedFoodName = highlightedStatsRow.getAttribute('data-food')
+        if ( oldHighlightedFoodName in foodDataDict ) {
+            let newHighlightedRowIndex = foodDataDict[oldHighlightedFoodName]['rowIndex']
+            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+            let fakeEvent = {'target': newHighlightedRow}
+            highlightStatsRow(fakeEvent)
+        } else {
+            // Un-highlight by passing the existing row into the highlight function
+            let fakeEvent = {'target': highlightedStatsRow}
+            highlightStatsRow(fakeEvent)
+        }
+    }
+    
+}
+
+
 function assignRowListeners() {
     let rows = document.querySelectorAll('.manage_food_row')
     rows.forEach(row => {
@@ -438,3 +527,6 @@ function assignRowListeners() {
 assignRowListeners()
 $(document).ready(showHideTabs)
 editButton.addEventListener('click', enterEditMode)
+
+foodNameSearch.addEventListener("input", searchFilter)
+foodCategorySearch.addEventListener("input", searchFilter)
