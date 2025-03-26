@@ -749,7 +749,10 @@ def edit_food(request):
             food.food_category = category
         else:
             food.food_category = None
-        food.save()
-        return HttpResponse(status=200)
+        try:
+            food.save()
+            return HttpResponse(status=200)
+        except IntegrityError:
+            return HttpResponse(status=406)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])

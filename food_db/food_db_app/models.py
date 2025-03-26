@@ -124,7 +124,7 @@ class Food(models.Model):
     def __str__(self):
         return self.name
     clean_key = models.CharField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     food_category = models.ForeignKey(
         'FoodCategory',
         on_delete=models.PROTECT,

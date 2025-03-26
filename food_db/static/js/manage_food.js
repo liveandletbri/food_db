@@ -20,6 +20,7 @@ let cancelEditButton = document.getElementById('cancel_edit_food_button')
 let foodStatsMergeHeader = document.getElementById('food_stats_merge_header')
 let foodStatsMergeBody = document.getElementById('food_stats_merge_body')
 let badMergeTooltip = document.getElementById('cant_self_merge_tooltip')
+let duplicateNameTooltip = document.getElementById('duplicate_name_tooltip')
 
 let defaultMergeHeaderText = 'Select a food to merge with'
 let defaultMergeButtonText = 'Merge with another'
@@ -139,7 +140,7 @@ async function submitEdits() {
     let categorySelect = highlightedStatsRow.querySelector('.food_category')
     editButton.innerText = 'Saving edits...'
     editButton.setAttribute('disabled', true)
-    await fetch(`${currentUrlDomain}/edit_food/`, {
+    let apiSuccess = await fetch(`${currentUrlDomain}/edit_food/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -152,25 +153,38 @@ async function submitEdits() {
         })
     })
     .then(function(response) {
-        if ( ! response.status == 200 ) {
-            // Quit the function here
-            console.log("d'oh!")
-            return
+        if ( response.status == 406 ) {
+            // Reset edit button, display tooltip, then quit the function without resetting inputs or edit mode
+            editButton.innerText = 'Save edits'
+            editButton.removeAttribute('disabled')
+            
+            duplicateNameTooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
+            duplicateNameTooltip.style.top = `${highlightedStatsRow.offsetTop + 330}px`;
+            duplicateNameTooltip.innerText = duplicateNameTooltip.innerText.replace('{food}', nameInput.value)
+
+            showAndHideTooltip(duplicateNameTooltip, 5000)
+            return false
+        } else if ( response.status == 200 ) {
+            return true
+        } else {
+            return false
         }
     })
-    // This assumes the response was 200 since it didn't return earlier
-    // Doing this so I can use await, which must be at top-level (rather than
-    // putting it under the .then function above)
-    await reloadFoodCategoryTable()
-    editButton.removeAttribute('disabled')
-    resetEditMode(false, '')
     
-    // Reloading the table un-highlights the row, so we re-highlight it by
-    // faking a click event.
-    let newHighlightedRowIndex = foodDataDict[nameInput.value]['rowIndex']
-    let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
-    let fakeEvent = {'target': newHighlightedRow}
-    highlightStatsRow(fakeEvent)
+    if ( apiSuccess ) {
+        // Doing this so I can use await, which must be at top-level (rather than
+        // putting it under the .then function above)
+        await reloadFoodCategoryTable()
+        editButton.removeAttribute('disabled')
+        resetEditMode(false, '')
+        
+        // Reloading the table un-highlights the row, so we re-highlight it by
+        // faking a click event.
+        let newHighlightedRowIndex = foodDataDict[nameInput.value]['rowIndex']
+        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+        let fakeEvent = {'target': newHighlightedRow}
+        highlightStatsRow(fakeEvent)
+    }
 }
 
 const submitEditsHandler = () => submitEdits()
