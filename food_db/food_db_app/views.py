@@ -731,7 +731,7 @@ def merge_foods(request):
 def delete_food(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        food = Food.objects.get(name=data['food_to_merge'])
+        food = Food.objects.get(name=data['food_name'])
         food.delete()
         return HttpResponse(status=200)
     else:

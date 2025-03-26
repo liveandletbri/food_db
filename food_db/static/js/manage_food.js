@@ -12,6 +12,7 @@ let originalCategoryValue = null
 let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
+let deleteButton = document.getElementById('delete_food_button')
 let mergeButton = document.getElementById('merge_food_button')
 let cancelMergeButton = document.getElementById('cancel_merge_food_button')
 let editButton = document.getElementById('edit_food_button')
@@ -29,6 +30,7 @@ let foodStatsTemplate = `<h4>Used in these recipes:</h4>
 <ul>
 {recipeList}
 </ul>`
+let emptyFoodStatsTemplate = '<h4 style="margin: 0;">Not used in any recipes</h4>'
 
 function getFoodData(document) {
     // foodDataRaw is declared in manage_food.html, passed from views.py
@@ -204,6 +206,7 @@ function highlightStatsRow(event){
     } else if (inputNodeNames.includes(targetElement.nodeName)) {
         targetElement = targetElement.parentNode.parentNode
     }
+
     if (highlightedStatsRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
         highlightedStatsRow.classList.remove('highlight_stats')
@@ -212,6 +215,7 @@ function highlightStatsRow(event){
         foodStatsBody.innerHTML = ''
         mergeButton.style.display = 'none'
         editButton.style.display = 'none'
+        deleteButton.style.display = 'none'
         resetMergeMode(false, '')
     } else {
         if (highlightedStatsRow) {
@@ -224,9 +228,15 @@ function highlightStatsRow(event){
         let food = targetElement.getAttribute('data-food')
         let category = targetElement.getAttribute('data-category')
         let recipes = Array.from(foodDataDict[food]['recipes'])
-        let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
+        if ( recipes.length > 0 ) {
+            let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
+            foodStatsBody.innerHTML = foodStatsTemplate.replace('{recipeList}',recipeHTML)
+            deleteButton.style.display = 'none'
+        } else {
+            deleteButton.style.display = ''
+            foodStatsBody.innerHTML = emptyFoodStatsTemplate
+        }
         foodStatsHeader.innerText = `${category}: ${food}`
-        foodStatsBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{recipeList}',recipeHTML)
         mergeButton.style.display = ''
         mergeButton.addEventListener('click', enterMergeMode)
         editButton.style.display = ''
@@ -262,7 +272,7 @@ async function mergeFoods(event) {
     let confirmText = `Are you sure you want to merge "${firstFood}" with "${secondFood}"? All recipes using "${firstFood}" will be updated to instead use "${secondFood}", and "${firstFood}" will disappear from the database.`
     let confirmMerge = confirm(confirmText)
     if (confirmMerge) {
-        await fetch(`${currentUrlDomain}/merge_foods/`, {
+        let apiSuccess = await fetch(`${currentUrlDomain}/merge_foods/`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -275,24 +285,26 @@ async function mergeFoods(event) {
         })
         .then(function(response) {
             if (! response.status == 200) {
-                // Quit the function here
                 console.log("d'oh!")
-                return
+                return false
+            } else {
+                return true
             }
         })
-        // This assumes the response was 200 since it didn't return earlier
-        // Doing this so I can use await, which must be at top-level (rather than
-        // putting it under the .then function above)
-        await reloadFoodCategoryTable()
-        resetMergeMode(false, '')
-        
-        // The merge row should now be highlighted, but using the highlightedMergeRow 
-        // variable won't work since that is from before reloadFoodCategoryTable. 
-        // Instead we'll find it by index.
-        let newHighlightedRowIndex = foodDataDict[secondFood]['rowIndex']
-        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
-        let fakeEvent = {'target': newHighlightedRow}
-        highlightStatsRow(fakeEvent)
+        if ( apiSuccess ) {
+            // Doing this so I can use await, which must be at top-level (rather than
+            // putting it under the .then function above)
+            await reloadFoodCategoryTable()
+            resetMergeMode(false, '')
+            
+            // The merge row should now be highlighted, but using the highlightedMergeRow 
+            // variable won't work since that is from before reloadFoodCategoryTable. 
+            // Instead we'll find it by index.
+            let newHighlightedRowIndex = foodDataDict[secondFood]['rowIndex']
+            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+            let fakeEvent = {'target': newHighlightedRow}
+            highlightStatsRow(fakeEvent)
+        }
     }
 }
 
@@ -318,6 +330,44 @@ function resetMergeMode(stillInMergeMode, headerText) {
     mergeButton.innerText = defaultMergeButtonText
     mergeButton.removeEventListener('click', mergeFoodsHandler)
     mergeButton.addEventListener('click', enterMergeMode)
+}
+
+async function deleteFood() {
+    let foodName = highlightedStatsRow.getAttribute('data-food')
+    let confirmText = `Are you sure you want to delete "${foodName}"? No recipes are using it so no recipes will be impacted.`
+    let confirmDelete = confirm(confirmText)
+    if (confirmDelete) {
+        deleteButton.innerText = 'Deleting...'
+        deleteButton.setAttribute('disabled', true)
+        let apiSuccess = await fetch(`${currentUrlDomain}/delete_food/`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                food_name: foodName,
+            })
+        })
+        .then(function(response) {
+            if (! response.status == 200) {
+                console.log("d'oh!")
+                return false
+            } else {
+                return true
+            }
+        })
+
+        if ( apiSuccess ) {
+            await reloadFoodCategoryTable()
+
+            deleteButton.innerText = 'Delete food'
+            deleteButton.removeAttribute('disabled')
+            // This is my cheater way of resetting the highlighting variables and stats table.
+            let fakeEvent = {'target': highlightedStatsRow}  // this row doesn't exist in the table anymore, but I still have it in this variable!
+            highlightStatsRow(fakeEvent)
+        }
+    }
 }
 
 function highlightMergeRow(event) {

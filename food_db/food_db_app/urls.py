@@ -34,6 +34,7 @@ urlpatterns = [
     # apis
     path('cook/', views.cook_meal, name='cook_meal'),
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
+    path('delete_food/', views.delete_food, name='delete_food'),
     path('edit_food/', views.edit_food, name='edit_food'),
     path('get_ingredient_category_order_number/', views.get_ingredient_category_order_number, name='get_ingredient_category_order_number'),
     path('ingred_parse', views.ingredient_parse_api, name='ingred_parse'),
