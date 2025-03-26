@@ -41,7 +41,7 @@
             <td>
                 <span class="food_category_label locked">{{ food.category }}</span>
                 <select class="food_input food_category unlocked" style="display: none;">
-                    {% for category in categories %}
+                    {% for category in all_categories %}
                     <option value="{{ category }}" {% if category == food.category %}selected{% endif %}>{{ category }}</option>
                     {% endfor %}
                 </select>
