@@ -1,5 +1,6 @@
 import django_filters as filters
 from django import forms
+from django.db.models import Count
 from .models import Recipe, Tag, Food
 
 class RecipeTextFilter(filters.FilterSet):
@@ -61,10 +62,22 @@ class FoodTextFilter(filters.FilterSet):
         widget=forms.CheckboxInput,
         initial=False,
     )
+    no_recipe = filters.BooleanFilter(
+        method='filter_no_recipe',
+        label='Foods not used in a Recipe',
+        widget=forms.CheckboxInput,
+        initial=False,
+    )
 
     def filter_no_category(self, queryset, name, value):
         if value:
             return queryset.filter(food_category=None)
+        else:
+            return queryset
+
+    def filter_no_recipe(self, queryset, name, value):
+        if value:
+            return queryset.annotate(recipe_count=Count('ingredient')).filter(recipe_count=0)
         else:
             return queryset
 

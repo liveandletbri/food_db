@@ -25,6 +25,14 @@
     <label>{{ food_search.form.no_category.label }}:</label>
     <input type="checkbox" class="manage_food_search" name="no_category" id="no_category_search_input">
     <br><br>
+    <label>{{ food_search.form.no_recipe.label }}:</label>
+    <input type="checkbox" class="manage_food_search" name="no_recipe" id="no_recipe_search_input">
+    <br><br>
+
+    {% with result_count=food_search.qs|length %}
+    <h3 id="result_count">{% if result_count == 0 %}Ah shit, no matching foods found 😔{% else %}Found {{ result_count }} food{% endif %}{% if result_count > 1 %}s{% endif %}</h3>
+    {% endwith %}
+
     <table id="foods_categories_table" class="manage_food_table">
         <tr>
             <th class="food_name">Food Name</th>

@@ -12,10 +12,12 @@ let originalCategoryValue = null
 let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
+let resultCount = document.getElementById('result_count')
 
 let foodNameSearch = document.getElementById('food_name_search_input')
 let foodCategorySearch = document.getElementById('food_category_search_input')
 let noCategorySearch = document.getElementById('no_category_search_input')
+let noRecipeSearch = document.getElementById('no_recipe_search_input')
 
 let deleteButton = document.getElementById('delete_food_button')
 let mergeButton = document.getElementById('merge_food_button')
@@ -273,9 +275,11 @@ async function reloadFoodCategoryTable(params) {
     responseHtml.innerHTML = response
     foodDataDict = getFoodData(responseHtml)
     let responseFoodCategoryTable = responseHtml.querySelector('#foods_categories_table')
+    let responseResultCount = responseHtml.querySelector('#result_count')
 
     // Frankenstein it right into our existing page
     foodCategoryTable.innerHTML = responseFoodCategoryTable.innerHTML
+    resultCount.innerHTML = responseResultCount.innerHTML
 
     assignRowListeners()
 }
@@ -445,11 +449,13 @@ async function searchFilter() {
     let foodNameSearchValue = foodNameSearch.value
     let foodCategorySearchValue = foodCategorySearch.value
     let noCategorySearchValue = noCategorySearch.checked
+    let noRecipeSearchValue = noRecipeSearch.checked
 
     let params = {
         name: foodNameSearchValue,
         category: foodCategorySearchValue,
         no_category: noCategorySearchValue,
+        no_recipe: noRecipeSearchValue,
     }
 
     // Format params as URL query string
@@ -534,3 +540,4 @@ editButton.addEventListener('click', enterEditMode)
 foodNameSearch.addEventListener("input", searchFilter)
 foodCategorySearch.addEventListener("input", searchFilter)
 noCategorySearch.addEventListener("input", searchFilter)
+noRecipeSearch.addEventListener("input", searchFilter)
