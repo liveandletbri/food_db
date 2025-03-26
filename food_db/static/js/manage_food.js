@@ -46,7 +46,7 @@ function getFoodData(document) {
 function autoTextareaHeight(event) {
     element = event.target
     element.style.height = "5px";
-    element.style.height = (element.scrollHeight)+"px";
+    element.style.height = (element.scrollHeight+3)+"px";
 }
 
 function showHideTabs(){   

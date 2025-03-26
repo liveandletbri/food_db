@@ -414,21 +414,20 @@ svg.grip-icon {
  .tab_container li { margin-left: 5px;}
 
 .manage_food_table {
-    width: 50%;
+    width: 60%;
     font-size: medium;
     float: left;
     table-layout: fixed;
 }
 
-.mange_food_table tr {
-    position:relative;
-    transform:scale(1,1);
+.manage_food_table td {
+    padding: 0.5rem 0.5rem;
 }
 
 .food_stats {
     float: left;
     padding-left: 5%;
-    width: 50%;
+    width: 40%;
     position: sticky;
     top: 10px;
 }
@@ -454,7 +453,7 @@ svg.grip-icon {
 .food_name {
     resize: none;
     line-height: 1.3;
-    padding: 0px;
+    padding-top: 8px;
     width: 100%;
     box-sizing: border-box;
     display: flex;
