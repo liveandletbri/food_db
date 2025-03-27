@@ -189,7 +189,7 @@ async function submitEdits() {
     if ( apiSuccess ) {
         // Doing this so I can use await, which must be at top-level (rather than
         // putting it under the .then function above)
-        await reloadFoodCategoryTable()
+        await searchFilter()
         editButton.removeAttribute('disabled')
         resetEditMode(false, '')
         
@@ -314,7 +314,7 @@ async function mergeFoods(event) {
         if ( apiSuccess ) {
             // Doing this so I can use await, which must be at top-level (rather than
             // putting it under the .then function above)
-            await reloadFoodCategoryTable()
+            await searchFilter()
             resetMergeMode(false, '')
             
             // The merge row should now be highlighted, but using the highlightedMergeRow 
@@ -379,7 +379,7 @@ async function deleteFood() {
         })
 
         if ( apiSuccess ) {
-            await reloadFoodCategoryTable()
+            await searchFilter()
 
             deleteButton.innerText = 'Delete food'
             deleteButton.removeAttribute('disabled')
@@ -518,7 +518,6 @@ async function searchFilter() {
     }
     
 }
-
 
 async function executeWithTimeout(promise, timeoutMs) {
     let timeoutHandle;
