@@ -11,8 +11,8 @@
 </h4>
 
 <ul id="tabs">
-    <li><a id="food_tab">View Foods</a></li>
-    <li><a id="category_tab">View Categories</a></li>
+    <li><a class="manage_food_tab" id="food_tab">View Foods</a></li>
+    <li><a class="manage_food_tab" id="category_tab">View Categories</a></li>
 </ul>
 
 <div class="tab_container" id="food_tab_content">
@@ -79,7 +79,45 @@
 
 
 <div class="tab_container" id="category_tab_content">
-    Categories will be here at some point
+    <label>{{ food_search.form.category.label }}:</label>
+    <input type="text" class="manage_food_search" name="category" id="category_name_search_input">
+    <br>
+
+    {% with result_count=categories|length %}
+    <h3 id="result_count">{% if result_count == 0 %}Ah shit, no matching categories found 😔{% else %}Found {{ result_count }} {% endif %}{% if result_count > 1 %}categories{% else %}category{% endif %}</h3>
+    {% endwith %}
+
+    <table id="categories_table" class="manage_food_table">
+        <tr>
+            <th class="food_category">Food Category</th>
+        </tr>
+        {% for cat in categories %}
+        <tr class="manage_food_row" data-category="{{ cat }}">
+            <td>
+                <textarea 
+                    readonly 
+                    oncopy="return false"
+                    oncut="return false"
+                    onpaste="return false"
+                    class="food_input food_name locked"
+                >{{ cat }}</textarea>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="food_stats" id="category_tab_stats">
+        <h3 id="category_stats_header">Select a category</h3>
+        <span id="category_stats_body"></span>
+        <div id="category_stats_buttons">
+            <button id="delete_food_button" style="display: none;" class="food_stats_button" type="button" onclick="deleteFood()">Delete food</button>
+            <button id="merge_food_button" style="display: none;" class="food_stats_button" type="button">Merge with another</button>
+            <button id="cancel_merge_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetMergeMode(false, '')">Cancel Merge</button>
+            <button id="edit_food_button" style="display: none;" class="food_stats_button" type="button">Edit Row</button>
+            <button id="cancel_edit_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetEditMode(true)">Cancel Edit</button>
+        </div>
+        <h3 id="category_stats_merge_header"></h3>
+        <span id="category_stats_merge_body"></span>
+    </div>
 </div>
 
 <script src="{% static 'js/tooltip.js' %}"></script>
