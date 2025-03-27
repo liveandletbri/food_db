@@ -18,6 +18,7 @@ let foodNameSearch = document.getElementById('food_name_search_input')
 let foodCategorySearch = document.getElementById('food_category_search_input')
 let noCategorySearch = document.getElementById('no_category_search_input')
 let noRecipeSearch = document.getElementById('no_recipe_search_input')
+let categoryNameSearch = document.getElementById('category_name_search_input')
 
 let deleteButton = document.getElementById('delete_food_button')
 let mergeButton = document.getElementById('merge_food_button')
@@ -73,6 +74,7 @@ function showHideTabs(){
             $('.tab_container').hide();
             $('#'+ thisTabId + '_content').fadeIn('slow');
         }
+        autoHeightAllRows()
     });
 }
 
@@ -555,14 +557,17 @@ function assignRowListeners() {
         row.addEventListener('click', function(event) {handleFoodRowClick(event)})
     })
 
+    autoHeightAllRows()
+}
+
+function autoHeightAllRows() {
+    console.log('hi')
     let inputs = document.querySelectorAll('.food_name')
     inputs.forEach(textarea => {
         let fakeEvent = {'target': textarea}
         autoTextareaHeight(fakeEvent)
         textarea.addEventListener('change', function(event) {autoTextareaHeight(event)})
     })
-
-    
 }
 
 assignRowListeners()
@@ -573,3 +578,4 @@ foodNameSearch.addEventListener("input", searchFilterWithTimeout)
 foodCategorySearch.addEventListener("input", searchFilterWithTimeout)
 noCategorySearch.addEventListener("input", searchFilterWithTimeout)
 noRecipeSearch.addEventListener("input", searchFilterWithTimeout)
+categoryNameSearch.addEventListener("input", searchFilterWithTimeout)
