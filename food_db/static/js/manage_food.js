@@ -466,6 +466,9 @@ async function searchFilter() {
     console.log(`Performing GET with params: ${param_string}`)
 
     await reloadFoodCategoryTable(param_string)
+
+    // searchFilterWithTimeout may set us to "searching" status
+    foodCategoryTable.classList.remove('searching') 
     
     // If in merge mode, preserve the original highlighted row even if it's
     // not in the search results - in other words, always show the stats and don't
@@ -517,6 +520,36 @@ async function searchFilter() {
 }
 
 
+async function executeWithTimeout(promise, timeoutMs) {
+    let timeoutHandle;
+  
+    const timeoutPromise = new Promise((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error("Timeout")), timeoutMs);
+    });
+  
+    try {
+        const result = await Promise.race([promise, timeoutPromise]);
+        clearTimeout(timeoutHandle);
+        return { result, timedOut: false };
+    } catch (error) {
+        clearTimeout(timeoutHandle);
+        return { result: null, timedOut: true, error };
+    }
+}
+  
+async function searchFilterWithTimeout() {
+    const timeoutDuration = 300; // Set your desired timeout in milliseconds
+  
+    const { result, timedOut, error } = await executeWithTimeout(searchFilter(), timeoutDuration);
+  
+    if (timedOut) {
+        resultCount.innerText = 'Searching...'
+        foodCategoryTable.classList.add('searching')
+    }
+}
+  
+
+
 function assignRowListeners() {
     let rows = document.querySelectorAll('.manage_food_row')
     rows.forEach(row => {
@@ -537,7 +570,7 @@ assignRowListeners()
 $(document).ready(showHideTabs)
 editButton.addEventListener('click', enterEditMode)
 
-foodNameSearch.addEventListener("input", searchFilter)
-foodCategorySearch.addEventListener("input", searchFilter)
-noCategorySearch.addEventListener("input", searchFilter)
-noRecipeSearch.addEventListener("input", searchFilter)
+foodNameSearch.addEventListener("input", searchFilterWithTimeout)
+foodCategorySearch.addEventListener("input", searchFilterWithTimeout)
+noCategorySearch.addEventListener("input", searchFilterWithTimeout)
+noRecipeSearch.addEventListener("input", searchFilterWithTimeout)

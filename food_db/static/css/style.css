@@ -424,6 +424,10 @@ input[type="text"].manage_food_search {
     table-layout: fixed;
 }
 
+.manage_food_table.searching {
+    background: gray;
+}
+
 .manage_food_table td {
     padding: 0.5rem 0.5rem;
 }
