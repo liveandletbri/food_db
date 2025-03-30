@@ -3,6 +3,7 @@
 {% block content %}
 
 {{ foods|json_script:"foodDataRaw" }}
+{{ categories|json_script:"categoryDataRaw" }}
 
 <h4>
     Here are all the types of foods you've used as ingredients. You can <strong>add, edit, and merge</strong> 
@@ -30,7 +31,7 @@
     <br><br>
 
     {% with result_count=food_search.qs|length %}
-    <h3 id="result_count">{% if result_count == 0 %}Ah shit, no matching foods found 😔{% else %}Found {{ result_count }} food{% endif %}{% if result_count > 1 %}s{% endif %}</h3>
+    <h3 id="food_result_count">{% if result_count == 0 %}Ah shit, no matching foods found 😔{% else %}Found {{ result_count }} food{% endif %}{% if result_count > 1 %}s{% endif %}</h3>
     {% endwith %}
 
     <table id="foods_categories_table" class="manage_food_table">
@@ -73,8 +74,8 @@
         <h3 id="food_stats_merge_header"></h3>
         <span id="food_stats_merge_body"></span>
     </div>
-    <span id="cant_self_merge_tooltip" class="form_validate_tooltip">You can't merge a food with itself, dummy. Pick another.</span>
-    <span id="duplicate_name_tooltip" class="form_validate_tooltip">There's already a food named "{food}". Maybe merge this one with that one, or try just being better.</span>
+    <span id="cant_self_merge_food_tooltip" class="form_validate_tooltip">You can't merge a food with itself, dummy. Pick another.</span>
+    <span id="duplicate_food_name_tooltip" class="form_validate_tooltip">There's already a food named "{food}". Maybe merge this one with that one, or try just being better.</span>
 </div>
 
 
@@ -84,7 +85,7 @@
     <br>
 
     {% with result_count=categories|length %}
-    <h3 id="result_count">{% if result_count == 0 %}Ah shit, no matching categories found 😔{% else %}Found {{ result_count }} {% endif %}{% if result_count > 1 %}categories{% else %}category{% endif %}</h3>
+    <h3 id="category_result_count">{% if result_count == 0 %}Ah shit, no matching categories found 😔{% else %}Found {{ result_count }} {% endif %}{% if result_count > 1 %}categories{% else %}category{% endif %}</h3>
     {% endwith %}
 
     <table id="categories_table" class="manage_food_table">
@@ -92,7 +93,7 @@
             <th class="food_category">Food Category</th>
         </tr>
         {% for cat in categories %}
-        <tr class="manage_food_row" data-category="{{ cat }}">
+        <tr class="manage_food_row" data-category="{{ cat.name }}">
             <td>
                 <textarea 
                     readonly 
@@ -100,7 +101,7 @@
                     oncut="return false"
                     onpaste="return false"
                     class="food_input food_name locked"
-                >{{ cat }}</textarea>
+                >{{ cat.name }}</textarea>
             </td>
         </tr>
         {% endfor %}
@@ -109,11 +110,11 @@
         <h3 id="category_stats_header">Select a category</h3>
         <span id="category_stats_body"></span>
         <div id="category_stats_buttons">
-            <button id="delete_food_button" style="display: none;" class="food_stats_button" type="button" onclick="deleteFood()">Delete food</button>
-            <button id="merge_food_button" style="display: none;" class="food_stats_button" type="button">Merge with another</button>
-            <button id="cancel_merge_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetMergeMode(false, '')">Cancel Merge</button>
-            <button id="edit_food_button" style="display: none;" class="food_stats_button" type="button">Edit Row</button>
-            <button id="cancel_edit_food_button" style="display: none;" class="food_stats_button" type="button" onclick="resetEditMode(true)">Cancel Edit</button>
+            <button id="delete_category_button" style="display: none;" class="food_stats_button" type="button" onclick="deleteFood()">Delete food</button>
+            <button id="merge_category_button" style="display: none;" class="food_stats_button" type="button">Merge with another</button>
+            <button id="cancel_merge_category_button" style="display: none;" class="food_stats_button" type="button" onclick="resetMergeMode(false, '')">Cancel Merge</button>
+            <button id="edit_category_button" style="display: none;" class="food_stats_button" type="button">Edit Row</button>
+            <button id="cancel_edit_category_button" style="display: none;" class="food_stats_button" type="button" onclick="resetEditMode(true)">Cancel Edit</button>
         </div>
         <h3 id="category_stats_merge_header"></h3>
         <span id="category_stats_merge_body"></span>
