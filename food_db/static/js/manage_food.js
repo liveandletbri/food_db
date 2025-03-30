@@ -279,32 +279,59 @@ function resetEditMode(cancelEdits) {
 
 async function submitEdits() {
     let nameInput = highlightedStatsRow.querySelector('.food_name')
-    let categorySelect = highlightedStatsRow.querySelector('.food_category')
-    foodEditButton.innerText = 'Saving edits...'
-    foodEditButton.setAttribute('disabled', true)
-    let apiSuccess = await fetch(`${currentUrlDomain}/edit_food/`, {
+    let categorySelect
+    let apiUrl
+    let apiParams
+    let editButton
+    let tooltip
+    let dataDict
+    let table
+
+    if ( activeTab == 'food' ) {
+        categorySelect = highlightedStatsRow.querySelector('.food_category')
+        apiUrl = 'edit_food'
+        apiParams = {
+            original_food_name: originalFoodValue,
+            new_food_name: nameInput.value,
+            category_name: categorySelect.value,
+        }
+        editButton = foodEditButton
+        tooltip = foodDuplicateNameTooltip
+        dataDict = foodDataDict
+        table = foodCategoryTable
+    } else {
+        apiUrl = 'edit_category'
+        apiParams = {
+            original_category_name: originalCategoryValue,
+            new_category_name: nameInput.value,
+        }
+        editButton = categoryEditButton
+        tooltip = categoryDuplicateNameTooltip
+        dataDict = categoryDataDict
+        table = categoryTable
+    }
+
+    editButton.innerText = 'Saving edits...'
+    editButton.setAttribute('disabled', true)
+    let apiSuccess = await fetch(`${currentUrlDomain}/${apiUrl}/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            original_food_name: originalFoodValue,
-            new_food_name: nameInput.value,
-            category_name: categorySelect.value,
-        })
+        body: JSON.stringify(apiParams)
     })
     .then(function(response) {
         if ( response.status == 406 ) {
             // Reset edit button, display tooltip, then quit the function without resetting inputs or edit mode
-            foodEditButton.innerText = 'Save edits'
-            foodEditButton.removeAttribute('disabled')
+            editButton.innerText = 'Save edits'
+            editButton.removeAttribute('disabled')
             
-            foodDuplicateNameTooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
-            foodDuplicateNameTooltip.style.top = `${highlightedStatsRow.offsetTop + 330}px`;
-            foodDuplicateNameTooltip.innerText = foodDuplicateNameTooltip.innerText.replace('{food}', nameInput.value)
+            tooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
+            tooltip.style.top = `${highlightedStatsRow.offsetTop + 330}px`;
+            tooltip.innerText = tooltip.innerText.replace('{food}', nameInput.value)
 
-            showAndHideTooltip(foodDuplicateNameTooltip, 5000)
+            showAndHideTooltip(tooltip, 5000)
             return false
         } else if ( response.status == 200 ) {
             return true
@@ -317,13 +344,13 @@ async function submitEdits() {
         // Doing this so I can use await, which must be at top-level (rather than
         // putting it under the .then function above)
         await searchFilter()
-        foodEditButton.removeAttribute('disabled')
+        editButton.removeAttribute('disabled')
         resetEditMode(false, '')
         
         // Reloading the table un-highlights the row, so we re-highlight it by
         // faking a click event.
-        let newHighlightedRowIndex = foodDataDict[nameInput.value]['rowIndex']
-        let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+        let newHighlightedRowIndex = dataDict[nameInput.value]['rowIndex']
+        let newHighlightedRow = table.rows[newHighlightedRowIndex]
         let fakeEvent = {'target': newHighlightedRow}
         highlightStatsRow(fakeEvent)
     }
@@ -416,7 +443,7 @@ async function reloadFoodCategoryTable(params) {
     foodResultCount.innerHTML = responseFoodResultCount.innerHTML;
     foodResultCount.innerHTML = responseFoodResultCount.innerHTML;
     categoryResultCount.innerHTML = responseCategoryResultCount.innerHTML;
-    
+
     assignRowListeners()
 }
 
