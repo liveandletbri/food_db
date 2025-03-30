@@ -1,7 +1,8 @@
 let currentUrl = window.location.href
 let currentUrlDomain = currentUrl.split("/food/")[0]
-let foodDataDict = getFoodData(document)
+let [foodDataDict, categoryDataDict] = getFoodData(document)
 
+// Operational variables
 let highlightedStatsRow
 let highlightedMergeRow
 let mergeMode = false
@@ -9,29 +10,53 @@ let editMode = false
 let originalFoodValue = null
 let originalCategoryValue = null
 
+// Tab-dependent variables
+let activeTab
+
+// Food tab objects
 let foodCategoryTable = document.getElementById('foods_categories_table')
 let foodStatsHeader = document.getElementById('food_stats_header')
 let foodStatsBody = document.getElementById('food_stats_body')
-let resultCount = document.getElementById('result_count')
+let foodResultCount = document.getElementById('food_result_count')
 
 let foodNameSearch = document.getElementById('food_name_search_input')
 let foodCategorySearch = document.getElementById('food_category_search_input')
 let noCategorySearch = document.getElementById('no_category_search_input')
 let noRecipeSearch = document.getElementById('no_recipe_search_input')
-let categoryNameSearch = document.getElementById('category_name_search_input')
 
-let deleteButton = document.getElementById('delete_food_button')
-let mergeButton = document.getElementById('merge_food_button')
-let cancelMergeButton = document.getElementById('cancel_merge_food_button')
-let editButton = document.getElementById('edit_food_button')
-let cancelEditButton = document.getElementById('cancel_edit_food_button')
+let foodDeleteButton = document.getElementById('delete_food_button')
+let foodMergeButton = document.getElementById('merge_food_button')
+let foodCancelMergeButton = document.getElementById('cancel_merge_food_button')
+let foodEditButton = document.getElementById('edit_food_button')
+let foodCancelEditButton = document.getElementById('cancel_edit_food_button')
 
 let foodStatsMergeHeader = document.getElementById('food_stats_merge_header')
 let foodStatsMergeBody = document.getElementById('food_stats_merge_body')
-let badMergeTooltip = document.getElementById('cant_self_merge_tooltip')
-let duplicateNameTooltip = document.getElementById('duplicate_name_tooltip')
+let foodBadMergeTooltip = document.getElementById('cant_self_merge_food_tooltip')
+let foodDuplicateNameTooltip = document.getElementById('duplicate_food_name_tooltip')
 
-let defaultMergeHeaderText = 'Select a food to merge with'
+// Category tab objects
+let categoryTable = document.getElementById('categories_table')
+let categoryStatsHeader = document.getElementById('category_stats_header')
+let categoryStatsBody = document.getElementById('category_stats_body')
+let categoryResultCount = document.getElementById('category_result_count')
+
+let categoryNameSearch = document.getElementById('category_name_search_input')
+
+let categoryDeleteButton = document.getElementById('delete_category_button')
+let categoryMergeButton = document.getElementById('merge_category_button')
+let categoryCancelMergeButton = document.getElementById('cancel_merge_category_button')
+let categoryEditButton = document.getElementById('edit_category_button')
+let categoryCancelEditButton = document.getElementById('cancel_edit_category_button')
+
+let categoryStatsMergeHeader = document.getElementById('category_stats_merge_header')
+let categoryStatsMergeBody = document.getElementById('category_stats_merge_body')
+let categoryBadMergeTooltip = document.getElementById('cant_self_merge_category_tooltip')
+let categoryDuplicateNameTooltip = document.getElementById('duplicate_category_name_tooltip')
+
+// Variables for filling out HTML
+let defaultFoodMergeHeaderText = 'Select a food to merge with'
+let defaultCategoryMergeHeaderText = 'Select a category to merge with'
 let defaultMergeButtonText = 'Merge with another'
 
 let foodStatsTemplate = `<h4>Used in these recipes:</h4>
@@ -41,17 +66,28 @@ let foodStatsTemplate = `<h4>Used in these recipes:</h4>
 let emptyFoodStatsTemplate = '<h4 style="margin: 0;">Not used in any recipes</h4>'
 
 function getFoodData(document) {
-    // foodDataRaw is declared in manage_food.html, passed from views.py
+    // foodDataRaw and categoryDataRaw are declared in manage_food.html, passed from views.py
     let foodData = JSON.parse(document.querySelector('#foodDataRaw').textContent)
-    let returnDict = {}
+    let categoryData = JSON.parse(document.querySelector('#categoryDataRaw').textContent)
+
+    let returnFoodDict = {}
+    let returnCategoryDict = {}
+
     foodData.forEach((food, index) => {
-        returnDict[food.name] = {
+        returnFoodDict[food.name] = {
             'category': food.category,
             'recipes': food.recipes,
             'rowIndex': index + 1,   // The headers are row 0 in the table, so starting the index at 1
         }
     })
-    return returnDict
+
+    categoryData.forEach((cat, index) => {
+        returnCategoryDict[cat.name] = {
+            'foods': cat.foods,
+            'rowIndex': index + 1,   // The headers are row 0 in the table, so starting the index at 1
+        }
+    })
+    return [returnFoodDict, returnCategoryDict]
 }
 
 function autoTextareaHeight(event) {
@@ -61,27 +97,65 @@ function autoTextareaHeight(event) {
 }
 
 function showHideTabs(){   
+    // on page load, show first tab and hide the other
     $('#tabs li a:not(:first)').addClass('inactive');
     $('.tab_container').hide();
     $('.tab_container:first').show();
-        
+    activeTab = 'food'  // food tab is the first tab
+    
+    // actions when a tab is clicked
     $('#tabs li a').click(function() {
         var thisTabId = $(this).attr('id');
-        if($(this).hasClass('inactive')){ //this is the start of our condition 
+
+        // if the tab was inactive, make it active and hide the old tab
+        if($(this).hasClass('inactive')){ 
+            // perform the tab swap
             $('#tabs li a').addClass('inactive');           
             $(this).removeClass('inactive');
             
             $('.tab_container').hide();
             $('#'+ thisTabId + '_content').fadeIn('slow');
+            
+            // reset highlighting and editing variables
+            resetEditMode(true)
+            resetMergeMode(false, '')
+            if ( highlightedStatsRow ) {
+                // un-highlight stats row
+                let fakeEvent = {'target': highlightedStatsRow}
+                highlightStatsRow(fakeEvent)
+            }
+            if ( highlightedMergeRow ) {
+                // un-highlight merge row
+                let fakeEvent = {'target': highlightedMergeRow}
+                highlightMergeRow(fakeEvent)
+            }
+            // fix row heights
+            autoHeightAllRows()
+
+            // set the new active tab to be this tab
+            activeTab = thisTabId.split('_')[0]  // set the value to be 'food' or 'category'
         }
-        autoHeightAllRows()
     });
 }
 
 function enterMergeMode() {
     mergeMode = true
-    foodStatsMergeHeader.innerText = defaultMergeHeaderText
-    cancelMergeButton.style.display = ''
+    let header
+    let mergeButton
+    let cancelButton
+    if ( activeTab == 'food') {
+        header = foodStatsMergeHeader
+        mergeButton = foodMergeButton
+        editButton = foodEditButton
+        cancelButton = foodCancelMergeButton
+    } else {
+        header = categoryStatsMergeHeader
+        mergeButton = categoryMergeButton
+        editButton = categoryEditButton
+        cancelButton = categoryCancelMergeButton
+    }
+    header.innerText = defaultFoodMergeHeaderText
+    cancelButton.style.display = ''
     mergeButton = document.getElementById('merge_food_button')
     mergeButton.removeEventListener('click', enterMergeMode)
     editButton.style.display = 'none'
@@ -89,24 +163,47 @@ function enterMergeMode() {
 
 function enterEditMode() {
     editMode = true
+    let header
+    let mergeButton
+    let editButton
+    let cancelButton
+    let cancelEditButton
+    if ( activeTab == 'food') {
+        header = foodStatsMergeHeader
+        mergeButton = foodMergeButton
+        editButton = foodEditButton
+        cancelButton = foodCancelMergeButton
+        cancelEditButton = foodCancelEditButton
+
+        foodNameSearch.setAttribute('disabled', true)
+        foodCategorySearch.setAttribute('disabled', true)
+    } else {
+        header = categoryStatsMergeHeader
+        mergeButton = categoryMergeButton
+        editButton = categoryEditButton
+        cancelButton = categoryCancelMergeButton
+        cancelEditButton = categoryCancelEditButton
+
+        categoryNameSearch.setAttribute('disabled', true)
+    }
     mergeButton.style.display = 'none'
     cancelEditButton.style.display = ''
 
-    foodNameSearch.setAttribute('disabled', true)
-    foodCategorySearch.setAttribute('disabled', true)
-
-    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    let nameInput = highlightedStatsRow.querySelector('.food_name')  // despite being called "food name", this is actually also used in the category tab
     nameInput.classList.remove('locked')
     nameInput.classList.add('unlocked')
     nameInput.removeAttribute('readonly')
 
-    let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
-    let categorySelect = highlightedStatsRow.querySelector('.food_category')
-    categoryLabel.style.display = 'none'
-    categorySelect.style.display = ''
-
-    originalFoodValue = nameInput.value
-    originalCategoryValue = categoryLabel.innerText
+    if ( activeTab == 'food' ) {
+        let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
+        let categorySelect = highlightedStatsRow.querySelector('.food_category')
+        categoryLabel.style.display = 'none'
+        categorySelect.style.display = ''
+        originalFoodValue = nameInput.value
+        originalCategoryValue = categoryLabel.innerText
+    } else {
+        originalCategoryValue = nameInput.value
+    }
 
     editButton.removeEventListener('click', enterEditMode)
     editButton.addEventListener('click', submitEditsHandler)
@@ -115,14 +212,37 @@ function enterEditMode() {
 
 function resetEditMode(cancelEdits) {
     editMode = false
+
+    let header
+    let mergeButton
+    let editButton
+    let cancelButton
+    let cancelEditButton
+    if ( activeTab == 'food') {
+        header = foodStatsMergeHeader
+        mergeButton = foodMergeButton
+        editButton = foodEditButton
+        cancelButton = foodCancelMergeButton
+        cancelEditButton = foodCancelEditButton
+
+        foodNameSearch.removeAttribute('disabled')
+        foodCategorySearch.removeAttribute('disabled')
+    } else {
+        header = categoryStatsMergeHeader
+        mergeButton = categoryMergeButton
+        editButton = categoryEditButton
+        cancelButton = categoryCancelMergeButton
+        cancelEditButton = categoryCancelEditButton
+
+        categoryNameSearch.removeAttribute('disabled')
+    }
+
+
     mergeButton.style.display = ''
     editButton.style.display = ''
     cancelEditButton.style.display = 'none'
 
-    foodNameSearch.removeAttribute('disabled')
-    foodCategorySearch.removeAttribute('disabled')
-
-    let nameInput = highlightedStatsRow.querySelector('.food_name')
+    let nameInput = highlightedStatsRow.querySelector('.food_name')  // Again, works on both tabs
     if (nameInput.classList.contains('unlocked')) {
         nameInput.classList.remove('unlocked')
         nameInput.classList.add('locked')
@@ -131,32 +251,37 @@ function resetEditMode(cancelEdits) {
 
     let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
     let categorySelect = highlightedStatsRow.querySelector('.food_category')
-    categoryLabel.style.display = ''
-    categorySelect.style.display = 'none'
+
+    if ( activeTab == 'food' ) {
+        categoryLabel.style.display = ''
+        categorySelect.style.display = 'none'
+    }
 
     editButton.removeEventListener('click', submitEditsHandler)
     editButton.addEventListener('click', enterEditMode)
     editButton.innerText = 'Edit row'
 
-    if (cancelEdits) {
+    if ( cancelEdits && activeTab == 'food' ) {
         highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
         highlightedStatsRow.querySelector('.food_name').innerHTML = originalFoodValue
-        originalFoodValue = null
-
-        // no need to change any values for the Category since categoryLabel still holds the original value
-        originalCategoryValue = null
-    } else {
-        originalFoodValue = null
-        originalCategoryValue = null
+        // when on food tab, no need to reset any values for the Category since categoryLabel
+        // still holds the original value
+    } else if ( cancelEdits && activeTab == 'category' ) {
+        highlightedStatsRow.querySelector('.food_name').value = originalCategoryValue
+        highlightedStatsRow.querySelector('.food_name').innerHTML = originalCategoryValue
+    } else if ( ! cancelEdits && activeTab == 'food' ) {
+        // If saving edits, update categoryLabel when on food tab
         categoryLabel.innerText = categorySelect.value
     }
+    originalFoodValue = null
+    originalCategoryValue = null
 }
 
 async function submitEdits() {
     let nameInput = highlightedStatsRow.querySelector('.food_name')
     let categorySelect = highlightedStatsRow.querySelector('.food_category')
-    editButton.innerText = 'Saving edits...'
-    editButton.setAttribute('disabled', true)
+    foodEditButton.innerText = 'Saving edits...'
+    foodEditButton.setAttribute('disabled', true)
     let apiSuccess = await fetch(`${currentUrlDomain}/edit_food/`, {
         method: "POST",
         headers: {
@@ -172,14 +297,14 @@ async function submitEdits() {
     .then(function(response) {
         if ( response.status == 406 ) {
             // Reset edit button, display tooltip, then quit the function without resetting inputs or edit mode
-            editButton.innerText = 'Save edits'
-            editButton.removeAttribute('disabled')
+            foodEditButton.innerText = 'Save edits'
+            foodEditButton.removeAttribute('disabled')
             
-            duplicateNameTooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
-            duplicateNameTooltip.style.top = `${highlightedStatsRow.offsetTop + 330}px`;
-            duplicateNameTooltip.innerText = duplicateNameTooltip.innerText.replace('{food}', nameInput.value)
+            foodDuplicateNameTooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
+            foodDuplicateNameTooltip.style.top = `${highlightedStatsRow.offsetTop + 330}px`;
+            foodDuplicateNameTooltip.innerText = foodDuplicateNameTooltip.innerText.replace('{food}', nameInput.value)
 
-            showAndHideTooltip(duplicateNameTooltip, 5000)
+            showAndHideTooltip(foodDuplicateNameTooltip, 5000)
             return false
         } else if ( response.status == 200 ) {
             return true
@@ -192,7 +317,7 @@ async function submitEdits() {
         // Doing this so I can use await, which must be at top-level (rather than
         // putting it under the .then function above)
         await searchFilter()
-        editButton.removeAttribute('disabled')
+        foodEditButton.removeAttribute('disabled')
         resetEditMode(false, '')
         
         // Reloading the table un-highlights the row, so we re-highlight it by
@@ -222,15 +347,19 @@ function highlightStatsRow(event){
         targetElement = targetElement.parentNode.parentNode
     }
 
+    if ( activeTab=='food' ) {
+
+    }
+
     if (highlightedStatsRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
         highlightedStatsRow.classList.remove('highlight_stats')
         highlightedStatsRow = null
         foodStatsHeader.innerText = 'Select a food'
         foodStatsBody.innerHTML = ''
-        mergeButton.style.display = 'none'
-        editButton.style.display = 'none'
-        deleteButton.style.display = 'none'
+        foodMergeButton.style.display = 'none'
+        foodEditButton.style.display = 'none'
+        foodDeleteButton.style.display = 'none'
         resetMergeMode(false, '')
     } else {
         if (highlightedStatsRow) {
@@ -246,15 +375,15 @@ function highlightStatsRow(event){
         if ( recipes.length > 0 ) {
             let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
             foodStatsBody.innerHTML = foodStatsTemplate.replace('{recipeList}',recipeHTML)
-            deleteButton.style.display = 'none'
+            foodDeleteButton.style.display = 'none'
         } else {
-            deleteButton.style.display = ''
+            foodDeleteButton.style.display = ''
             foodStatsBody.innerHTML = emptyFoodStatsTemplate
         }
         foodStatsHeader.innerText = `${category}: ${food}`
-        mergeButton.style.display = ''
-        mergeButton.addEventListener('click', enterMergeMode)
-        editButton.style.display = ''
+        foodMergeButton.style.display = ''
+        foodMergeButton.addEventListener('click', enterMergeMode)
+        foodEditButton.style.display = ''
     }
 }
 
@@ -264,7 +393,7 @@ async function reloadFoodCategoryTable(params) {
     } else {
         params = `?${params}`
     }
-    let response = await fetch(`/food${params}`, {
+    let apiResponse = await fetch(`/food/${params}`, {
         method: "GET",
     })
     .then(function(response) {
@@ -272,17 +401,22 @@ async function reloadFoodCategoryTable(params) {
         return response.text();
     })
     
+    // Semicolons were necessary here, I think because of the line that starts with []
+
     // Render the response text as an html element, then extract the new search result div from its innards
-    let responseHtml = document.createElement('html')
-    responseHtml.innerHTML = response
-    foodDataDict = getFoodData(responseHtml)
-    let responseFoodCategoryTable = responseHtml.querySelector('#foods_categories_table')
-    let responseResultCount = responseHtml.querySelector('#result_count')
+    let responseHtml = document.createElement('html');
+    responseHtml.innerHTML = apiResponse;
+    [foodDataDict, categoryDataDict] = getFoodData(responseHtml);
+    let responseFoodCategoryTable = responseHtml.querySelector('#foods_categories_table');
+    let responseFoodResultCount = responseHtml.querySelector('#food_result_count');
+    let responseCategoryResultCount = responseHtml.querySelector('#category_result_count');
 
     // Frankenstein it right into our existing page
-    foodCategoryTable.innerHTML = responseFoodCategoryTable.innerHTML
-    resultCount.innerHTML = responseResultCount.innerHTML
-
+    foodCategoryTable.innerHTML = responseFoodCategoryTable.innerHTML;
+    foodResultCount.innerHTML = responseFoodResultCount.innerHTML;
+    foodResultCount.innerHTML = responseFoodResultCount.innerHTML;
+    categoryResultCount.innerHTML = responseCategoryResultCount.innerHTML;
+    
     assignRowListeners()
 }
 
@@ -336,9 +470,9 @@ function resetMergeMode(stillInMergeMode, headerText) {
     mergeMode = stillInMergeMode
     if (!stillInMergeMode) {
         // Remove cancel button and show edit button again
-        cancelMergeButton.style.display = 'none'
+        foodCancelMergeButton.style.display = 'none'
         if (highlightedStatsRow) {
-            editButton.style.display = ''
+            foodEditButton.style.display = ''
         }
     }
     foodStatsMergeHeader.innerText = ''
@@ -348,10 +482,10 @@ function resetMergeMode(stillInMergeMode, headerText) {
     }
     foodStatsMergeHeader.innerText = headerText
     foodStatsMergeBody.innerHTML = ''
-    mergeButton.classList.remove('merge_selected')
-    mergeButton.innerText = defaultMergeButtonText
-    mergeButton.removeEventListener('click', mergeFoodsHandler)
-    mergeButton.addEventListener('click', enterMergeMode)
+    foodMergeButton.classList.remove('merge_selected')
+    foodMergeButton.innerText = defaultMergeButtonText
+    foodMergeButton.removeEventListener('click', mergeFoodsHandler)
+    foodMergeButton.addEventListener('click', enterMergeMode)
 }
 
 async function deleteFood() {
@@ -359,8 +493,8 @@ async function deleteFood() {
     let confirmText = `Are you sure you want to delete "${foodName}"? No recipes are using it so no recipes will be impacted.`
     let confirmDelete = confirm(confirmText)
     if (confirmDelete) {
-        deleteButton.innerText = 'Deleting...'
-        deleteButton.setAttribute('disabled', true)
+        foodDeleteButton.innerText = 'Deleting...'
+        foodDeleteButton.setAttribute('disabled', true)
         let apiSuccess = await fetch(`${currentUrlDomain}/delete_food/`, {
             method: "POST",
             headers: {
@@ -383,8 +517,8 @@ async function deleteFood() {
         if ( apiSuccess ) {
             await searchFilter()
 
-            deleteButton.innerText = 'Delete food'
-            deleteButton.removeAttribute('disabled')
+            foodDeleteButton.innerText = 'Delete food'
+            foodDeleteButton.removeAttribute('disabled')
             // This is my cheater way of resetting the highlighting variables and stats table.
             let fakeEvent = {'target': highlightedStatsRow}  // this row doesn't exist in the table anymore, but I still have it in this variable!
             highlightStatsRow(fakeEvent)
@@ -402,23 +536,23 @@ function highlightMergeRow(event) {
     }
     if (highlightedMergeRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
-        resetMergeMode(true, defaultMergeHeaderText)
+        resetMergeMode(true, defaultFoodMergeHeaderText)
     } else if (highlightedStatsRow == targetElement) {
         // Clicked the stats row, which is highlighted blue. You can't merge into yourself!
         // showAndHideTooltip is defined in tooltip.js
 
-        badMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
-        badMergeTooltip.style.top = `${targetElement.offsetTop + 330}px`;
-        showAndHideTooltip(badMergeTooltip)
+        foodBadMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
+        foodBadMergeTooltip.style.top = `${targetElement.offsetTop + 330}px`;
+        showAndHideTooltip(foodBadMergeTooltip)
     } else {
         if (highlightedMergeRow) {
             // Un-highlight the different row
             highlightedMergeRow.classList.remove('highlight_merge')
         }
         // Modify merge button to indicate we're ready to merge
-        mergeButton.classList.add('merge_selected')
-        mergeButton.innerText = 'Merge foods'
-        mergeButton.addEventListener('click', mergeFoodsHandler)
+        foodMergeButton.classList.add('merge_selected')
+        foodMergeButton.innerText = 'Merge foods'
+        foodMergeButton.addEventListener('click', mergeFoodsHandler)
         
         // Highlight and set stats for this row
         targetElement.classList.add('highlight_merge')
@@ -544,7 +678,7 @@ async function searchFilterWithTimeout() {
     const { result, timedOut, error } = await executeWithTimeout(searchFilter(), timeoutDuration);
   
     if (timedOut) {
-        resultCount.innerText = 'Searching...'
+        foodResultCount.innerText = 'Searching...'
         foodCategoryTable.classList.add('searching')
     }
 }
@@ -572,7 +706,7 @@ function autoHeightAllRows() {
 
 assignRowListeners()
 $(document).ready(showHideTabs)
-editButton.addEventListener('click', enterEditMode)
+foodEditButton.addEventListener('click', enterEditMode)
 
 foodNameSearch.addEventListener("input", searchFilterWithTimeout)
 foodCategorySearch.addEventListener("input", searchFilterWithTimeout)
