@@ -633,7 +633,14 @@ def manage_food(request):
         }
         for food in found_foods
     ]
-    categories = sorted(list({food['category'] for food in foods}))
+    category_names = sorted(list({food['category'] for food in foods}))
+    categories = [
+        {
+            'name': cat,
+            'foods': [food.name for food in Food.objects.filter(food_category__name=cat)],
+        }
+        for cat in category_names
+    ]
     all_categories = [cat.name for cat in FoodCategory.objects.all().order_by('name')]
     context = {
         'foods': foods,
