@@ -1,6 +1,6 @@
 let currentUrl = window.location.href
 let currentUrlDomain = currentUrl.split("/food/")[0]
-let [foodDataDict, categoryDataDict] = getFoodData(document)
+let [foodDataDict, categoryDataDict] = getFoodData(document);
 
 // Operational variables
 let highlightedStatsRow
@@ -61,9 +61,15 @@ let defaultMergeButtonText = 'Merge with another'
 
 let foodStatsTemplate = `<h4>Used in these recipes:</h4>
 <ul>
-{recipeList}
+{statsList}
 </ul>`
 let emptyFoodStatsTemplate = '<h4 style="margin: 0;">Not used in any recipes</h4>'
+
+let categoryStatsTemplate = `<h4>Assigned to these foods:</h4>
+<ul>
+{statsList}
+</ul>`
+let emptyCategoryStatsTemplate = '<h4 style="margin: 0;">Not assigned to any foods</h4>'
 
 function getFoodData(document) {
     // foodDataRaw and categoryDataRaw are declared in manage_food.html, passed from views.py
@@ -119,6 +125,7 @@ function showHideTabs(){
             // reset highlighting and editing variables
             resetEditMode(true)
             resetMergeMode(false, '')
+            hideAllButtons()
             if ( highlightedStatsRow ) {
                 // un-highlight stats row
                 let fakeEvent = {'target': highlightedStatsRow}
@@ -136,6 +143,20 @@ function showHideTabs(){
             activeTab = thisTabId.split('_')[0]  // set the value to be 'food' or 'category'
         }
     });
+}
+
+function hideAllButtons () {
+    foodDeleteButton.style.display = 'none'
+    foodMergeButton.style.display = 'none'
+    foodCancelMergeButton.style.display = 'none'
+    foodEditButton.style.display = 'none'
+    foodCancelEditButton.style.display = 'none'
+
+    categoryDeleteButton.style.display = 'none'
+    categoryMergeButton.style.display = 'none'
+    categoryCancelMergeButton.style.display = 'none'
+    categoryEditButton.style.display = 'none'
+    categoryCancelEditButton.style.display = 'none'
 }
 
 function enterMergeMode() {
@@ -211,6 +232,7 @@ function enterEditMode() {
 }
 
 function resetEditMode(cancelEdits) {
+    let wasInEditMode = editMode
     editMode = false
 
     let header
@@ -242,36 +264,38 @@ function resetEditMode(cancelEdits) {
     editButton.style.display = ''
     cancelEditButton.style.display = 'none'
 
-    let nameInput = highlightedStatsRow.querySelector('.food_name')  // Again, works on both tabs
-    if (nameInput.classList.contains('unlocked')) {
-        nameInput.classList.remove('unlocked')
-        nameInput.classList.add('locked')
-        nameInput.setAttribute('readonly', true)
-    }
+    if ( wasInEditMode ) {
+        let nameInput = highlightedStatsRow.querySelector('.food_name')  // Again, works on both tabs
+        if (nameInput.classList.contains('unlocked')) {
+            nameInput.classList.remove('unlocked')
+            nameInput.classList.add('locked')
+            nameInput.setAttribute('readonly', true)
+        }
 
-    let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
-    let categorySelect = highlightedStatsRow.querySelector('.food_category')
+        let categoryLabel = highlightedStatsRow.querySelector('.food_category_label')
+        let categorySelect = highlightedStatsRow.querySelector('.food_category')
 
-    if ( activeTab == 'food' ) {
-        categoryLabel.style.display = ''
-        categorySelect.style.display = 'none'
-    }
+        if ( activeTab == 'food' ) {
+            categoryLabel.style.display = ''
+            categorySelect.style.display = 'none'
+        }
 
-    editButton.removeEventListener('click', submitEditsHandler)
-    editButton.addEventListener('click', enterEditMode)
-    editButton.innerText = 'Edit row'
+        editButton.removeEventListener('click', submitEditsHandler)
+        editButton.addEventListener('click', enterEditMode)
+        editButton.innerText = 'Edit row'
 
-    if ( cancelEdits && activeTab == 'food' ) {
-        highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
-        highlightedStatsRow.querySelector('.food_name').innerHTML = originalFoodValue
-        // when on food tab, no need to reset any values for the Category since categoryLabel
-        // still holds the original value
-    } else if ( cancelEdits && activeTab == 'category' ) {
-        highlightedStatsRow.querySelector('.food_name').value = originalCategoryValue
-        highlightedStatsRow.querySelector('.food_name').innerHTML = originalCategoryValue
-    } else if ( ! cancelEdits && activeTab == 'food' ) {
-        // If saving edits, update categoryLabel when on food tab
-        categoryLabel.innerText = categorySelect.value
+        if ( cancelEdits && activeTab == 'food' ) {
+            highlightedStatsRow.querySelector('.food_name').value = originalFoodValue
+            highlightedStatsRow.querySelector('.food_name').innerHTML = originalFoodValue
+            // when on food tab, no need to reset any values for the Category since categoryLabel
+            // still holds the original value
+        } else if ( cancelEdits && activeTab == 'category' ) {
+            highlightedStatsRow.querySelector('.food_name').value = originalCategoryValue
+            highlightedStatsRow.querySelector('.food_name').innerHTML = originalCategoryValue
+        } else if ( ! cancelEdits && activeTab == 'food' ) {
+            // If saving edits, update categoryLabel when on food tab
+            categoryLabel.innerText = categorySelect.value
+        }
     }
     originalFoodValue = null
     originalCategoryValue = null
@@ -297,7 +321,6 @@ async function submitEdits() {
         }
         editButton = foodEditButton
         tooltip = foodDuplicateNameTooltip
-        dataDict = foodDataDict
         table = foodCategoryTable
     } else {
         apiUrl = 'edit_category'
@@ -307,7 +330,6 @@ async function submitEdits() {
         }
         editButton = categoryEditButton
         tooltip = categoryDuplicateNameTooltip
-        dataDict = categoryDataDict
         table = categoryTable
     }
 
@@ -344,6 +366,11 @@ async function submitEdits() {
         // Doing this so I can use await, which must be at top-level (rather than
         // putting it under the .then function above)
         await searchFilter()
+        if ( activeTab == 'food' ) {
+            dataDict = foodDataDict
+        } else {
+            dataDict = categoryDataDict
+        }
         editButton.removeAttribute('disabled')
         resetEditMode(false, '')
         
@@ -374,19 +401,39 @@ function highlightStatsRow(event){
         targetElement = targetElement.parentNode.parentNode
     }
 
-    if ( activeTab=='food' ) {
+    let statsHeader
+    let statsBody
+    let statsTemplate
+    let emptyStatsTemplate
+    let mergeButton
+    let editButton
+    let deleteButton
 
+    if ( activeTab=='food' ) {
+        statsHeader = foodStatsHeader
+        statsBody = foodStatsBody
+        statsTemplate = foodStatsTemplate
+        emptyStatsTemplate = emptyFoodStatsTemplate
+        mergeButton = foodMergeButton
+        editButton = foodEditButton
+        deleteButton = foodDeleteButton
+    } else {
+        statsHeader = categoryStatsHeader
+        statsBody = categoryStatsBody
+        statsTemplate = categoryStatsTemplate
+        emptyStatsTemplate = emptyCategoryStatsTemplate
+        mergeButton = categoryMergeButton
+        editButton = categoryEditButton
+        deleteButton = categoryDeleteButton
     }
 
     if (highlightedStatsRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
         highlightedStatsRow.classList.remove('highlight_stats')
         highlightedStatsRow = null
-        foodStatsHeader.innerText = 'Select a food'
-        foodStatsBody.innerHTML = ''
-        foodMergeButton.style.display = 'none'
-        foodEditButton.style.display = 'none'
-        foodDeleteButton.style.display = 'none'
+        statsHeader.innerText = `Select a ${activeTab}`
+        statsBody.innerHTML = ''
+        hideAllButtons()
         resetMergeMode(false, '')
     } else {
         if (highlightedStatsRow) {
@@ -396,21 +443,37 @@ function highlightStatsRow(event){
         // Highlight and set stats for this row
         targetElement.classList.add('highlight_stats')
         highlightedStatsRow = targetElement
-        let food = targetElement.getAttribute('data-food')
-        let category = targetElement.getAttribute('data-category')
-        let recipes = Array.from(foodDataDict[food]['recipes'])
-        if ( recipes.length > 0 ) {
-            let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
-            foodStatsBody.innerHTML = foodStatsTemplate.replace('{recipeList}',recipeHTML)
-            foodDeleteButton.style.display = 'none'
+        
+        let food
+        let category
+        let statsList
+        if ( activeTab=='food' ) {
+            food = targetElement.getAttribute('data-food')
+            category = targetElement.getAttribute('data-category')
+            statsList = Array.from(foodDataDict[food]['recipes'])
         } else {
-            foodDeleteButton.style.display = ''
-            foodStatsBody.innerHTML = emptyFoodStatsTemplate
+            category = targetElement.getAttribute('data-category')
+            statsList = Array.from(categoryDataDict[category]['foods'])
         }
-        foodStatsHeader.innerText = `${category}: ${food}`
-        foodMergeButton.style.display = ''
-        foodMergeButton.addEventListener('click', enterMergeMode)
-        foodEditButton.style.display = ''
+
+        if ( statsList.length > 0 ) {
+            let listItemHTML;
+            if ( activeTab=='food' ) {
+                statsHeader.innerText = `${category}: ${food}`;
+                listItemHTML = statsList.map(rec => `<li style="padding-bottom: 10px;"><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`).join('');
+            } else {
+                statsHeader.innerText = category;
+                listItemHTML = statsList.map(food => `<li style="padding-bottom: 5px;">${food}</li>`).join('');
+            }
+            statsBody.innerHTML = statsTemplate.replace('{statsList}', listItemHTML);
+            deleteButton.style.display = 'none';
+        } else {
+            deleteButton.style.display = '';
+            statsBody.innerHTML = emptyStatsTemplate;
+        }
+        mergeButton.style.display = '';
+        mergeButton.addEventListener('click', enterMergeMode);
+        editButton.style.display = '';
     }
 }
 
@@ -589,7 +652,7 @@ function highlightMergeRow(event) {
         let recipes = Array.from(foodDataDict[food]['recipes'])
         let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
         foodStatsMergeHeader.innerText = `${category}: ${food}`
-        foodStatsMergeBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{recipeList}',recipeHTML)
+        foodStatsMergeBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{statsList}',recipeHTML)
     }
 }
 
