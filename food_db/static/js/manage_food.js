@@ -139,13 +139,11 @@ function showHideTabs(){
             hideAllButtons()
             if ( highlightedStatsRow ) {
                 // un-highlight stats row
-                let fakeEvent = {'target': highlightedStatsRow}
-                highlightStatsRow(fakeEvent)
+                unHighlightStatsRow()
             }
             if ( highlightedMergeRow ) {
                 // un-highlight merge row
-                let fakeEvent = {'target': highlightedMergeRow}
-                highlightMergeRow(fakeEvent)
+                resetMergeMode(true, defaultHeaderText)
             }
             // fix row heights
             autoHeightAllRows()
@@ -396,6 +394,25 @@ async function submitEdits() {
 
 const submitEditsHandler = () => submitEdits()
 
+function unHighlightStatsRow() {
+    highlightedStatsRow.classList.remove('highlight_stats');
+    highlightedStatsRow = null;
+    
+    let statsHeader
+    let statsBody
+    if ( activeTab == 'food' ) {
+        statsHeader = foodStatsHeader
+        statsBody = foodStatsBody
+    } else {
+        statsHeader = categoryStatsHeader
+        statsBody = categoryStatsBody
+    }
+    statsHeader.innerText = `Select a ${activeTab}`;
+    statsBody.innerHTML = '';
+    hideAllButtons();
+    resetMergeMode(false, '');
+}
+
 function highlightStatsRow(event){
     targetElement = event.target
     let inputNodeNames = ['TEXTAREA', 'SELECT', 'SPAN', 'LABEL']
@@ -440,12 +457,7 @@ function highlightStatsRow(event){
 
     if (highlightedStatsRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
-        highlightedStatsRow.classList.remove('highlight_stats')
-        highlightedStatsRow = null
-        statsHeader.innerText = `Select a ${activeTab}`
-        statsBody.innerHTML = ''
-        hideAllButtons()
-        resetMergeMode(false, '')
+        unHighlightStatsRow()
     } else {
         if (highlightedStatsRow) {
             // Un-highlight the different row
@@ -485,7 +497,9 @@ function highlightStatsRow(event){
         }
         mergeButton.style.display = '';
         mergeButton.addEventListener('click', enterMergeMode);
-        editButton.style.display = '';
+        if ( ! mergeMode ) {
+            editButton.style.display = '';
+        }
     }
 }
 
@@ -672,9 +686,6 @@ async function deleteFood() {
 
             foodDeleteButton.innerText = 'Delete food'
             foodDeleteButton.removeAttribute('disabled')
-            // This is my cheater way of resetting the highlighting variables and stats table.
-            let fakeEvent = {'target': highlightedStatsRow}  // this row doesn't exist in the table anymore, but I still have it in this variable!
-            highlightStatsRow(fakeEvent)
         }
     }
 }
@@ -686,7 +697,7 @@ async function deleteCategory() {
     if (confirmDelete) {
         categoryDeleteButton.innerText = 'Deleting...'
         categoryDeleteButton.setAttribute('disabled', true)
-        let apiSuccess = await fetch(`${currentUrlDomain}/delete_category/`, {
+        let apiSuccess = await fetch(`${currentUrlDomain}/delete_food_category/`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -708,11 +719,8 @@ async function deleteCategory() {
         if ( apiSuccess ) {
             await searchFilter()
 
-            categoryDeleteButton.innerText = 'Delete food'
+            categoryDeleteButton.innerText = 'Delete category'
             categoryDeleteButton.removeAttribute('disabled')
-            // This is my cheater way of resetting the highlighting variables and stats table.
-            let fakeEvent = {'target': highlightedStatsRow}  // this row doesn't exist in the table anymore, but I still have it in this variable!
-            highlightStatsRow(fakeEvent)
         }
     }
 }
@@ -888,15 +896,16 @@ async function searchFilter() {
             let fakeEvent = {'target': newHighlightedRow}
             highlightMergeRow(fakeEvent)
         } else {
-            // Un-highlight by passing the existing row into the highlight function
-            let fakeEvent = {'target': highlightedMergeRow}
-            highlightMergeRow(fakeEvent)
+            // Un-highlight the merge row
+            resetMergeMode(true, defaultHeaderText)
         }
     }
 
     // If NOT in merge mode and just have a highlighted stats row
     // Un-highlight the stats row if it's no longer in the search results
-    if ( ! mergeMode && highlightedStatsRow ) {
+    // Excluding edit mode too, as we reach this stage during the table 
+    // reset that comes with saving an edit
+    if ( ! mergeMode && ! editMode && highlightedStatsRow ) {
         let oldHighlightedRowName = highlightedStatsRow.getAttribute(`data-${activeTab}`)
         if ( oldHighlightedRowName in dataDict ) {
             let newHighlightedRowIndex = dataDict[oldHighlightedRowName]['rowIndex']
@@ -905,8 +914,7 @@ async function searchFilter() {
             highlightStatsRow(fakeEvent)
         } else {
             // Un-highlight by passing the existing row into the highlight function
-            let fakeEvent = {'target': highlightedStatsRow}
-            highlightStatsRow(fakeEvent)
+            unHighlightStatsRow()
         }
     }
     
@@ -974,6 +982,7 @@ function autoHeightAllRows() {
 assignRowListeners()
 $(document).ready(showHideTabs)
 foodEditButton.addEventListener('click', enterEditMode)
+categoryEditButton.addEventListener('click', enterEditMode)
 
 foodNameSearch.addEventListener("input", searchFilterWithTimeout)
 foodCategorySearch.addEventListener("input", searchFilterWithTimeout)
