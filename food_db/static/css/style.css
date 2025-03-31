@@ -542,3 +542,9 @@ button.merge_selected {
 #cancel_edit_food_button {
     margin-bottom: 20px;
 }
+#cancel_merge_category_button {
+    margin-bottom: 20px;
+}
+#cancel_edit_category_button {
+    margin-bottom: 20px;
+}
