@@ -625,7 +625,7 @@ def edit_recipe(request, key):
 def manage_food(request):
     food_search_form = FoodTextFilter(request.GET, queryset=Food.objects.all().order_by('name'))
     found_foods = food_search_form.qs.distinct()
-    food_category_search_form = FoodCategoryTextFilter(request.GET, queryset=Food.objects.all().order_by('name'))
+    food_category_search_form = FoodCategoryTextFilter(request.GET, queryset=FoodCategory.objects.all().order_by('name'))
     found_categories = food_category_search_form.qs.distinct()
     foods = [
         {
