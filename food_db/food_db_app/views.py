@@ -638,7 +638,7 @@ def manage_food(request):
     categories = [
         {
             'name': cat.name,
-            'foods': [food.name for food in Food.objects.filter(food_category__name=cat.name)],
+            'foods': [food.name for food in Food.objects.filter(food_category__name=cat.name).order_by('name')],
         }
         for cat in found_categories
     ]
