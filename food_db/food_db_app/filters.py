@@ -1,7 +1,7 @@
 import django_filters as filters
 from django import forms
 from django.db.models import Count
-from .models import Recipe, Tag, Food
+from .models import Recipe, Tag, Food, FoodCategory
 
 class RecipeTextFilter(filters.FilterSet):
     title = filters.CharFilter(
@@ -45,12 +45,13 @@ class RecipeTextFilter(filters.FilterSet):
         distinct = True
 
 class FoodTextFilter(filters.FilterSet):
-    name = filters.CharFilter(
+    food_name = filters.CharFilter(
         label='Food name contains',
         lookup_expr='icontains',
+        field_name='name',
         distinct = True
     )  # https://docs.djangoproject.com/en/5.1/ref/models/querysets/#field-lookups
-    category = filters.CharFilter(
+    food_category = filters.CharFilter(
         label='Category name contains',
         field_name='food_category__name',
         lookup_expr='icontains',
@@ -85,4 +86,30 @@ class FoodTextFilter(filters.FilterSet):
     class Meta:
         model = Food
         fields = ['name', 'food_category']
+        distinct = True
+
+class FoodCategoryTextFilter(filters.FilterSet):
+    category_name = filters.CharFilter(
+        label='Category name contains',
+        lookup_expr='icontains',
+        field_name='name',
+        distinct = True
+    )
+    no_food = filters.BooleanFilter(
+        method='filter_no_foods',
+        label='Categories not assigned to a Food',
+        widget=forms.CheckboxInput,
+        initial=False,
+    )
+
+    def filter_no_foods(self, queryset, name, value):
+        if value:
+            return queryset.annotate(food_count=Count('food')).filter(food_count=0)
+        else:
+            return queryset
+
+    
+    class Meta:
+        model = FoodCategory
+        fields = ['name']
         distinct = True

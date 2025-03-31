@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from math import floor
 from pytz import timezone
 
-from .filters import RecipeTextFilter, FoodTextFilter
+from .filters import RecipeTextFilter, FoodTextFilter, FoodCategoryTextFilter
 from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory, FoodCategory
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
@@ -625,6 +625,8 @@ def edit_recipe(request, key):
 def manage_food(request):
     food_search_form = FoodTextFilter(request.GET, queryset=Food.objects.all().order_by('name'))
     found_foods = food_search_form.qs.distinct()
+    food_category_search_form = FoodCategoryTextFilter(request.GET, queryset=Food.objects.all().order_by('name'))
+    found_categories = food_category_search_form.qs.distinct()
     foods = [
         {
             'name': food.name,
@@ -633,13 +635,12 @@ def manage_food(request):
         }
         for food in found_foods
     ]
-    category_names = sorted(list({food['category'] for food in foods}))
     categories = [
         {
-            'name': cat,
-            'foods': [food.name for food in Food.objects.filter(food_category__name=cat)],
+            'name': cat.name,
+            'foods': [food.name for food in Food.objects.filter(food_category__name=cat.name)],
         }
-        for cat in category_names
+        for cat in found_categories
     ]
     all_categories = [cat.name for cat in FoodCategory.objects.all().order_by('name')]
     context = {
@@ -647,6 +648,7 @@ def manage_food(request):
         'categories': categories,
         'all_categories': all_categories,
         'food_search': food_search_form,
+        'category_search': food_category_search_form,
     }
     return render(request, 'manage_food.html', context)
 

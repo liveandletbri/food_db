@@ -17,10 +17,10 @@
 </ul>
 
 <div class="tab_container" id="food_tab_content">
-    <label>{{ food_search.form.name.label }}:</label>
+    <label>{{ food_search.form.food_name.label }}:</label>
     <input type="text" class="manage_food_search" name="name" id="food_name_search_input">
     <br>
-    <label>{{ food_search.form.category.label }}:</label>
+    <label>{{ food_search.form.food_category.label }}:</label>
     <input type="text" class="manage_food_search" name="category" id="food_category_search_input">
     <br>
     <label>{{ food_search.form.no_category.label }}:</label>
@@ -80,11 +80,14 @@
 
 
 <div class="tab_container" id="category_tab_content">
-    <label>{{ food_search.form.category.label }}:</label>
+    <label>{{ category_search.form.name.label }}:</label>
     <input type="text" class="manage_food_search" name="category" id="category_name_search_input">
     <br>
+    <label>{{ category_search.form.no_food.label }}:</label>
+    <input type="checkbox" class="manage_food_search" name="no_food" id="no_food_search_input">
+    <br><br>
 
-    {% with result_count=categories|length %}
+    {% with result_count=category_search.qs|length %}
     <h3 id="category_result_count">{% if result_count == 0 %}Ah shit, no matching categories found 😔{% else %}Found {{ result_count }} {% endif %}{% if result_count > 1 %}categories{% else %}category{% endif %}</h3>
     {% endwith %}
 
@@ -110,7 +113,7 @@
         <h3 id="category_stats_header">Select a category</h3>
         <span id="category_stats_body"></span>
         <div id="category_stats_buttons">
-            <button id="delete_category_button" style="display: none;" class="food_stats_button" type="button" onclick="deleteFood()">Delete food</button>
+            <button id="delete_category_button" style="display: none;" class="food_stats_button" type="button" onclick="deleteCategory()">Delete category</button>
             <button id="merge_category_button" style="display: none;" class="food_stats_button" type="button">Merge with another</button>
             <button id="cancel_merge_category_button" style="display: none;" class="food_stats_button" type="button" onclick="resetMergeMode(false, '')">Cancel Merge</button>
             <button id="edit_category_button" style="display: none;" class="food_stats_button" type="button">Edit Row</button>
