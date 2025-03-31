@@ -42,6 +42,7 @@ let categoryStatsBody = document.getElementById('category_stats_body')
 let categoryResultCount = document.getElementById('category_result_count')
 
 let categoryNameSearch = document.getElementById('category_name_search_input')
+let noFoodSearch = document.getElementById('no_food_search_input')
 
 let categoryDeleteButton = document.getElementById('delete_category_button')
 let categoryMergeButton = document.getElementById('merge_category_button')
@@ -115,6 +116,16 @@ function showHideTabs(){
 
         // if the tab was inactive, make it active and hide the old tab
         if($(this).hasClass('inactive')){ 
+            // first, clear search inputs and reset tables
+            foodNameSearch.value = ''
+            foodCategorySearch.value = ''
+            categoryNameSearch.value = ''
+            noCategorySearch.checked = false
+            noRecipeSearch.checked = false
+            noFoodSearch.checked = false
+            searchFilter()  // this is the reason this is first - this async function is called without await
+
+
             // perform the tab swap
             $('#tabs li a').addClass('inactive');           
             $(this).removeClass('inactive');
@@ -139,7 +150,7 @@ function showHideTabs(){
             // fix row heights
             autoHeightAllRows()
 
-            // set the new active tab to be this tab
+            // set the new "active tab" to be this tab
             activeTab = thisTabId.split('_')[0]  // set the value to be 'food' or 'category'
         }
     });
@@ -323,7 +334,7 @@ async function submitEdits() {
         tooltip = foodDuplicateNameTooltip
         table = foodCategoryTable
     } else {
-        apiUrl = 'edit_category'
+        apiUrl = 'edit_food_category'
         apiParams = {
             original_category_name: originalCategoryValue,
             new_category_name: nameInput.value,
@@ -387,7 +398,7 @@ const submitEditsHandler = () => submitEdits()
 
 function highlightStatsRow(event){
     targetElement = event.target
-    let inputNodeNames = ['TEXTAREA', 'SELECT', 'SPAN']
+    let inputNodeNames = ['TEXTAREA', 'SELECT', 'SPAN', 'LABEL']
     if (inputNodeNames.includes(targetElement.nodeName) && targetElement.classList.contains('unlocked')) {
         // Totally skip this function - do not change the highlights and stats if clicking an unlocked input 
         return
@@ -451,21 +462,22 @@ function highlightStatsRow(event){
             food = targetElement.getAttribute('data-food')
             category = targetElement.getAttribute('data-category')
             statsList = Array.from(foodDataDict[food]['recipes'])
+            statsHeader.innerText = `${category}: ${food}`;
+            if ( statsList.length > 0 ) {
+                let listItemHTML = statsList.map(rec => `<li style="padding-bottom: 10px;"><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`).join('');
+                statsBody.innerHTML = statsTemplate.replace('{statsList}', listItemHTML);
+            }
         } else {
             category = targetElement.getAttribute('data-category')
             statsList = Array.from(categoryDataDict[category]['foods'])
+            statsHeader.innerText = category;
+            if ( statsList.length > 0 ) {
+                let listItemHTML = statsList.map(food => `<li style="padding-bottom: 5px;">${food}</li>`).join('');
+                statsBody.innerHTML = statsTemplate.replace('{statsList}', listItemHTML);
+            }
         }
 
         if ( statsList.length > 0 ) {
-            let listItemHTML;
-            if ( activeTab=='food' ) {
-                statsHeader.innerText = `${category}: ${food}`;
-                listItemHTML = statsList.map(rec => `<li style="padding-bottom: 10px;"><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`).join('');
-            } else {
-                statsHeader.innerText = category;
-                listItemHTML = statsList.map(food => `<li style="padding-bottom: 5px;">${food}</li>`).join('');
-            }
-            statsBody.innerHTML = statsTemplate.replace('{statsList}', listItemHTML);
             deleteButton.style.display = 'none';
         } else {
             deleteButton.style.display = '';
@@ -477,7 +489,7 @@ function highlightStatsRow(event){
     }
 }
 
-async function reloadFoodCategoryTable(params) {
+async function reloadDataTables(params) {
     if ( params == undefined ) {
         params = ''
     } else {
@@ -499,12 +511,13 @@ async function reloadFoodCategoryTable(params) {
     [foodDataDict, categoryDataDict] = getFoodData(responseHtml);
     let responseFoodCategoryTable = responseHtml.querySelector('#foods_categories_table');
     let responseFoodResultCount = responseHtml.querySelector('#food_result_count');
+    let responseCategoryTable = responseHtml.querySelector('#categories_table');
     let responseCategoryResultCount = responseHtml.querySelector('#category_result_count');
 
     // Frankenstein it right into our existing page
     foodCategoryTable.innerHTML = responseFoodCategoryTable.innerHTML;
     foodResultCount.innerHTML = responseFoodResultCount.innerHTML;
-    foodResultCount.innerHTML = responseFoodResultCount.innerHTML;
+    categoryTable.innerHTML = responseCategoryTable.innerHTML;
     categoryResultCount.innerHTML = responseCategoryResultCount.innerHTML;
 
     assignRowListeners()
@@ -513,21 +526,42 @@ async function reloadFoodCategoryTable(params) {
 
 async function mergeFoods(event) {
     event.preventDefault()
-    firstFood = highlightedStatsRow.getAttribute('data-food')
-    secondFood = highlightedMergeRow.getAttribute('data-food')
-    let confirmText = `Are you sure you want to merge "${firstFood}" with "${secondFood}"? All recipes using "${firstFood}" will be updated to instead use "${secondFood}", and "${firstFood}" will disappear from the database.`
+    let firstThing
+    let secondThing
+    let confirmText
+    let apiUrl
+    let apiParms
+    let dataDict
+    let table
+
+    if ( activeTab == 'food' ) {
+        firstThing = highlightedStatsRow.getAttribute('data-food')
+        secondThing = highlightedMergeRow.getAttribute('data-food')
+        confirmText = `Are you sure you want to merge "${firstThing}" with "${secondThing}"? All recipes using "${firstThing}" will be updated to instead use "${secondThing}", and "${firstThing}" will disappear from the database.`
+        apiUrl = 'merge_foods'
+        apiParms = {
+            food_to_merge: firstThing,
+            food_to_keep: secondThing,
+        }
+    } else {
+        firstThing = highlightedStatsRow.getAttribute('data-category')
+        secondThing = highlightedMergeRow.getAttribute('data-category')
+        confirmText = `Are you sure you want to merge "${firstThing}" with "${secondThing}"? All foods assigned to "${firstThing}" will be updated to instead be assigned to "${secondThing}", and "${firstThing}" will disappear from the database.`
+        apiUrl = 'merge_food_categories'
+        apiParms = {
+            category_to_merge: firstThing,
+            category_to_keep: secondThing,
+        }
+    }
     let confirmMerge = confirm(confirmText)
     if (confirmMerge) {
-        let apiSuccess = await fetch(`${currentUrlDomain}/merge_foods/`, {
+        let apiSuccess = await fetch(`${currentUrlDomain}/${apiUrl}/`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                food_to_merge: firstFood,
-                food_to_keep: secondFood,
-            })
+            body: JSON.stringify(apiParms)
         })
         .then(function(response) {
             if (! response.status == 200) {
@@ -542,12 +576,20 @@ async function mergeFoods(event) {
             // putting it under the .then function above)
             await searchFilter()
             resetMergeMode(false, '')
+
+            if ( activeTab == 'food' ) {
+                dataDict = foodDataDict
+                table = foodCategoryTable
+            } else {
+                dataDict = categoryDataDict
+                table = categoryTable
+            }
             
             // The merge row should now be highlighted, but using the highlightedMergeRow 
-            // variable won't work since that is from before reloadFoodCategoryTable. 
+            // variable won't work since that is from before reloadDataTables. 
             // Instead we'll find it by index.
-            let newHighlightedRowIndex = foodDataDict[secondFood]['rowIndex']
-            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+            let newHighlightedRowIndex = dataDict[secondThing]['rowIndex']
+            let newHighlightedRow = table.rows[newHighlightedRowIndex]
             let fakeEvent = {'target': newHighlightedRow}
             highlightStatsRow(fakeEvent)
         }
@@ -558,24 +600,45 @@ const mergeFoodsHandler = (event) => mergeFoods(event)
 
 function resetMergeMode(stillInMergeMode, headerText) {
     mergeMode = stillInMergeMode
+    
+    let mergeButton
+    let cancelMergeButton
+    let editButton
+    let mergeHeader
+    let mergeBody
+
+    if ( activeTab =='food' ) {
+        mergeButton = foodMergeButton
+        cancelMergeButton = foodCancelMergeButton
+        editButton = foodEditButton
+        mergeHeader = foodStatsMergeHeader
+        mergeBody = foodStatsMergeBody
+    } else {
+        mergeButton = categoryMergeButton
+        cancelMergeButton = categoryCancelMergeButton
+        editButton = categoryEditButton
+        mergeHeader = categoryStatsMergeHeader
+        mergeBody = categoryStatsMergeBody
+    }
+    
     if (!stillInMergeMode) {
         // Remove cancel button and show edit button again
-        foodCancelMergeButton.style.display = 'none'
+        cancelMergeButton.style.display = 'none'
         if (highlightedStatsRow) {
-            foodEditButton.style.display = ''
+            editButton.style.display = ''
         }
     }
-    foodStatsMergeHeader.innerText = ''
+    mergeHeader.innerText = ''
     if (highlightedMergeRow) {
         highlightedMergeRow.classList.remove('highlight_merge')
         highlightedMergeRow = null
     }
-    foodStatsMergeHeader.innerText = headerText
-    foodStatsMergeBody.innerHTML = ''
-    foodMergeButton.classList.remove('merge_selected')
-    foodMergeButton.innerText = defaultMergeButtonText
-    foodMergeButton.removeEventListener('click', mergeFoodsHandler)
-    foodMergeButton.addEventListener('click', enterMergeMode)
+    mergeHeader.innerText = headerText
+    mergeBody.innerHTML = ''
+    mergeButton.classList.remove('merge_selected')
+    mergeButton.innerText = defaultMergeButtonText
+    mergeButton.removeEventListener('click', mergeFoodsHandler)
+    mergeButton.addEventListener('click', enterMergeMode)
 }
 
 async function deleteFood() {
@@ -616,43 +679,131 @@ async function deleteFood() {
     }
 }
 
+async function deleteCategory() {
+    let categoryName = highlightedStatsRow.getAttribute('data-category')
+    let confirmText = `Are you sure you want to delete "${categoryName}"? No foods are assigned it nothing will be impacted.`
+    let confirmDelete = confirm(confirmText)
+    if (confirmDelete) {
+        categoryDeleteButton.innerText = 'Deleting...'
+        categoryDeleteButton.setAttribute('disabled', true)
+        let apiSuccess = await fetch(`${currentUrlDomain}/delete_category/`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                category_name: categoryName,
+            })
+        })
+        .then(function(response) {
+            if (! response.status == 200) {
+                console.log("d'oh!")
+                return false
+            } else {
+                return true
+            }
+        })
+
+        if ( apiSuccess ) {
+            await searchFilter()
+
+            categoryDeleteButton.innerText = 'Delete food'
+            categoryDeleteButton.removeAttribute('disabled')
+            // This is my cheater way of resetting the highlighting variables and stats table.
+            let fakeEvent = {'target': highlightedStatsRow}  // this row doesn't exist in the table anymore, but I still have it in this variable!
+            highlightStatsRow(fakeEvent)
+        }
+    }
+}
+
 function highlightMergeRow(event) {
     targetElement = event.target
+    let inputNodeNames = ['TEXTAREA', 'SELECT', 'SPAN', 'LABEL']
     if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
         targetElement = targetElement.parentNode
-    } else if (targetElement.nodeName == "TEXTAREA") {
+    } else if (inputNodeNames.includes(targetElement.nodeName)) {
         targetElement = targetElement.parentNode.parentNode
     }
+
+    let defaultHeaderText
+    let badMergeTooltip
+    let mergeButton
+    let mergeHeader
+    let mergeBody
+    let statsTemplate
+    let emptyStatsTemplate
+
+    if ( activeTab=='food' ) {
+        defaultHeaderText = defaultFoodMergeHeaderText
+        badMergeTooltip = foodBadMergeTooltip
+        mergeButton = foodMergeButton
+        mergeHeader = foodStatsMergeHeader
+        mergeBody = foodStatsMergeBody
+        statsTemplate = foodStatsTemplate
+        emptyStatsTemplate = emptyFoodStatsTemplate
+    } else {
+        defaultHeaderText = defaultCategoryMergeHeaderText
+        badMergeTooltip = categoryBadMergeTooltip
+        mergeButton = categoryMergeButton
+        mergeHeader = categoryStatsMergeHeader
+        mergeBody = categoryStatsMergeBody
+        statsTemplate = categoryStatsTemplate
+        emptyStatsTemplate = emptyCategoryStatsTemplate
+    }
+
     if (highlightedMergeRow == targetElement) {
         // If clicking the already-highlighted row, un-highlight it and remove stats
-        resetMergeMode(true, defaultFoodMergeHeaderText)
+        resetMergeMode(true, defaultHeaderText)
     } else if (highlightedStatsRow == targetElement) {
         // Clicked the stats row, which is highlighted blue. You can't merge into yourself!
         // showAndHideTooltip is defined in tooltip.js
 
-        foodBadMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
-        foodBadMergeTooltip.style.top = `${targetElement.offsetTop + 330}px`;
-        showAndHideTooltip(foodBadMergeTooltip)
+        badMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
+        badMergeTooltip.style.top = `${targetElement.offsetTop + 330}px`;
+        showAndHideTooltip(badMergeTooltip)
     } else {
         if (highlightedMergeRow) {
             // Un-highlight the different row
             highlightedMergeRow.classList.remove('highlight_merge')
         }
         // Modify merge button to indicate we're ready to merge
-        foodMergeButton.classList.add('merge_selected')
-        foodMergeButton.innerText = 'Merge foods'
-        foodMergeButton.addEventListener('click', mergeFoodsHandler)
+        mergeButton.classList.add('merge_selected')
+        mergeButton.innerText = 'Merge foods'
+        mergeButton.addEventListener('click', mergeFoodsHandler)
         
+
+
         // Highlight and set stats for this row
         targetElement.classList.add('highlight_merge')
         highlightedMergeRow = targetElement
-        let food = targetElement.getAttribute('data-food')
-        let category = targetElement.getAttribute('data-category')
-        let recipes = Array.from(foodDataDict[food]['recipes'])
-        let recipeHTML = recipes.map(rec => `<li><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`)
-        foodStatsMergeHeader.innerText = `${category}: ${food}`
-        foodStatsMergeBody.innerHTML = foodStatsTemplate.replace('{food}',food).replace('{category}',category).replace('{statsList}',recipeHTML)
+
+        let food
+        let category
+        let statsList
+        if ( activeTab=='food' ) {
+            food = targetElement.getAttribute('data-food')
+            category = targetElement.getAttribute('data-category')
+            statsList = Array.from(foodDataDict[food]['recipes'])
+            mergeHeader.innerText = `${category}: ${food}`;
+            if ( statsList.length > 0 ) {
+                let listItemHTML = statsList.map(rec => `<li style="padding-bottom: 10px;"><a href="${currentUrlDomain}/recipe/${rec.clean_key}">${rec.title}</a></li>`).join('');
+                mergeBody.innerHTML = statsTemplate.replace('{statsList}', listItemHTML);
+            }
+        } else {
+            category = targetElement.getAttribute('data-category')
+            statsList = Array.from(categoryDataDict[category]['foods'])
+            mergeHeader.innerText = category;
+            if ( statsList.length > 0 ) {
+                let listItemHTML = statsList.map(food => `<li style="padding-bottom: 5px;">${food}</li>`).join('');
+                mergeBody.innerHTML = statsTemplate.replace('{statsList}', listItemHTML);
+            }
+        }
+
+        if ( statsList.length == 0 ) {
+            mergeBody.innerHTML = emptyStatsTemplate;
+        }
     }
 }
 
@@ -674,14 +825,18 @@ async function searchFilter() {
 
     let foodNameSearchValue = foodNameSearch.value
     let foodCategorySearchValue = foodCategorySearch.value
+    let categoryNameSearchValue = categoryNameSearch.value
     let noCategorySearchValue = noCategorySearch.checked
     let noRecipeSearchValue = noRecipeSearch.checked
+    let noFoodSearchValue = noFoodSearch.checked
 
     let params = {
-        name: foodNameSearchValue,
-        category: foodCategorySearchValue,
+        food_name: foodNameSearchValue,
+        food_category: foodCategorySearchValue,
+        category_name: categoryNameSearchValue,
         no_category: noCategorySearchValue,
         no_recipe: noRecipeSearchValue,
+        no_food: noFoodSearchValue,
     }
 
     // Format params as URL query string
@@ -691,10 +846,22 @@ async function searchFilter() {
 
     console.log(`Performing GET with params: ${param_string}`)
 
-    await reloadFoodCategoryTable(param_string)
+    await reloadDataTables(param_string)
 
     // searchFilterWithTimeout may set us to "searching" status
     foodCategoryTable.classList.remove('searching') 
+    categoryTable.classList.remove('searching') 
+
+    let dataDict
+    let table
+
+    if ( activeTab == 'food' ) {
+        dataDict = foodDataDict
+        table = foodCategoryTable
+    } else {
+        dataDict = categoryDataDict
+        table = categoryTable
+    }
     
     // If in merge mode, preserve the original highlighted row even if it's
     // not in the search results - in other words, always show the stats and don't
@@ -702,10 +869,10 @@ async function searchFilter() {
     // results, its stats stay visible. When it appears back in the search results,
     // highlight it again.
     if ( mergeMode && highlightedStatsRow ) {
-        let oldHighlightedFoodName = highlightedStatsRow.getAttribute('data-food')
-        if ( oldHighlightedFoodName in foodDataDict ) {
-            let newHighlightedRowIndex = foodDataDict[oldHighlightedFoodName]['rowIndex']
-            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+        let oldHighlightedRowName = highlightedStatsRow.getAttribute(`data-${activeTab}`)
+        if ( oldHighlightedRowName in dataDict ) {
+            let newHighlightedRowIndex = dataDict[oldHighlightedRowName]['rowIndex']
+            let newHighlightedRow = table.rows[newHighlightedRowIndex]
             let fakeEvent = {'target': newHighlightedRow}
             highlightStatsRow(fakeEvent)
         }
@@ -714,10 +881,10 @@ async function searchFilter() {
     // If in merge mode and have selected a merge highlight row
     // Un-highlight the merge row if it's no longer in the search results
     if ( mergeMode && highlightedMergeRow ) {
-        let oldHighlightedFoodName = highlightedMergeRow.getAttribute('data-food')
-        if ( oldHighlightedFoodName in foodDataDict ) {
-            let newHighlightedRowIndex = foodDataDict[oldHighlightedFoodName]['rowIndex']
-            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+        let oldHighlightedRowName = highlightedMergeRow.getAttribute(`data-${activeTab}`)
+        if ( oldHighlightedRowName in dataDict ) {
+            let newHighlightedRowIndex = dataDict[oldHighlightedRowName]['rowIndex']
+            let newHighlightedRow = table.rows[newHighlightedRowIndex]
             let fakeEvent = {'target': newHighlightedRow}
             highlightMergeRow(fakeEvent)
         } else {
@@ -730,10 +897,10 @@ async function searchFilter() {
     // If NOT in merge mode and just have a highlighted stats row
     // Un-highlight the stats row if it's no longer in the search results
     if ( ! mergeMode && highlightedStatsRow ) {
-        let oldHighlightedFoodName = highlightedStatsRow.getAttribute('data-food')
-        if ( oldHighlightedFoodName in foodDataDict ) {
-            let newHighlightedRowIndex = foodDataDict[oldHighlightedFoodName]['rowIndex']
-            let newHighlightedRow = foodCategoryTable.rows[newHighlightedRowIndex]
+        let oldHighlightedRowName = highlightedStatsRow.getAttribute(`data-${activeTab}`)
+        if ( oldHighlightedRowName in dataDict ) {
+            let newHighlightedRowIndex = dataDict[oldHighlightedRowName]['rowIndex']
+            let newHighlightedRow = table.rows[newHighlightedRowIndex]
             let fakeEvent = {'target': newHighlightedRow}
             highlightStatsRow(fakeEvent)
         } else {
@@ -766,10 +933,20 @@ async function searchFilterWithTimeout() {
     const timeoutDuration = 300; // Set your desired timeout in milliseconds
   
     const { result, timedOut, error } = await executeWithTimeout(searchFilter(), timeoutDuration);
-  
+    
+    let resultCount
+    let table
+    if ( activeTab == 'food' ) {
+        resultCount = foodResultCount
+        table = foodCategoryTable
+    } else {
+        resultCount = categoryResultCount
+        table = categoryTable
+    }
+
     if (timedOut) {
-        foodResultCount.innerText = 'Searching...'
-        foodCategoryTable.classList.add('searching')
+        resultCount.innerText = 'Searching...'
+        table.classList.add('searching')
     }
 }
   
@@ -803,3 +980,4 @@ foodCategorySearch.addEventListener("input", searchFilterWithTimeout)
 noCategorySearch.addEventListener("input", searchFilterWithTimeout)
 noRecipeSearch.addEventListener("input", searchFilterWithTimeout)
 categoryNameSearch.addEventListener("input", searchFilterWithTimeout)
+noFoodSearch.addEventListener("input", searchFilterWithTimeout)
