@@ -12,6 +12,10 @@ let originalCategoryValue = null
 
 // Tab-dependent variables
 let activeTab
+let tooltipOffsets = {
+    'food': 800,
+    'category': 610,
+}
 
 // Food tab objects
 let foodCategoryTable = document.getElementById('foods_categories_table')
@@ -359,8 +363,8 @@ async function submitEdits() {
             editButton.removeAttribute('disabled')
             
             tooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
-            tooltip.style.top = `${highlightedStatsRow.offsetTop + 330}px`;
-            tooltip.innerText = tooltip.innerText.replace('{food}', nameInput.value)
+            tooltip.style.top = `${highlightedStatsRow.offsetTop + tooltipOffsets[activeTab]}px`;
+            tooltip.innerText = tooltip.innerText.replace('{this}', nameInput.value)
 
             showAndHideTooltip(tooltip, 5000)
             return false
@@ -769,7 +773,7 @@ function highlightMergeRow(event) {
         // showAndHideTooltip is defined in tooltip.js
 
         badMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
-        badMergeTooltip.style.top = `${targetElement.offsetTop + 330}px`;
+        badMergeTooltip.style.top = `${targetElement.offsetTop + tooltipOffsets[activeTab]}px`;
         showAndHideTooltip(badMergeTooltip)
     } else {
         if (highlightedMergeRow) {
