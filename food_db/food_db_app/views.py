@@ -721,6 +721,24 @@ def swap_ingredient_category_order_numbers(request):
         return HttpResponseNotAllowed(permitted_methods=['POST'])
 
 @csrf_exempt
+def merge_food_categories(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        category_to_merge = FoodCategory.objects.get(name=data['category_to_merge'])
+        category_to_keep = FoodCategory.objects.get(name=data['category_to_keep'])
+        foods_to_update = Food.objects.filter(food_category__name=category_to_merge.name)
+        for food in foods_to_update:
+            assert food.food_category == category_to_merge
+            food.food_category = category_to_keep
+            food.save()
+        
+        category_to_merge.delete()
+        
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
 def merge_foods(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -739,12 +757,36 @@ def merge_foods(request):
         return HttpResponseNotAllowed(permitted_methods=['POST'])
     
 @csrf_exempt
+def delete_food_category(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        cat = FoodCategory.objects.get(name=data['category_name'])
+        cat.delete()
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+    
+@csrf_exempt
 def delete_food(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         food = Food.objects.get(name=data['food_name'])
         food.delete()
         return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+    
+@csrf_exempt
+def edit_food_category(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        cat = FoodCategory.objects.get(name=data['original_category_name'])
+        cat.name = data['new_category_name']
+        try:
+            cat.save()
+            return HttpResponse(status=200)
+        except IntegrityError:
+            return HttpResponse(status=406)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
     
