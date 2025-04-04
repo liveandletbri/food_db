@@ -153,17 +153,8 @@ def add_recipe(request):
         total_step_count = extra_step_count + 1
         create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
 
-        # Adding a new tag does not require the form to be valid
-        if create_recipe_form.data.get('new_tag'):
-            
-            tag_instance = Tag(name=create_recipe_form.data['new_tag'])
-            tag_instance.save()
-
-            # Refresh the page
-            return HttpResponseRedirect(reverse('add_recipe'))
-
         # Check if the form is valid:
-        elif create_recipe_form.is_valid():
+        if create_recipe_form.is_valid():
             # Parse servings field into the two model fields
             (servings_min, servings_max) = create_recipe_form.cleaned_data['servings']
             create_recipe_form.cleaned_data.pop('servings')
@@ -652,6 +643,17 @@ def manage_food(request):
     }
     return render(request, 'manage_food.html', context)
 
+
+@csrf_exempt
+def add_tag(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        tag_instance = Tag(name=data['tag_name'])
+        tag_instance.save()
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
 
 @csrf_exempt
 def ingredient_parse_api(request):

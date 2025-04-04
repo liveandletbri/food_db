@@ -32,6 +32,7 @@ urlpatterns = [
     path('search/', views.search, name='search'),
 
     # apis
+    path('add_tag/', views.add_tag, name='add_tag'),
     path('cook/', views.cook_meal, name='cook_meal'),
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
     path('delete_food_category/', views.delete_food_category, name='delete_food_category'),
