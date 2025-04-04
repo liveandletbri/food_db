@@ -220,16 +220,11 @@ button.form_mod_button {
 textarea.default_text {
     color: gray;
 }
-.form_validate_tooltip {
+.tooltip {
     /* display: none; */
-    background: #d65f5f;
-    color: white;
-    margin: -20px;
-    margin-left: 100px;
     font-weight: 500;
     border-radius: 15px;
     padding: 10px;
-    position: absolute;
     z-index: 1;
     text-align: center;
     max-width: 350px;
@@ -240,11 +235,41 @@ textarea.default_text {
     -o-transition: opacity 1s;
     transition: opacity 1s;
 }
-.form_validate_tooltip.visible {
+.tooltip.visible {
     opacity: 80%;
-    /* display: block; */
     z-index: 1000;
 }
+.form_validate_tooltip {
+    background: #d65f5f;
+    color: white;
+    margin: -20px;
+    margin-left: 100px;
+    position: absolute;
+}
+.cooking_mode_tooltip {
+    background: #3cc382;
+    color: white;
+    position: fixed;
+    bottom: 30px;
+}
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    .cooking_mode_tooltip {
+        /* Right align */
+        right: 30px;
+        max-width: 200px;
+    }
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    .cooking_mode_tooltip {
+        /* Centered */
+        left: 50%;
+        transform: translate(-50%, 0);
+        width: 350px;
+    }
+}
+
 textarea,
 input[type="text"],
 input[type="number"],

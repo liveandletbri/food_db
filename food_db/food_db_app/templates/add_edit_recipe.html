@@ -50,49 +50,49 @@
             <td class="recipe_summary_label">{{create_recipe_form.title.label}}</td>
             <td>
                 {{create_recipe_form.title}}
-                <span id="title_tooltip" class="form_validate_tooltip">You must enter a unique title with at least 4 alphanumeric characters</span>
+                <span id="title_tooltip" class="form_validate_tooltip tooltip">You must enter a unique title with at least 4 alphanumeric characters</span>
             </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.url.label}}</td>
             <td>
                 {{create_recipe_form.url}}
-                <span id="url_tooltip" class="form_validate_tooltip">This needs to be a valid URL</span>
+                <span id="url_tooltip" class="form_validate_tooltip tooltip">This needs to be a valid URL</span>
             </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.recipe_book.label}}</td>
             <td>
                 {{create_recipe_form.recipe_book}}
-                <span id="recipe_book_tooltip" class="form_validate_tooltip">You gotta specify either at least one ingredient and one step, <i>or</i> a recipe book and page</span>
+                <span id="recipe_book_tooltip" class="form_validate_tooltip tooltip">You gotta specify either at least one ingredient and one step, <i>or</i> a recipe book and page</span>
             </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.recipe_book_page.label}}</td>
             <td>
                 {{create_recipe_form.recipe_book_page}}
-                <span id="recipe_book_page_tooltip" class="form_validate_tooltip">The page number must be a positive integer</span>
+                <span id="recipe_book_page_tooltip" class="form_validate_tooltip tooltip">The page number must be a positive integer</span>
             </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.duration_minutes.label}}</td>
             <td>
                 {{create_recipe_form.duration_minutes}}
-                <span id="duration_minutes_tooltip" class="form_validate_tooltip">The duration must be a positive integer</span>
+                <span id="duration_minutes_tooltip" class="form_validate_tooltip tooltip">The duration must be a positive integer</span>
             </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.servings.label}}</td>
             <td>
                 {{create_recipe_form.servings}}
-                <span id="servings_tooltip" class="form_validate_tooltip">Servings must either be a single integer, like "4", or a range of integers, like "5-6"</span>
+                <span id="servings_tooltip" class="form_validate_tooltip tooltip">Servings must either be a single integer, like "4", or a range of integers, like "5-6"</span>
             </td>
         </tr>
         <tr>
             <td class="recipe_summary_label">Total calories in recipe</td>
             <td>
                 {{create_recipe_form.calories_per_recipe}}
-                <span id="calories_per_recipe_tooltip" class="form_validate_tooltip">The calories must be a positive integer</span>
+                <span id="calories_per_recipe_tooltip" class="form_validate_tooltip tooltip">The calories must be a positive integer</span>
             </td>
         </tr>
         <tr>
@@ -153,7 +153,7 @@
                         <option value="{{ food }}">
                         {% endfor %}
                     </datalist>
-                    <span id="ingred_{{ forloop.counter0 }}_food_tooltip" class="form_validate_tooltip">You must specify at least one ingredient</span>
+                    <span id="ingred_{{ forloop.counter0 }}_food_tooltip" class="form_validate_tooltip tooltip">You must specify at least one ingredient</span>
                 </td>
                 <td class="ingred_body_ingredient_category" width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_ingredient_category" id="id_ingred_{{ forloop.counter0 }}_ingredient_category" value="{{ ingred.ingredient_category }}"></td>
                 <td class="ingred_body_notes" width="20%"><input type="text" name="ingred_{{ forloop.counter0 }}_notes" id="id_ingred_{{ forloop.counter0 }}_notes" value="{{ ingred.notes }}"></td>
@@ -185,7 +185,7 @@
             <div class="step-form">
                 <td class="step-textbox">
                     <textarea name="step_{{ forloop.counter0 }}_description" id="id_step_{{ forloop.counter0 }}_description">{{ step.description }}</textarea>
-                    <span id="step_{{ forloop.counter0 }}_description_tooltip" class="form_validate_tooltip">You must specify at least one recipe step</span>
+                    <span id="step_{{ forloop.counter0 }}_description_tooltip" class="form_validate_tooltip tooltip">You must specify at least one recipe step</span>
                 </td>
                 <td class="step_row_buttons"><a style="cursor: pointer;" onmouseover="">
                     <img class="delete_step_button" src="{% static 'img/x-icon.svg' %}" width="20" height="20" title="Delete step"/>
