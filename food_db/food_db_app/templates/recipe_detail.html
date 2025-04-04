@@ -2,6 +2,14 @@
 {% load markdown %}
 {% load static %}
 {% block content %}
+<video style="display: none;" id="video_empty">
+    <source src="{% static 'video/empty.mp4' %}" type="video/mp4">
+</video>
+<div id="cooking_mode_container" class="cooking_mode_tooltip tooltip visible">
+    <span id="cooking_mode_title" style="font-size: 20px; font-weight: 900;">Enable Cooking Mode</span>
+    <br>
+    <span id="cooking_mode_subtitle" style="font-size: 15px;"></span>
+</div>
 <table>
     <tr>
         <td>
@@ -152,7 +160,7 @@
     </table>
 
     <h2>Steps</h2>
-    <table>
+    <table id="steps_table">
         {% for step in steps %}
             <tr>
                 <td class="step_number">{{ step.order_number }}.</td>
@@ -162,4 +170,6 @@
     </table>
 {% endif %}
 <script src="{% static 'js/drag_ingredient_categories.js' %}"></script>
+<script src="{% static 'js/tooltip.js' %}"></script>
+<script src="{% static 'js/cooking_mode.js' %}"></script>
 {% endblock content %}

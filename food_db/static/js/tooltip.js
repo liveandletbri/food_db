@@ -1,9 +1,9 @@
 function hideToolTip(tooltip) {
-    tooltip.className = "form_validate_tooltip"
+    tooltip.classList.remove('visible')
 }
 
 function showToolTip(tooltip) {
-    tooltip.className = "form_validate_tooltip visible"
+    tooltip.classList.add('visible')
 }
 
 function showAndHideTooltip(tooltip, duration) {
