@@ -41,20 +41,7 @@ async function exitCookingMode() {
     cookingModeContainer.addEventListener('click', enterCookingModeHandler)
 }
 
-function highlightOnHover() {
-    cookingModeContainer.style.background = '#86f9c1'
-    cookingModeContainer.style.color = '#161616'
-    
-}
-function unHighlightOnExit() {
-    cookingModeContainer.style.background = '#3cc382'
-    cookingModeContainer.style.color = 'white'
-}
-
-
 const enterCookingModeHandler = () => enterCookingMode()
 const exitCookingModeHandler = () => exitCookingMode()
 
-cookingModeContainer.addEventListener('mouseenter', highlightOnHover)
-cookingModeContainer.addEventListener('mouseleave', unHighlightOnExit)
 cookingModeContainer.addEventListener('click', enterCookingModeHandler)

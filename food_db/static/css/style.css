@@ -259,6 +259,10 @@ textarea.default_text {
         right: 30px;
         max-width: 200px;
     }
+    .cooking_mode_tooltip:hover {
+        background: #86f9c1;
+        color: #161616;
+    }
 }
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
@@ -267,6 +271,10 @@ textarea.default_text {
         left: 50%;
         transform: translate(-50%, 0);
         width: 350px;
+    }
+    .cooking_mode_tooltip:active {
+        background: #86f9c1;
+        color: #161616;
     }
 }
 
