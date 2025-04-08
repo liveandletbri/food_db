@@ -154,6 +154,14 @@ async function validateAddRecipe(e) {
 
     // Submit if all clear!
     if (invalid == false) {
+        
+        if (currentUrl.endsWith('/add')) {
+            submitRecipeButton.innerText = 'Adding...'
+        } else {
+            submitRecipeButton.innerText = 'Updating...'
+        }
+        submitRecipeButton.style.backgroundColor = 'lightgray'
+        submitRecipeButton.style.opacity = 0.25
         form.submit()
     }
 }
