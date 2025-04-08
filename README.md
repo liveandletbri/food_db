@@ -92,18 +92,17 @@ for recipe in all_recipes:
 ### Python
 If you want to run code locally, I recommend [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) to get the virtual environment set up. However, I prefer to run everything inside the Docker container using something like `docker exec -it food-db-django bash`.
 ```
-cd food_db/food_db
 pyenv install 3.11.9
+
+cd food_db/food_db
 pyenv virtualenv 3.11.9 food-db-3.11.9
 pyenv local food-db-3.11.9
-pip install --upgrade pip
-pip install -r django-requirements.txt
+uv pip install -r django-requirements.txt
 
 cd ../ingredient_parse
 pyenv virtualenv 3.11.9 ingredient-parse-3.11.9
 pyenv local ingredient-parse-3.11.9
-pip install --upgrade pip 
-pip install -r ingred-requirements.txt
+uv pip install -r ingred-requirements.txt
 ```
 
 When returning later, activate the environment with `pyenv activate food-db-3.11.9`

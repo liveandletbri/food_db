@@ -5,8 +5,11 @@ WORKDIR /app
 # Copy the application code
 COPY . .
 
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Install Python dependencies
-RUN pip install --no-cache-dir -r django-requirements.txt
+RUN uv pip install --no-cache-dir --system -r django-requirements.txt
 
 # Set Python path for easier imports
 ENV PYTHONPATH=/app/food_db_app:/app
