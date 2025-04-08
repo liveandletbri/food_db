@@ -3,6 +3,7 @@ import re
 import requests
 
 from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
 from django.db import transaction
 from django.db.utils import IntegrityError
@@ -17,6 +18,9 @@ from .filters import RecipeTextFilter, FoodTextFilter, FoodCategoryTextFilter
 from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory, FoodCategory
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
+
+LAST_DEBUG_LOG_START_TIME = None
+LAST_DEBUG_LOG_TIME = None
 
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
@@ -53,6 +57,23 @@ def remove_dupes_preserve_order(sequence):
     while preserving the order in which they first appeared.'''
     seen = set()
     return [x for x in sequence if x not in seen and not seen.add(x)]
+
+def log_debug_message(message, restart_timer=False):
+    now = datetime.now()
+    global LAST_DEBUG_LOG_START_TIME
+    global LAST_DEBUG_LOG_TIME
+    if not LAST_DEBUG_LOG_START_TIME or restart_timer:
+        LAST_DEBUG_LOG_START_TIME = now
+        LAST_DEBUG_LOG_TIME = now
+        diff_from_start = 0
+        diff_from_last = 0
+        print(f'START - {message}')
+    else:
+        diff_from_start = (now - LAST_DEBUG_LOG_START_TIME).total_seconds()
+        diff_from_last = round((now - LAST_DEBUG_LOG_TIME).total_seconds() * 1000)
+        print(f'{diff_from_last} ms from last - {diff_from_start} sec from start - {message}')
+    
+    LAST_DEBUG_LOG_TIME = now
 
 # Create your views here.
 def index(request):
@@ -139,12 +160,14 @@ def recipe_detail(request, key):
     return render(request, 'recipe_detail.html', context)
 
 def add_recipe(request):
+    log_debug_message('add_recipe() called', restart_timer=True)
     existing_foods = [food.name for food in Food.objects.all()]
     existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
     existing_books = [book.name for book in RecipeBook.objects.all()]
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
+        log_debug_message('is POST')
         # Create a form instance and populate it with data from the request (binding):
         extra_ingred_count = int(request.POST.get('extra_ingred_count'))
         total_ingred_count = extra_ingred_count + 1
@@ -153,8 +176,11 @@ def add_recipe(request):
         total_step_count = extra_step_count + 1
         create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
 
+        log_debug_message('is valid?')
+
         # Check if the form is valid:
         if create_recipe_form.is_valid():
+            log_debug_message('is valid.')
             # Parse servings field into the two model fields
             (servings_min, servings_max) = create_recipe_form.cleaned_data['servings']
             create_recipe_form.cleaned_data.pop('servings')
@@ -176,6 +202,8 @@ def add_recipe(request):
                 notes=create_recipe_form.cleaned_data.get('notes'),
             )
 
+            log_debug_message('made recipe instance')
+
             recipe_book_title = create_recipe_form.cleaned_data['recipe_book']
             if recipe_book_title != '':
                 try:
@@ -190,17 +218,23 @@ def add_recipe(request):
                 
             recipe_instance.save()
 
+            log_debug_message('saved book')
+
             # Extract tags from form data and create the relationship from tag -> recipe
             tags = request.POST.getlist('tag')
             
             if tags:
+                # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
                 for tag in tags:
                     tag_instance = Tag.objects.get(name=tag)
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
+            
+            log_debug_message('saved tags')
 
             recipe_images = request.FILES.getlist('images')
             if recipe_images:
+                # Using a for loop instead of bulk_create to ensure RecipeImage.save() is triggered
                 for recipe_image in recipe_images:
                     recipe_image_instance = RecipeImage(
                         recipe=recipe_instance,
@@ -208,13 +242,21 @@ def add_recipe(request):
                     )
                     recipe_image_instance.save()
 
+            log_debug_message('saved pics')
+
             # Establish ingredient categories
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
             ingredient_categories = remove_dupes_preserve_order([create_recipe_form.cleaned_data[f'{ingred_id_prefix}_ingredient_category'] or '' for ingred_id_prefix in sorted(ingredient_ids)])
 
-            # For each ingredient in the form
-            for ingred_id_prefix in sorted(ingredient_ids):
-                if create_recipe_form.cleaned_data['ingred_0_food'] != '':  # ingredients were entered for this recipe
+            ingredient_instances = []
+            step_instances = []
+
+            if create_recipe_form.cleaned_data['ingred_0_food'] != '':  # ingredients were entered for this recipe
+                # For each ingredient in the form
+                for ingred_id_prefix in sorted(ingredient_ids):
+                    
+                    log_debug_message(f'start ingredient {ingred_id_prefix}')
+
                     # Gather ingredients fields together
                     ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
@@ -265,24 +307,30 @@ def add_recipe(request):
                         ingredient_category=ingredient_category_instance,
                         notes=ingred.get('notes', ''),
                     )
-                    ingredient_instance.save()
+                    ingredient_instances.append(ingredient_instance)
+                
+                Ingredient.objects.bulk_create(ingredient_instances)
 
-            # Now, for each step
-            step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
-            for i, step_id_prefix in enumerate(sorted(step_ids)):
-                if create_recipe_form.cleaned_data['step_0_description'] != '':  # steps were entered for this recipe
+            if create_recipe_form.cleaned_data['step_0_description'] != '':  # steps were entered for this recipe
+                # Now, for each step
+                step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
+                for i, step_id_prefix in enumerate(sorted(step_ids)):
                     step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                     step_instance = RecipeStep(
                         recipe=recipe_instance,
                         order_number=i,
                         description=step_description,
                     )
-                    step_instance.save()
+                    step_instances.append(step_instance)
+                
+                RecipeStep.objects.bulk_create(step_instances)
+            log_debug_message(f'finished steps')
 
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
                 s3.upload_recipe(recipe_instance)
+                log_debug_message(f'uploaded to S3')
 
             # redirect to a new URL:
             return redirect('recipe_detail', key=clean_key)
@@ -351,10 +399,12 @@ def search(request):
 
 
 def edit_recipe(request, key):
+    log_debug_message('edit_recipe() called', restart_timer=True)
     recipe_instance = get_object_or_404(Recipe, clean_key=key)
 
     # If this is a POST request then process the Form data similarly to an add_recipe request, 
     if request.method == 'POST':
+        log_debug_message('is POST')
         # Create a form instance and populate it with data from the request (binding):
         extra_ingred_count = int(request.POST.get('extra_ingred_count'))
         total_ingred_count = extra_ingred_count + 1
@@ -362,6 +412,8 @@ def edit_recipe(request, key):
         extra_step_count = int(request.POST.get('extra_step_count'))
         total_step_count = extra_step_count + 1
         create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
+
+        log_debug_message('is valid?')
 
         # Adding a new tag does not require the form to be valid
         if create_recipe_form.data.get('new_tag'):
@@ -374,6 +426,7 @@ def edit_recipe(request, key):
 
         # Check if the form is valid:
         elif create_recipe_form.is_valid():
+            log_debug_message('is valid.')
             
             # Parse servings field into the two model fields
             (servings_min, servings_max) = create_recipe_form.cleaned_data['servings']
@@ -393,6 +446,8 @@ def edit_recipe(request, key):
             recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
 
+            log_debug_message('made recipe instance')
+
             if servings_min:
                 recipe_instance.servings_min=servings_min
                 recipe_instance.servings_max=servings_max
@@ -409,22 +464,32 @@ def edit_recipe(request, key):
 
             recipe_instance.save()
 
+            log_debug_message('saved book')
+
             # Remove any existing tags from the recipe
+            # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
             existing_tags = Tag.objects.filter(recipes=recipe_instance)
             for tag in existing_tags:
                 tag.recipes.remove(recipe_instance)
                 tag.save()
             
+            log_debug_message('removed tags')
+            
             # Extract tags from form data and create new relationships from tag -> recipe
+            # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
             tags = request.POST.getlist('tag')
             if tags:
                 for tag in tags:
                     tag_instance = Tag.objects.get(name=tag)
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
+            
+            log_debug_message('saved tags')
 
-            # only adding images here, not deleting any
+            # Only adding images here, not deleting any
+            # Using a for loop instead of bulk_create to ensure RecipeImage.save() is triggered
             recipe_images = request.FILES.getlist('images')
+            recipe_image_instances = []
             if recipe_images:
                 for recipe_image in recipe_images:
                     recipe_image_instance = RecipeImage(
@@ -433,16 +498,17 @@ def edit_recipe(request, key):
                     )
                     recipe_image_instance.save()
 
+            log_debug_message('saved pics')
+
             # Remove any existing ingredients from the recipe
-            existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance)
-            for ingred in existing_ingreds:
-                ingred.delete()
+            existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance).delete()
             existing_ingred_categories = IngredientCategory.objects.filter(recipe=recipe_instance)
             # Before deleting the ingredient categories, preserve their orders
             existing_ingred_category_orders = {cat.name: cat.order_number for cat in existing_ingred_categories}
             # Now we can delete them
-            for cat in existing_ingred_categories:
-                cat.delete()
+            existing_ingred_categories.delete()
+
+            log_debug_message('removed ingreds and categories')
 
             # Establish ingredient categories and assign their order values
             ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}  # Creates a distinct set of ingredient ID prefixes, e.g. {ingred_0, ingred_1}
@@ -456,8 +522,15 @@ def edit_recipe(request, key):
                 else:
                     ingred_category_orders[category] = len(existing_ingred_category_orders) + i
 
+            log_debug_message('mapped ingred category numbers')
+
+            ingredient_instances = []
+
             # For each ingredient in the form
             for ingred_id_prefix in sorted(ingredient_ids):
+                    
+                log_debug_message(f'start ingredient {ingred_id_prefix}')
+
                 # Gather ingredients fields together
                 ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
@@ -499,7 +572,7 @@ def edit_recipe(request, key):
                 else:
                     ingredient_category_instance = IngredientCategory.objects.get(recipe=recipe_instance, name=category_name)
                 
-                # Save ingredient
+                # Create ingredient instance
                 ingredient_instance = Ingredient(
                     food=Food.objects.get(clean_key=selected_food),
                     recipe=recipe_instance,
@@ -508,15 +581,20 @@ def edit_recipe(request, key):
                     ingredient_category=ingredient_category_instance,
                     notes=ingred.get('notes', ''),
                 )
-                ingredient_instance.save()
+                ingredient_instances.append(ingredient_instance)
+            
+            if len(ingredient_instances) > 0:
+                # Save all ingredients in a single transaction
+                Ingredient.objects.bulk_create(ingredient_instances)
+                log_debug_message('bulk-saved ingredients')
 
             # Remove any existing steps from the recipe
             existing_steps = RecipeStep.objects.filter(recipe=recipe_instance)
-            for step in existing_steps:
-                step.delete()
+            existing_steps.delete()
 
             # Now, for each step in the form
             step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
+            step_instances = []
             for i, step_id_prefix in enumerate(sorted(step_ids)):
                 step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                 step_instance = RecipeStep(
@@ -524,12 +602,19 @@ def edit_recipe(request, key):
                     order_number=i,
                     description=step_description,
                 )
-                step_instance.save()
+                step_instances.append(step_instance)
+
+            if len(step_instances) > 0:
+                # Save all steps in a single transaction
+                RecipeStep.objects.bulk_create(step_instances)
+
+            log_debug_message(f'finished steps')
 
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
                 s3.upload_recipe(recipe_instance)
+                log_debug_message(f'uploaded to S3')
 
             # redirect to a new URL:
             return redirect('recipe_detail', key=clean_key)
