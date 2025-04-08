@@ -361,6 +361,7 @@ input[type="url"] {
     font-weight: bold;
     align-content: center;
     cursor: grab;
+    max-width: 100px;
 }
 .recipe_detail_ingredient_category_td:active {
     cursor: grabbing;
