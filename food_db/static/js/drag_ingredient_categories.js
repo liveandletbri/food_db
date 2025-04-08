@@ -11,7 +11,7 @@ async function getOrderNumber(ingredientCategory) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            recipe_title: recipeTitle,  // recipeTitle is defined in cook_meal.js
+            recipe_key: currentRecipeKey,
             ingredient_category: ingredientCategory,
         })
     })
@@ -27,7 +27,7 @@ async function swapOrderNumbers(ingredientCategory1, orderNumber1, ingredientCat
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            recipe_title: recipeTitle,  // recipeTitle is defined in cook_meal.js
+            recipe_key: currentRecipeKey,
             ingredient_category_1: ingredientCategory1,
             order_number_1: orderNumber1,
             ingredient_category_2: ingredientCategory2,

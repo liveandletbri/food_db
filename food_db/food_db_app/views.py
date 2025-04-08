@@ -694,7 +694,7 @@ def delete_recipe_image(request):
 def get_ingredient_category_order_number(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        recipe = Recipe.objects.get(title=data['recipe_title'])
+        recipe = Recipe.objects.get(clean_key=data['recipe_key'])
         ingredient_category = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category'])
 
         print(f'get_ingredient_category_order_number: {ingredient_category.name} = {ingredient_category.order_number}')
@@ -706,11 +706,12 @@ def get_ingredient_category_order_number(request):
 def swap_ingredient_category_order_numbers(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        recipe = Recipe.objects.get(title=data['recipe_title'])
+        recipe = Recipe.objects.get(clean_key=data['recipe_key'])
         ingredient_category_1 = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category_1'])
         new_number_1 = data['order_number_1']
         ingredient_category_2 = IngredientCategory.objects.get(recipe=recipe, name=data['ingredient_category_2'])
         new_number_2 = data['order_number_2']
+        # This atomic function does not work with SQLite, but leaving in case I change database engines in the future
         with transaction.atomic():
             ingredient_category_1.order_number = new_number_1
             ingredient_category_2.order_number = new_number_2
