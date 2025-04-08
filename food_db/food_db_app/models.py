@@ -102,7 +102,14 @@ class IngredientCategory(models.Model):
     
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['recipe', 'name'], name='unique_recipe_ingredient_category_name'),
+            models.UniqueConstraint(
+                fields=['recipe', 'name'],
+                name='unique_recipe_ingredient_category_name',
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(name__exact='Misc'),
+                name='recipe_ingredient_category_name_not_misc',
+            ),
         ]
     recipe = models.ForeignKey(
         Recipe,

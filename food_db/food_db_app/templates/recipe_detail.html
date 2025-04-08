@@ -133,7 +133,7 @@
                                         {% endspaceless %};"
                                 >
                                     <i class="fa-solid fa-grip-vertical grip-icon"></i>
-                                    <span>&#160;&#160;&#160;{{ category }}</span>
+                                    <span>&#160;&#160;&#160;{% if category != '' %}{{ category }}{% else %}Misc{% endif %}</span>
                                 </td>
                         {% endif %}
                         {% for ingredient in ingredient_list %}
