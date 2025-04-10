@@ -155,7 +155,7 @@ async function validateAddRecipe(e) {
     // Submit if all clear!
     if (invalid == false) {
         
-        if (currentUrl.endsWith('/add')) {
+        if (currentUrl.endsWith('/add/')) {
             submitRecipeButton.innerText = 'Adding...'
         } else {
             submitRecipeButton.innerText = 'Updating...'
