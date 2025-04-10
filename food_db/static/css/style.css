@@ -258,6 +258,7 @@ textarea.default_text {
     color: white;
     position: fixed;
     bottom: 30px;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
@@ -588,4 +589,13 @@ button.merge_selected {
 }
 #cancel_edit_category_button {
     margin-bottom: 20px;
+}
+
+#ingredients_header {
+    display: flex
+}
+#copy_groceries_button {
+    margin-left: 10px;
+    margin-top: 5px;
+    background-color: #3cc382;
 }
