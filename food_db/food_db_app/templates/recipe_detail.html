@@ -98,7 +98,10 @@
     {% endif %}
 </table>
 {% if not recipe.recipe_book %}
-    <h2>Ingredients</h2>
+    <div id="ingredients_header">
+        <h2>Ingredients</h2>
+        <button type="button" id="copy_groceries_button">Copy grocery list</button>
+    </div>
     <table id="recipe_detail_ingredients_table">
         <thead><tr>
             {% if ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
