@@ -122,14 +122,22 @@ def recipe_detail(request, key):
     ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
     ingredients_have_categories = ingredient_categories != ['']
 
+    def stringify_ingredient_quantity(ingred):
+        if ingred.quantity:
+            # Apply multiplier to ingredient quantities
+            quant = str(round(ingred.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
+            # import pdb; pdb.set_trace()
+            return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
+        else:
+            return ''
+
     # Store ingredients in ingreds_by_category, where keys are the ingredient category
     ingreds_by_category = {}
     for cat in ingredient_category_instances:
         ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
         ingreds = [
             {
-                'unit_of_measurement': ingred.unit_of_measurement,
-                'quantity': ingred.quantity,
+                'quantity': stringify_ingredient_quantity(ingred),
                 'food': ingred.food,
                 'notes': ingred.notes,
                 'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
@@ -137,12 +145,6 @@ def recipe_detail(request, key):
             for ingred in ingred_instances
         ]
         ingreds_by_category[cat.name] = ingreds
-
-    # Apply multiplier to ingredient quantities
-    for ingredient_list in ingreds_by_category.values():
-        for ingredient in ingredient_list:
-            if ingredient['quantity']:
-                ingredient['quantity'] = str(round(ingredient['quantity'] * Decimal(multiplier),2)).rstrip('0').rstrip('.')
 
     # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
