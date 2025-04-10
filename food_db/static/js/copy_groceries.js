@@ -14,8 +14,13 @@ function parseIngredientsTable () {
             foodCategory = 'Other'
         }
         let food = dataCell.getAttribute('data-food')
-        let quantity = dataCell.getAttribute('data-quantity')
-        let foodQuantity = `${quantity} ${food}`
+        let quantity = dataCell.getAttribute('data-quantity').trim()
+        let foodQuantity
+        if ( quantity != '' ) {
+            foodQuantity = `${quantity} ${food}`
+        } else {
+            foodQuantity = food
+        }
 
         if ( ! (foodCategory in ingredsByCategory) ) {
             ingredsByCategory[foodCategory] = [foodQuantity]
