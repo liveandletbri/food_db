@@ -123,7 +123,6 @@
                                 ondragstart="handleDragStart(event)"
                                 class="ingredient_category_row"
                                 data-ingredient_category="{{ category }}" 
-                                data-food_category="{{ ingredient.food_category }}"
                             >
                                 <td 
                                     rowspan="{{ ingredient_list | length }}" 
@@ -147,15 +146,16 @@
                                 or (not ingredients_have_categories)
                             -->
                             {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
-                                <tr data-ingredient_category="{{ category }}" data-food_category="{{ ingredient.food_category }}">
+                                <tr data-ingredient_category="{{ category }}">
                             {% endif %}
-                                <td class="recipe_detail_ingredient_food">
-                                    {% if ingredient.quantity %}
-                                        {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
-                                    {% endif %}
-                                    {{ ingredient.food }}
+                                <td class="recipe_detail_ingredient_food">{{ ingredient.quantity }} {{ ingredient.food }}</td>
+                                <td class="recipe_detail_ingredient_notes"
+                                    data-food_category="{{ ingredient.food_category }}"
+                                    data-quantity="{{ ingredient.quantity }}" 
+                                    data-food="{{ ingredient.food }}"
+                                >
+                                    {{ ingredient.notes }}
                                 </td>
-                                <td class="recipe_detail_ingredient_notes" data-ingredient_category="{{ category }}">{{ ingredient.notes }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
