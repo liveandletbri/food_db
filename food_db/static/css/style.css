@@ -48,11 +48,18 @@ span.tag_display_label.Dessert {
     background-color: #ffa7b2;
     color: black;
 }
+span.tag_display_label.Easy.in.Bulk {
+    background-color: #00067c;
+}
 span.tag_display_label.FATBUTTWORTH {
     background-color: #000000;
 }
 span.tag_display_label.Healthy {
     background-color: #00e500;
+}
+span.tag_display_label.Marge {
+    background-color: #ab5088;
+    color: #f8fcad;
 }
 span.tag_display_label.Mexican {
     background-color: #d7083c;
