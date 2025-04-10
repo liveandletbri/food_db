@@ -123,13 +123,26 @@ def recipe_detail(request, key):
     ingredients_have_categories = ingredient_categories != ['']
 
     # Store ingredients in ingreds_by_category, where keys are the ingredient category
-    ingreds_by_category = {cat.name: list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat)) for cat in ingredient_category_instances}
+    ingreds_by_category = {}
+    for cat in ingredient_category_instances:
+        ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
+        ingreds = [
+            {
+                'unit_of_measurement': ingred.unit_of_measurement,
+                'quantity': ingred.quantity,
+                'food': ingred.food,
+                'notes': ingred.notes,
+                'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
+            }
+            for ingred in ingred_instances
+        ]
+        ingreds_by_category[cat.name] = ingreds
 
     # Apply multiplier to ingredient quantities
     for ingredient_list in ingreds_by_category.values():
         for ingredient in ingredient_list:
-            if ingredient.quantity:
-                ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
+            if ingredient['quantity']:
+                ingredient['quantity'] = str(round(ingredient['quantity'] * Decimal(multiplier),2)).rstrip('0').rstrip('.')
 
     # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')

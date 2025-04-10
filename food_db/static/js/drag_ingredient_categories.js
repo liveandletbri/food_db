@@ -43,10 +43,10 @@ async function handleDrop(e) {
         targetElement = targetElement.parentNode;   
     }  
     if (source != targetElement) {
-        let sourceCategory = source.children[0].getAttribute('data-ingredient_category')
+        let sourceCategory = source.getAttribute('data-ingredient_category')
         let sourceOrderNumber = await getOrderNumber(sourceCategory)
         console.log(`getOrderNumber: ${sourceCategory} = ${sourceOrderNumber}`)
-        let targetCategory = targetElement.children[0].getAttribute('data-ingredient_category')
+        let targetCategory = targetElement.getAttribute('data-ingredient_category')
         let targetOrderNumber = await getOrderNumber(targetCategory)
         console.log(`getOrderNumber: ${targetCategory} = ${targetOrderNumber}`)
 

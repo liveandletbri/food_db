@@ -122,6 +122,8 @@
                                 ondragover="handleDragOver(event)" 
                                 ondragstart="handleDragStart(event)"
                                 class="ingredient_category_row"
+                                data-ingredient_category="{{ category }}" 
+                                data-food_category="{{ ingredient.food_category }}"
                             >
                                 <td 
                                     rowspan="{{ ingredient_list | length }}" 
@@ -145,9 +147,9 @@
                                 or (not ingredients_have_categories)
                             -->
                             {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
-                                <tr>
+                                <tr data-ingredient_category="{{ category }}" data-food_category="{{ ingredient.food_category }}">
                             {% endif %}
-                                <td class="recipe_detail_ingredient_food" data-ingredient_category="{{ category }}">
+                                <td class="recipe_detail_ingredient_food">
                                     {% if ingredient.quantity %}
                                         {{ ingredient.quantity }} {% if ingredient.unit_of_measurement.name != '' %}{{ ingredient.unit_of_measurement }}{% if ingredient.quantity != "1" %}s{% endif %}{% endif %}
                                     {% endif %}
@@ -175,4 +177,5 @@
 <script src="{% static 'js/drag_ingredient_categories.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/cooking_mode.js' %}"></script>
+<script src="{% static 'js/copy_groceries.js' %}"></script>
 {% endblock content %}
