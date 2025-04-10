@@ -1,7 +1,7 @@
 var source;
 let currentUrl = window.location.href
 let currentUrlDomain = currentUrl.split("/recipe/")[0]
-let currentRecipeKey = currentUrl.split("/recipe/")[1]
+let currentRecipeKey = currentUrl.split("/recipe/")[1].split('?')[0]
 
 async function getOrderNumber(ingredientCategory) {
     let response = await fetch(`${currentUrlDomain}/get_ingredient_category_order_number/`, {
@@ -58,9 +58,6 @@ async function handleDrop(e) {
 
             await swapOrderNumbers(sourceCategory, newSourceOrderNumber, targetCategory, newTargetOrderNumber)
             console.log(`swapOrderNumbers: ${sourceCategory} changed to ${newSourceOrderNumber}, ${targetCategory} changed to ${newTargetOrderNumber}`)
-
-            let currentUrl = window.location.href
-            let currentRecipeKey = currentUrl.split("/recipe/")[1]
 
             let response = await fetch(`/recipe/${currentRecipeKey}`, {
                 method: "GET",
