@@ -259,6 +259,7 @@ textarea.default_text {
     position: fixed;
     bottom: 30px;
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
+    transition: opacity 0.8s;
 }
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
