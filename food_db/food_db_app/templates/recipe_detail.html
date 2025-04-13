@@ -100,7 +100,7 @@
 {% if not recipe.recipe_book %}
     <div id="ingredients_header">
         <h2>Ingredients</h2>
-        <button type="button" id="copy_groceries_button">Copy grocery list</button>
+        <button type="button" id="show_groceries_button">Show grocery list</button>
     </div>
     <table id="recipe_detail_ingredients_table">
         <thead><tr>
@@ -173,9 +173,19 @@
             </tr>
         {% endfor %}
     </table>
+    <div id="grocery_list_modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modal_text">{{ grocery_list | linebreaksbr }}</p>
+            <div class="modal-buttons">
+                <button id="select_text_button">Select Text</button>
+                <button id="close_modal_button">Close</button>
+            </div>
+        </div>
+    </div>
 {% endif %}
 <script src="{% static 'js/drag_ingredient_categories.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/cooking_mode.js' %}"></script>
-<script src="{% static 'js/copy_groceries.js' %}"></script>
+<script src="{% static 'js/show_groceries.js' %}"></script>
 {% endblock content %}
