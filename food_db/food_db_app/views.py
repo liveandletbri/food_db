@@ -122,14 +122,46 @@ def recipe_detail(request, key):
     ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
     ingredients_have_categories = ingredient_categories != ['']
 
-    # Store ingredients in ingreds_by_category, where keys are the ingredient category
-    ingreds_by_category = {cat.name: list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat)) for cat in ingredient_category_instances}
+    def stringify_ingredient_quantity(ingred):
+        if ingred.quantity:
+            # Apply multiplier to ingredient quantities
+            quant = str(round(ingred.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
+            # import pdb; pdb.set_trace()
+            return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
+        else:
+            return ''
 
-    # Apply multiplier to ingredient quantities
-    for ingredient_list in ingreds_by_category.values():
-        for ingredient in ingredient_list:
-            if ingredient.quantity:
-                ingredient.quantity = str(round(ingredient.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
+    # Store ingredients in ingreds_by_category, where keys are the ingredient category
+    ingreds_by_category = {}
+    for cat in ingredient_category_instances:
+        ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
+        ingreds = [
+            {
+                'quantity': stringify_ingredient_quantity(ingred),
+                'food': ingred.food.name,
+                'notes': ingred.notes,
+                'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
+            }
+            for ingred in ingred_instances
+        ]
+        ingreds_by_category[cat.name] = ingreds
+    
+    # Assemble grocery list (foods by food category)
+    grocery_list_dict = defaultdict(list)
+    for ingred_list in ingreds_by_category.values():
+        for ingred in ingred_list:
+            grocery_list_dict[ingred['food_category']].append(ingred)
+    
+    # convert grocery list dictionary into string
+    grocery_list_str = ''
+    for i, (food_category, ingred_list) in enumerate(grocery_list_dict.items()):
+        if food_category == '':
+            food_category = 'Unknown'
+        grocery_list_str += f'{food_category}:\n'
+        grocery_list_str += '\n'.join([f'- {ingred["quantity"] + " " if ingred["quantity"] != "" else ""}{ingred["food"]}' for ingred in ingred_list])
+        # add double line breaks on all but final food category
+        if i < len(grocery_list_dict) - 1:
+            grocery_list_str += '\n\n'
 
     # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
@@ -152,6 +184,7 @@ def recipe_detail(request, key):
         'ingredients_have_categories': ingredients_have_categories,
         'ingredient_categories': ingredient_categories,
         'ingredients': dict(ingreds_by_category),
+        'grocery_list': grocery_list_str,
         'steps': steps,
         'multiplier': multiplier,
         'total_cooked_meal_counts': total_cooked_meal_counts,
