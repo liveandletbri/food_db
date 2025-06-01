@@ -177,7 +177,21 @@
     </div>
 
 
-    <h2>Recipe</h2>
+    <h2 id = "recipe_steps_header">
+        Recipe
+        {% if mode == 'edit' %}<i id="markdown_help_icon" class="fa-regular fa-circle-question fa-2xs"></i>{% endif %}
+    </h2>
+    <span id="markdown_help_tooltip" class="tooltip">
+        You can format the text of your recipe steps using Markdown syntax. You can google the full set of rules, but here are some of the most common tricks:<br><br>
+        <p id="markdown_help_indented_text">• **Double asterisks** make text <b>bold</b><br>
+        • *Single asterisks* or _underscores_ make it <i>italic</i>.<br>
+        • Use hyphens or asterisks to create bullet points<br>
+        • Make headings by starting a line with 1-4 hash symbols (#), and adding a blank line between the header and the following text, like this:<br><br>
+        </p><p id="markdown_help_centered_text">
+        # This is a large header<br><br>
+        #### This is a small one<br><br>
+        This is the normal text</p>
+    </span>
     {{create_recipe_form.extra_step_count}}
     <table id="step_table" class="form-table">
         {% for step in step_list %}
