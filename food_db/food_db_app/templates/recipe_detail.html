@@ -97,7 +97,7 @@
     </tr>
     {% endif %}
 </table>
-{% if not recipe.recipe_book %}
+{% if has_steps %}
     <div id="ingredients_header">
         <h2>Ingredients</h2>
         <button type="button" id="show_groceries_button">Show grocery list</button>

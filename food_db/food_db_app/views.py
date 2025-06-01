@@ -168,6 +168,13 @@ def recipe_detail(request, key):
     for step in steps:
         # increment by one to make the base-zero index look human-friendly
         step.order_number += 1
+    
+    if steps.count() == 1 and steps[0].description == '':
+        # If there is only one step and it is blank, then there aren't actually any steps
+        has_steps = False
+    else:
+        has_steps = True
+
 
     total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe).count()
 
@@ -189,6 +196,7 @@ def recipe_detail(request, key):
         'multiplier': multiplier,
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
+        'has_steps': has_steps,
     }
     return render(request, 'recipe_detail.html', context)
 
