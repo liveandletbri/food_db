@@ -658,8 +658,8 @@ button.merge_selected {
     font-size: 0.7rem;
     display: block;
     text-align: left;
-    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
-    transition: opacity 0.8s;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out, z-index 0.8s ease-in-out, opacity 0.8s;
+    z-index: -1;
 }
 #markdown_help_tooltip.visible {
     opacity: 100%;

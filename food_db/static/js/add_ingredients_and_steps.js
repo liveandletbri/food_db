@@ -1,5 +1,6 @@
 // From https://www.brennantymrak.com/articles/django-dynamic-formsets-javascript and https://stackoverflow.com/questions/6142025/dynamically-add-field-to-a-form
 
+let addOrEditMode = JSON.parse(addOrEditModeRaw.textContent)
 
 let ingredTable = document.querySelector("#ingred-table")
 let ingredTableBody = ingredTable.querySelector('tbody')
@@ -23,15 +24,16 @@ function addListenersToRowButtons() {
 window.onload = function() {
     addListenersToRowButtons()
     
+    if ( addOrEditMode == "edit" ) {
+        let markdownHelpIcon = document.querySelector("#markdown_help_icon")
+        let markdownHelpTooltip = document.querySelector("#markdown_help_tooltip")
+        markdownHelpIcon.addEventListener('mouseover', () => setTimeout(showToolTip, 300, markdownHelpTooltip))
+        markdownHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, markdownHelpTooltip))
 
-    let markdownHelpIcon = document.querySelector("#markdown_help_icon")
-    let markdownHelpTooltip = document.querySelector("#markdown_help_tooltip")
-    markdownHelpIcon.addEventListener('mouseover', () => setTimeout(showToolTip, 300, markdownHelpTooltip))
-    markdownHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, markdownHelpTooltip))
-
-    let recipeStepsHeader = document.querySelector("#recipe_steps_header")
-    markdownHelpTooltip.style.left = `${recipeStepsHeader.offsetLeft + 180}px`;
-    markdownHelpTooltip.style.top = `${recipeStepsHeader.offsetTop + 8}px`;
+        let recipeStepsHeader = document.querySelector("#recipe_steps_header")
+        markdownHelpTooltip.style.left = `${recipeStepsHeader.offsetLeft + 180}px`;
+        markdownHelpTooltip.style.top = `${recipeStepsHeader.offsetTop + 8}px`;
+    }
 }
 
 function getHighestIngredientNumber () {
