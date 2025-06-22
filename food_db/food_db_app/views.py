@@ -170,7 +170,10 @@ def recipe_detail(request, key):
         step.order_number += 1
     
     if steps.count() == 1 and steps[0].description == '':
-        # If there is only one step and it is blank, then there aren't actually any steps
+        # If there is only one step and it is blank, then there aren't actually any steps. Not totally sure why this happens.
+        has_steps = False
+    elif steps.count() == 0:
+        # This is what I'd expect to happen if there are no steps.
         has_steps = False
     else:
         has_steps = True
