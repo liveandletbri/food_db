@@ -88,6 +88,8 @@ class CreateRecipeForm(forms.Form):
     
     # Tag fields
     new_tag = forms.CharField(required=False)
+    is_cooking_tag = forms.BooleanField(required=False, initial=True, label='Cooking Tag')
+    is_baking_tag = forms.BooleanField(required=False, initial=False, label='Baking Tag')
 
     # Ingredient fields
     ingred_0_quantity = forms.DecimalField(required=False)

@@ -39,11 +39,20 @@
     <div id="add-tag-form" class="hide">
         <h2>Add a tag</h2>
             <table>
-                <tr class="spaceUnder">
+                <tr>
                     <td>Tag</td>
                     <td>{{create_recipe_form.new_tag}}</td>
                 </tr>
+                <tr>
+                    <td>Related to cooking?</td>
+                    <td>{{create_recipe_form.is_cooking_tag}}</td>
+                </tr>
+                <tr class="spaceUnder">
+                    <td>Related to baking?</td>
+                    <td>{{create_recipe_form.is_baking_tag}}</td>
+                </tr>
             </table>
+            <span id="cooking_or_baking_tag_tooltip" class="form_validate_tooltip tooltip">Tags have to be related to cooking, baking, or both, but not neither.</span>
         <!-- Using type="button" prevents clicking this from counting as a form submission -->
         <button id="add_tag_button" type="button">Add tag</button>
         <hr>

@@ -1,9 +1,20 @@
-let newTagInput = document.getElementById('id_new_tag');
+let newTagName = document.getElementById('id_new_tag');
+let isCookingTagInput = document.getElementById('id_is_cooking_tag');
+let isBakingTagInput = document.getElementById('id_is_baking_tag');
+let cookingOrBakingTooltip = document.getElementById('cooking_or_baking_tag_tooltip');
 
 function showTagForm(){
     document.getElementById('add-tag-form').className="show";
 }
-async function hideTagForm(){
+async function submitAndHideTagForm(){
+    let isCookingTag = isCookingTagInput.checked
+    let isBakingTag = isBakingTagInput.checked
+
+    if ( ! isCookingTag && ! isBakingTag ) {
+        showAndHideTooltip(cookingOrBakingTooltip)
+        return
+    }
+    
     document.getElementById('add-tag-form').className="hide";
 
     let addTagSuccess = await fetch(`/add_tag/`, {
@@ -13,7 +24,9 @@ async function hideTagForm(){
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            tag_name: newTagInput.value,
+            tag_name: newTagName.value,
+            is_cooking_tag: isCookingTag,
+            is_baking_tag: isBakingTag,
         })
     })
     .then(function(response) {
@@ -25,7 +38,7 @@ async function hideTagForm(){
     })
 
     if ( addTagSuccess ) {
-        newTagInput.value = '';
+        newTagName.value = '';
         
         let pageResponse = await fetch(`/add/`, {
             method: "GET",
@@ -45,6 +58,6 @@ async function hideTagForm(){
     }
 }
 
-const hideTagFormHandler = () => hideTagForm()
+const submitAndHideTagFormHandler = () => submitAndHideTagForm()
 
-document.getElementById('add_tag_button').addEventListener('click', hideTagFormHandler)
+document.getElementById('add_tag_button').addEventListener('click', submitAndHideTagFormHandler)
