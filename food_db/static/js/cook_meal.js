@@ -74,7 +74,7 @@ function celebrate() {
 
 upvoteButton.addEventListener('click', function() {
     celebrate()
-    setTimeout(toggleConfetti, 300)
+    setTimeout(startConfetti, 300)
     cookMeal()
-    setTimeout(toggleConfetti, 2900)
+    setTimeout(stopConfetti, 2900)
 })
