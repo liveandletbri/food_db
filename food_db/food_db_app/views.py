@@ -233,7 +233,7 @@ def add_recipe(request):
             
             clean_key = sanitize_string(create_recipe_form.cleaned_data['title'])
             capital_title = capitalize_title(create_recipe_form.cleaned_data['title'])
-
+            
             recipe_instance = Recipe(
                 clean_key=clean_key,
                 title=capital_title,
@@ -244,6 +244,7 @@ def add_recipe(request):
                 servings_max=servings_max,
                 calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
+                is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False),
             )
 
             log_debug_message('made recipe instance')
@@ -489,6 +490,7 @@ def edit_recipe(request, key):
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
             recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
+            recipe_instance.is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False)
 
             log_debug_message('made recipe instance')
 
