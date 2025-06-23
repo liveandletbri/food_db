@@ -228,6 +228,7 @@ def add_recipe(request):
     existing_foods = [food.name for food in Food.objects.all()]
     existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
     existing_books = [book.name for book in RecipeBook.objects.all()]
+    existing_tags = [tag for tag in Tag.objects.all().order_by('name')]
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
@@ -417,6 +418,7 @@ def add_recipe(request):
         'food_list': existing_foods,
         'unit_list': existing_units,
         'book_list': existing_books,
+        'tag_list': existing_tags,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -697,6 +699,7 @@ def edit_recipe(request, key):
         existing_foods = [food.name for food in Food.objects.all()]
         existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
         existing_books = [book.name for book in RecipeBook.objects.all()]
+        existing_tags = [tag for tag in Tag.objects.all().order_by('name')]
         
         create_recipe_form = CreateRecipeForm(
             initial=recipe_instance.__dict__,
@@ -746,8 +749,6 @@ def edit_recipe(request, key):
         # If the recipe is from a recipe book, it may have no steps. Populate a blank one for the form.
         if len(step_list) == 0:
             step_list = [{key: '' for key in step_fields}]
-        
-
 
     context = {
         'mode': 'edit',
@@ -759,6 +760,7 @@ def edit_recipe(request, key):
         'food_list': existing_foods,
         'unit_list': existing_units,
         'book_list': existing_books,
+        'tag_list': existing_tags,
     }
 
     return render(request, 'add_edit_recipe.html', context)
