@@ -20,6 +20,7 @@
                             {{ text }}
                         </div>
                         <!-- {% if forloop.counter|divisibleby:2 %}</ul><ul>{% endif %} -->
+                        <!-- Tag value: {{ value }} -->
                     {% endfor %}
                 </ul></label>
                 <!-- {{create_recipe_form.tags}} -->
@@ -240,6 +241,6 @@
 <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 <script src="{% static 'js/ingredient_parse.js' %}"></script>
 <script src="{% static 'js/recipe_add_form_validate.js' %}"></script>
-<script src="{% static 'js/create_tag.js' %}"></script>
+<script src="{% static 'js/recipe_tagging.js' %}"></script>
 <script src="{% static 'js/delete_image.js' %}"></script>
 {% endblock content %}
