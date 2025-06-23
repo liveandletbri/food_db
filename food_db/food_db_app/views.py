@@ -78,7 +78,10 @@ def log_debug_message(message, restart_timer=False):
 def get_only_relevant_tags(recipe, tag_name_list):
     """If the recipe is a baking recipe, any tags that are only for cooking (this does not include tags that apply to both
     cooking and baking) should be unchecked, and vice versa. Tags for the opposite mode can remain checked if you check
-    them in the form, but then switch between cooking and baking, thus hiding them from view but leaving them checked."""
+    them in the form, but then switch between cooking and baking, thus hiding them from view but leaving them checked.
+    
+    This function takes in a list of names (strings) of the tags that were checked in the form, and returns a list of Tag
+    instances that are relevant to the recipe type (cooking or baking)."""
 
     is_baking_recipe = recipe.is_baking_recipe
     return_tags = []
