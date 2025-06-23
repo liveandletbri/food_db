@@ -75,6 +75,24 @@ def log_debug_message(message, restart_timer=False):
     
     LAST_DEBUG_LOG_TIME = now
 
+def get_only_relevant_tags(recipe, tag_name_list):
+    """If the recipe is a baking recipe, any tags that are only for cooking (this does not include tags that apply to both
+    cooking and baking) should be unchecked, and vice versa. Tags for the opposite mode can remain checked if you check
+    them in the form, but then switch between cooking and baking, thus hiding them from view but leaving them checked."""
+
+    is_baking_recipe = recipe.is_baking_recipe
+    return_tags = []
+
+    for tag_name in tag_name_list:
+        tag = Tag.objects.get(name=tag_name)
+
+        if is_baking_recipe and tag.is_baking_tag:
+            return_tags.append(tag)
+        elif not is_baking_recipe and tag.is_cooking_tag:
+            return_tags.append(tag)
+    
+    return return_tags
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -126,7 +144,6 @@ def recipe_detail(request, key):
         if ingred.quantity:
             # Apply multiplier to ingredient quantities
             quant = str(round(ingred.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
-            # import pdb; pdb.set_trace()
             return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
         else:
             return ''
@@ -266,12 +283,11 @@ def add_recipe(request):
             log_debug_message('saved book')
 
             # Extract tags from form data and create the relationship from tag -> recipe
-            tags = request.POST.getlist('tag')
+            tags = get_only_relevant_tags(recipe_instance, request.POST.getlist('tag'))
             
             if tags:
                 # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-                for tag in tags:
-                    tag_instance = Tag.objects.get(name=tag)
+                for tag_instance in tags:
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
             
@@ -522,11 +538,11 @@ def edit_recipe(request, key):
             log_debug_message('removed tags')
             
             # Extract tags from form data and create new relationships from tag -> recipe
-            # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-            tags = request.POST.getlist('tag')
+            tags = get_only_relevant_tags(recipe_instance, request.POST.getlist('tag'))
+            
             if tags:
-                for tag in tags:
-                    tag_instance = Tag.objects.get(name=tag)
+                # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
+                for tag_instance in tags:
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
             
@@ -685,6 +701,7 @@ def edit_recipe(request, key):
             extra_steps=len(related_steps) - 1,
         )
         create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context via related_tags
+        create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
         if recipe_instance.servings_min:
             create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min)
             if recipe_instance.servings_max:
