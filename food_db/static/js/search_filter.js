@@ -7,6 +7,30 @@ let durationMinutesSearch = document.querySelector("#id_duration_lt_minutes")
 let durationClearButton = document.querySelector(".clear_duration_search_button")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
+let isBakingSearchInput = document.getElementById('id_baking_tags_check')
+
+function swapSearchTags() {
+    let isBakingSearch = isBakingSearchInput.checked
+    let tagDivs = document.querySelectorAll('.tag_check')
+    for (let div of tagDivs) {
+        let isCookingTag = div.getAttribute('data-is_cooking_tag') == 'True'
+        let isBakingTag = div.getAttribute('data-is_baking_tag') == 'True'
+        let tag = div.querySelector('input[type=checkbox]')
+
+        if ( isBakingSearch && ! isBakingTag ) {
+            div.style.display = 'none'
+            tag.checked = false
+        } else if ( ! isBakingSearch && ! isCookingTag ) {
+            div.style.display = 'none'
+            tag.checked = false
+        } else {
+            div.style.display = 'block'
+        }
+    }
+}
+
+swapSearchTags()  // Run on page setup to set tags to cooking
+isBakingSearchInput.addEventListener('change', function () {stealthSubmit(); swapSearchTags();})
 
 async function stealthSubmit(e) {
     // An async 'form submission' rather than an actual form submission that loads
@@ -15,6 +39,7 @@ async function stealthSubmit(e) {
     // HTML, rather than actually moving to a new URL. It's pretty brute force but
     // hey, what are side projects for?
 
+    let isBakingSearch = isBakingSearchInput.checked
     let titleSearchValue = titleSearch.value
     let ingredientSearchValue = ingredientSearch.value
     let durationHoursSearchValue = parseInt(durationHoursSearch.value)
@@ -44,6 +69,7 @@ async function stealthSubmit(e) {
         title: titleSearchValue,
         ingredient: ingredientSearchValue,
         duration_lt: durationSearchValue,
+        is_baking_recipe: isBakingSearch,
     }
 
     // Format params as URL query string

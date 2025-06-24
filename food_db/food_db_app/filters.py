@@ -38,6 +38,9 @@ class RecipeTextFilter(filters.FilterSet):
         distinct = True,
         exclude = True,
     )
+    is_baking_recipe = filters.BooleanFilter(
+        field_name='is_baking_recipe'
+    )
 
     class Meta:
         model = Recipe

@@ -424,7 +424,12 @@ def add_recipe(request):
     return render(request, 'add_edit_recipe.html', context)
 
 def search(request):
-    text_search_form = RecipeTextFilter(request.GET, queryset=Recipe.objects.all().order_by('-_date_created'))
+    search_params = request.GET.copy()
+    if 'is_baking_recipe' not in search_params:
+        # The lack of this key means we should filter to cooking recipes only
+        search_params['is_baking_recipe'] = 'False'
+
+    text_search_form = RecipeTextFilter(search_params, queryset=Recipe.objects.all().order_by('-_date_created'))
     found_recipes = text_search_form.qs.distinct()
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
@@ -445,15 +450,13 @@ def search(request):
     # Separate out the list of tags from the form so we have more control over them in the HTML
     tags = [
         {
-            'name': tag  ,
-            'checked': tag in request.GET.getlist('tag'),
+            'name': tag.name,
+            'checked': tag.name in request.GET.getlist('tag'),
+            'is_cooking_tag': tag.is_cooking_tag,
+            'is_baking_tag': tag.is_baking_tag,
         }
         for tag 
-        in [
-            tag.name 
-            for tag
-            in text_search_form.filters['tag'].extra['queryset']
-        ]
+        in text_search_form.filters['tag'].extra['queryset']
     ]
 
     context = {
