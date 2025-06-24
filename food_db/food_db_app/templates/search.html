@@ -4,6 +4,19 @@
 
 <form class="left_side_of_page" id="search_form" method="get">
     <div>
+        <table>
+            <tr>
+                <td>
+                    <label class="slider_switch">
+                        <input type="checkbox" id="id_baking_tags_check">
+                        <div class="slider">
+                            <span class="on">Baking</span>
+                            <span class="off">Cooking</span>
+                        </div>
+                    </label>
+                </td>
+            </tr>
+        </table>
         <label>{{ text_search.form.title.label }}:</label>
         {{ text_search.form.title }}
         <br>
@@ -20,17 +33,12 @@
         </span>
         <br>
         <table>
-            <tr>
-                <td>
-                    <input id="id_baking_tags_check" type="checkbox">Baking tags
-                </td>
-            </tr>
             <tr style="background-color: #ffffff;">
                 <td>
                     <label>{{ text_search.form.tag.label }}:</label>
                     <label class="tags_row"><ul>
                         {% for tag in tags %}
-                            <div class="ui slider checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
+                            <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
                                 <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}" {% if tag.checked %}checked{% endif %}>
                                 {{ tag.name }}
                             </div>
@@ -41,7 +49,7 @@
                     <label>{{ text_search.form.tag_exclusion.label }}:</label>
                     <label class="tags_row"><ul>
                         {% for tag in tags %}
-                            <div class="ui slider checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
+                            <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
                                 <input id="id_excluded_tag_{{ forloop.counter0 }}" name="excluded_tag" type="checkbox" value="{{ tag.name }}">
                                 {{ tag.name }}
                             </div>
@@ -56,7 +64,7 @@
 </form>
 <div id="search_results">
     {% with result_count=text_search.qs|length %}
-    <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
+    <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} {% if is_baking_recipe == 'true' %}baking{% else %}cooking{% endif %} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
     {% endwith %}
     <table id="search_results_table">
         <thead>

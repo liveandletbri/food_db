@@ -427,7 +427,7 @@ def search(request):
     search_params = request.GET.copy()
     if 'is_baking_recipe' not in search_params:
         # The lack of this key means we should filter to cooking recipes only
-        search_params['is_baking_recipe'] = 'False'
+        search_params['is_baking_recipe'] = 'false'
 
     text_search_form = RecipeTextFilter(search_params, queryset=Recipe.objects.all().order_by('-_date_created'))
     found_recipes = text_search_form.qs.distinct()
@@ -463,6 +463,7 @@ def search(request):
         'text_search': text_search_form,
         'recipe_data': recipe_data,
         'tags': tags,
+        'is_baking_recipe': search_params['is_baking_recipe'],
     }
     return render(request, 'search.html', context)
 
