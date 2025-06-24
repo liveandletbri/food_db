@@ -23,17 +23,15 @@ function addListenersToRowButtons() {
 // Need to wait for "onload" to be after all the SVGs are rendered by Font Awesome magic
 window.onload = function() {
     addListenersToRowButtons()
-    
-    if ( addOrEditMode == "edit" ) {
-        let markdownHelpIcon = document.querySelector("#markdown_help_icon")
-        let markdownHelpTooltip = document.querySelector("#markdown_help_tooltip")
-        markdownHelpIcon.addEventListener('mouseover', () => setTimeout(showToolTip, 300, markdownHelpTooltip))
-        markdownHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, markdownHelpTooltip))
 
-        let recipeStepsHeader = document.querySelector("#recipe_steps_header")
-        markdownHelpTooltip.style.left = `${recipeStepsHeader.offsetLeft + 180}px`;
-        markdownHelpTooltip.style.top = `${recipeStepsHeader.offsetTop + 8}px`;
-    }
+    let markdownHelpIcon = document.querySelector("#markdown_help_icon")
+    let markdownHelpTooltip = document.querySelector("#markdown_help_tooltip")
+    markdownHelpIcon.addEventListener('mouseover', () => setTimeout(showToolTip, 300, markdownHelpTooltip))
+    markdownHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, markdownHelpTooltip))
+
+    let recipeStepsHeader = document.querySelector("#recipe_steps_header")
+    markdownHelpTooltip.style.left = `${recipeStepsHeader.offsetLeft + 180}px`;
+    markdownHelpTooltip.style.top = `${recipeStepsHeader.offsetTop + 8}px`;
 }
 
 function getHighestIngredientNumber () {
