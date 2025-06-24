@@ -6,6 +6,11 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
+/* Create variable for table row color */
+:root {
+	--table-row-color:  rgba(0, 0, 0, 0.05);
+}
+
 html, body, div, span, applet, object,
 iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
 pre, a, abbr, acronym, address, big, cite,
@@ -3008,12 +3013,12 @@ input::-moz-focus-inner {
 
 		/* every other row in table is gray */
 		table tbody tr:nth-child(2n + 1) {
-			background-color: rgba(0, 0, 0, 0.05);
+			background-color: var(--table-row-color);
 		}
 		
 		/* force row to be gray with <tr class="alt"> */
 		table tbody tr.alt {
-			background-color: rgba(0, 0, 0, 0.05) !important;
+			background-color: var(--table-row-color) !important;
 		}
 		
 		/* force first td in the tr to be white <tr class="ingredient_category_row"> */
@@ -3024,12 +3029,12 @@ input::-moz-focus-inner {
 			background-color: transparent ;
 		}
 		table tbody tr.ingredient_category_row td:nth-child(n+1) {
-			background-color: rgba(0, 0, 0, 0.05);
+			background-color: var(--table-row-color);
 		}
 		
 		/* force row to be the opposite color compared to standard alternating pattern with <tr class="offset"> */
 		table tbody tr.offset {
-			background-color: rgba(0, 0, 0, 0.05);
+			background-color: var(--table-row-color);
 		}
 		table tbody tr.offset:nth-child(2n + 1) {
 			background-color: rgba(0, 0, 0, 0);

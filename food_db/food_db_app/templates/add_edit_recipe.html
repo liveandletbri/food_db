@@ -15,7 +15,7 @@
                 <label class="tags_row"><ul>
                     {% for tag in tag_list %}
                     
-                        <div class="ui slider checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
+                        <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
                             <input 
                                 id="id_tags_{{ forloop.counter0 }}" 
                                 name="tag" 
@@ -239,7 +239,7 @@
     <button type="button" id="submit_recipe_button" name="submitrecipe">{% if mode == 'add' %}Create {% else %}Update {% endif %}recipe!</button>
 </form>
 
-
+<script src="{% static 'js/swap_cooking_baking.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 <script src="{% static 'js/ingredient_parse.js' %}"></script>

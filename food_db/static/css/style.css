@@ -1,3 +1,8 @@
+:root {
+    --baking-color: rgba(228, 40, 156, 1);
+    --cooking-color: rgba(40, 100, 228, 1);
+}
+
 #logo_header {
     float: left;
     display: table
@@ -698,8 +703,7 @@ button.merge_selected {
     left: 0;
     right: 0;
     bottom: 0;
-    /* Cooking color */
-    background-color: #2864e4;
+    background-color: var(--cooking-color);
     border-radius: 34px;
     -webkit-transition: .4s;
     transition: .4s;
@@ -720,7 +724,7 @@ button.merge_selected {
 
 /* Baking color */
 input:checked + .slider {
-    background-color: #e4289c;
+    background-color: var(--baking-color);
 }
 
 input:checked + .slider:before {
