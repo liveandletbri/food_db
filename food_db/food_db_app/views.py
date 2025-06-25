@@ -220,6 +220,7 @@ def recipe_detail(request, key):
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
         'has_steps': has_steps,
+        'is_baking_recipe': str(recipe.is_baking_recipe),
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -765,6 +766,7 @@ def edit_recipe(request, key):
         'unit_list': existing_units,
         'book_list': existing_books,
         'tag_list': existing_tags,
+        'is_baking_recipe': str(recipe_instance.is_baking_recipe),
     }
 
     return render(request, 'add_edit_recipe.html', context)

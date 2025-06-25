@@ -186,6 +186,11 @@
         </div>
     </div>
 {% endif %}
+<script src="{% static 'js/swap_cooking_baking.js' %}"></script>
+<script>
+    document.getElementById('baking_switch_label').style.display = 'none'; // Sorry this is sloppy, but I'm undoing what happens at the start of swap_cooking_baking.js. Don't judge me.
+    swapCookingOrBakingColors({{ is_baking_recipe|lower }});
+</script>
 <script src="{% static 'js/drag_ingredient_categories.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/cooking_mode.js' %}"></script>

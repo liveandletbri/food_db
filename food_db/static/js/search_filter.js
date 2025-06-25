@@ -11,11 +11,11 @@ let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 function swapCookingOrBakingSearch() {
     stealthSubmit(); 
     swapCookingOrBakingTags();
-    swapCookingOrBakingColors();
+    swapCookingOrBakingColors(isBakingInput.checked);
 }
 
 swapCookingOrBakingTags()  // Run on page setup to set tags to cooking
-swapCookingOrBakingColors() // Also set colors on page setup
+swapCookingOrBakingColors(isBakingInput.checked) // Also set colors on page setup
 isBakingInput.addEventListener('change', swapCookingOrBakingSearch)
 
 async function stealthSubmit(e) {
