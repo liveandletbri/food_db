@@ -1,5 +1,6 @@
 import inspect
 from django.contrib import admin
+from django.db.models import Model
 from . import models
 
 # Register your models here.
@@ -7,7 +8,9 @@ from . import models
 my_admin_site = admin.site
 model_list = inspect.getmembers(models, inspect.isclass)
 for model_class in model_list:
-    if model_class[0] == 'PathAndRename':  # this class is not a model, but effectively a helper function
+    # only register Model classes, not other created or imported classes
+    class_parents = model_class[1].__bases__
+    if Model not in class_parents:
         continue
     try:
         my_admin_site.register(model_class[1])

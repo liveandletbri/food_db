@@ -3,6 +3,7 @@ import re
 import requests
 
 from collections import defaultdict
+from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
 from django.db import transaction
@@ -473,6 +474,7 @@ def search(request):
 def edit_recipe(request, key):
     log_debug_message('edit_recipe() called', restart_timer=True)
     recipe_instance = get_object_or_404(Recipe, clean_key=key)
+    existing_recipe_title = deepcopy(recipe_instance.title)  # Make a copy of the title so we can check if it was changed later
 
     # If this is a POST request then process the Form data similarly to an add_recipe request, 
     if request.method == 'POST':
@@ -686,7 +688,7 @@ def edit_recipe(request, key):
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
-                s3.upload_recipe(recipe_instance)
+                s3.upload_recipe(recipe_instance, existing_recipe_title)
                 s3.upload_db_backup()
                 log_debug_message(f'uploaded to S3')
 

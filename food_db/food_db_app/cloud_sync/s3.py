@@ -13,7 +13,7 @@ class S3Sync():
         self.cloud_sync_dir = os.path.dirname(os.path.realpath(__file__))
         self.bucket_url = f'{self.bucket_name}.s3-website-{self.aws_region}.amazonaws.com'
 
-    def upload_recipe(self, recipe):
+    def upload_recipe(self, recipe, old_recipe_title=None):
         # Import happens here, not at top of page, so it's after Django is set up
         from food_db_app.cloud_sync.parse import convert_recipe_to_html
 
@@ -27,6 +27,16 @@ class S3Sync():
             ContentType='text/html'
         )
         print(f'Successfully uploaded "{title}"')
+
+        if old_recipe_title and old_recipe_title != title:
+            # If the recipe was renamed, delete the file under the old name
+            self.delete_recipe(old_recipe_title)
+    
+    def delete_recipe(self, recipe_title):
+        print(f'Attempting to delete recipe "{recipe_title}" from S3 bucket {self.bucket_name}')
+        recipe = self.s3.Object(recipe_title)
+        recipe.delete()
+        print(f'Successfully deleted "{recipe_title}"')
 
     def upload_index(self):
         print(f'Attempting to upload index.html to S3 bucket {self.bucket_name}')

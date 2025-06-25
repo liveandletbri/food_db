@@ -5,6 +5,8 @@ from django.dispatch.dispatcher import receiver
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 
+from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
+
 @deconstructible
 class PathAndRename(object):
     def __init__(self, sub_path='media/'):
@@ -52,6 +54,15 @@ class Recipe(models.Model):
 
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
+
+@receiver(models.signals.pre_delete, sender=Recipe)
+def recipe_delete(sender, instance, **kwargs):
+    '''If a recipe is backed up in S3, delete it from S3 when the
+    Recipe instance is deleted from the database'''
+    if S3_SYNC_ENABLED:
+        s3 = S3Sync()
+        s3.delete_recipe(instance.title)
+        print(f'Successfully deleted recipe "{instance.title}" from S3')
 
 class RecipeStep(models.Model):
     class Meta:
