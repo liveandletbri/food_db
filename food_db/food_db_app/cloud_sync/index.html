@@ -26,7 +26,12 @@
         oDOM.childNodes.forEach((value, index, listObj) => {
           value.childNodes.forEach((value1, index1, listObj1) => {
             value1.childNodes.forEach((value2, index2, listObj2) => {
-              if (value2.localName === 'Key' && value2.textContent !== 'index.html') {
+              if (
+                value2.localName === 'Key' && (
+                  value2.textContent !== 'index.html'
+                  && ! value2.textContent.startsWith('db_backup')
+                ) 
+              ){
                 var fileName = value2.textContent
                 var url = window.location + fileName
                 var urlCleaned = url.replace("'", "%27")

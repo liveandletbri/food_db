@@ -41,6 +41,9 @@ If you're interested, read on. First you'll set your S3 bucket up, then configur
     }
 ]
 ```
+7. Optionally, you can enable versioning, which stores previous versions of the same file. Follow the [steps here](https://docs.aws.amazon.com/AmazonS3/latest/userguide/manage-versioning-examples.html) to get it set up. Once enabled, you can [configure a lifecycle policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-set-lifecycle-configuration-intro.html#how-to-set-lifecycle-configuration) that determines how long you keep backups, and if you only want to back up the database file (which is what I've done), or all files. My policy, which is what I recommend, includes these settings:
+    + "Limit the scope of this rule using one or more filters", where the filter is the prefix `db_backup/`. This means only your database file will be versioned, not the recipe files.
+    + I checked "Permanently delete noncurrent versions of objects", and then set "Days after objects become noncurrent" to 30, meaning I keep all database files uploaded in the last 30 days, regardless of how many there are. Anything older than 30 days is deleted.
 
 ### Setting environment variables
 Create the `.env` file at the root directory of this project if you haven't already. Add these lines inside it, filling in the values in `<brackets>`:
