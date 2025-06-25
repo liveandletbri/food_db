@@ -396,6 +396,7 @@ def add_recipe(request):
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
                 s3.upload_recipe(recipe_instance)
+                s3.upload_db_backup()
                 log_debug_message(f'uploaded to S3')
 
             # redirect to a new URL:
@@ -686,6 +687,7 @@ def edit_recipe(request, key):
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
                 s3.upload_recipe(recipe_instance)
+                s3.upload_db_backup()
                 log_debug_message(f'uploaded to S3')
 
             # redirect to a new URL:

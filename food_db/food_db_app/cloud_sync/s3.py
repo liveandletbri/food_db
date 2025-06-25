@@ -32,6 +32,18 @@ class S3Sync():
         print(f'Attempting to upload index.html to S3 bucket {self.bucket_name}')
         self.s3.upload_file(f'{self.cloud_sync_dir}/index.html', 'index.html', ExtraArgs={'ContentType':'text/html'})
         print('Successfully uploaded index.html')
+    
+    def upload_db_backup(self):
+        print(f'Attempting to back up database file to S3 bucket {self.bucket_name}')
+        db_backup_path = os.path.join(os.path.join(os.path.dirname(os.path.dirname(self.cloud_sync_dir)), 'db_data'), 'db.sqlite3')
+        if not os.path.exists(db_backup_path):
+            raise FileNotFoundError(f'Could not find database file at path: {db_backup_path}')
+        
+        self.s3.upload_file(
+            Filename=db_backup_path,
+            Key='db_backup/db.sqlite3',  # Use db_backup prefix to match lifecycle policy config
+        )
+        print('Successfully uploaded database file')
 
 if __name__ == '__main__':
     if S3_SYNC_ENABLED:
@@ -55,6 +67,7 @@ if __name__ == '__main__':
             for recipe in all_recipes:
                 s3.upload_recipe(recipe)
             s3.upload_index()
+            s3.upload_db_backup()
         
         if arg == 'recipe':
             try:
@@ -63,3 +76,4 @@ if __name__ == '__main__':
                 raise IndexError('Please provide a recipe key to upload')
             recipe = Recipe.objects.get(clean_key=recipe_key)
             s3.upload_recipe(recipe)
+            s3.upload_db_backup()
