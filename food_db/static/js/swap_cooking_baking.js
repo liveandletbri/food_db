@@ -1,4 +1,7 @@
-function swapCookingOrBakingTags(isBakingInput, element) {
+let isBakingInput = document.getElementById('cooking_baking_switch');
+document.getElementById('baking_switch_label').style.display = 'inline-block'; // Make it visible on pages where this .js script is included
+
+function swapCookingOrBakingTags(element) {
     if ( element == undefined ) {
         element = document
     }
@@ -21,7 +24,7 @@ function swapCookingOrBakingTags(isBakingInput, element) {
     }
 }
 
-function swapCookingOrBakingColors(isBakingInput) {
+function swapCookingOrBakingColors() {
     let isBakingSearch = isBakingInput.checked
     let root = document.documentElement
     let cookingColor =  window.getComputedStyle(root).getPropertyValue("--cooking-color")

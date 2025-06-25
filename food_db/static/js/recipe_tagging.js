@@ -1,5 +1,4 @@
 let newTagName = document.getElementById('id_new_tag');
-let isBakingRecipeInput = document.getElementById('id_is_baking_recipe');
 let isCookingTagInput = document.getElementById('id_is_cooking_tag');
 let isBakingTagInput = document.getElementById('id_is_baking_tag');
 let cookingOrBakingTooltip = document.getElementById('cooking_or_baking_tag_tooltip');
@@ -55,7 +54,7 @@ async function submitAndHideTagForm(){
         let tagsTable = document.getElementById('tags_table')
 
         // Frankenstein it right into our existing page, using swapCookingOrBakingTags from swap_cooking_baking.js
-        tagsTable.innerHTML = swapCookingOrBakingTags(isBakingRecipeInput, reponseTags.innerHTML)
+        tagsTable.innerHTML = swapCookingOrBakingTags(isBakingInput, reponseTags.innerHTML)
     }
 }
 
@@ -64,12 +63,12 @@ const submitAndHideTagFormHandler = () => submitAndHideTagForm()
 document.getElementById('add_tag_button').addEventListener('click', submitAndHideTagFormHandler)
 
 // Filter the table on page load
-swapCookingOrBakingTags(isBakingRecipeInput, document.getElementById('tags_table'))
+swapCookingOrBakingTags(document.getElementById('tags_table'))
 // Also set the colors on page load
-swapCookingOrBakingColors(isBakingRecipeInput)
+swapCookingOrBakingColors()
 
 // Also filter it on change of the is_baking_recipe checkbox
-isBakingRecipeInput.addEventListener('change', function() {
-    swapCookingOrBakingTags(isBakingRecipeInput, document.getElementById('tags_table'))
-    swapCookingOrBakingColors(isBakingRecipeInput)
+isBakingInput.addEventListener('change', function() {
+    swapCookingOrBakingTags(document.getElementById('tags_table'))
+    swapCookingOrBakingColors()
 })
