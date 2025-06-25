@@ -75,6 +75,27 @@ def log_debug_message(message, restart_timer=False):
     
     LAST_DEBUG_LOG_TIME = now
 
+def get_only_relevant_tags(recipe, tag_name_list):
+    """If the recipe is a baking recipe, any tags that are only for cooking (this does not include tags that apply to both
+    cooking and baking) should be unchecked, and vice versa. Tags for the opposite mode can remain checked if you check
+    them in the form, but then switch between cooking and baking, thus hiding them from view but leaving them checked.
+    
+    This function takes in a list of names (strings) of the tags that were checked in the form, and returns a list of Tag
+    instances that are relevant to the recipe type (cooking or baking)."""
+
+    is_baking_recipe = recipe.is_baking_recipe
+    return_tags = []
+
+    for tag_name in tag_name_list:
+        tag = Tag.objects.get(name=tag_name)
+
+        if is_baking_recipe and tag.is_baking_tag:
+            return_tags.append(tag)
+        elif not is_baking_recipe and tag.is_cooking_tag:
+            return_tags.append(tag)
+    
+    return return_tags
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -126,7 +147,6 @@ def recipe_detail(request, key):
         if ingred.quantity:
             # Apply multiplier to ingredient quantities
             quant = str(round(ingred.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
-            # import pdb; pdb.set_trace()
             return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
         else:
             return ''
@@ -200,6 +220,7 @@ def recipe_detail(request, key):
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
         'has_steps': has_steps,
+        'is_baking_recipe': str(recipe.is_baking_recipe),
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -208,6 +229,7 @@ def add_recipe(request):
     existing_foods = [food.name for food in Food.objects.all()]
     existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
     existing_books = [book.name for book in RecipeBook.objects.all()]
+    existing_tags = [tag for tag in Tag.objects.all().order_by('name')]
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
@@ -233,7 +255,7 @@ def add_recipe(request):
             
             clean_key = sanitize_string(create_recipe_form.cleaned_data['title'])
             capital_title = capitalize_title(create_recipe_form.cleaned_data['title'])
-
+            
             recipe_instance = Recipe(
                 clean_key=clean_key,
                 title=capital_title,
@@ -244,6 +266,7 @@ def add_recipe(request):
                 servings_max=servings_max,
                 calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
+                is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False),
             )
 
             log_debug_message('made recipe instance')
@@ -265,12 +288,11 @@ def add_recipe(request):
             log_debug_message('saved book')
 
             # Extract tags from form data and create the relationship from tag -> recipe
-            tags = request.POST.getlist('tag')
+            tags = get_only_relevant_tags(recipe_instance, request.POST.getlist('tag'))
             
             if tags:
                 # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-                for tag in tags:
-                    tag_instance = Tag.objects.get(name=tag)
+                for tag_instance in tags:
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
             
@@ -397,12 +419,18 @@ def add_recipe(request):
         'food_list': existing_foods,
         'unit_list': existing_units,
         'book_list': existing_books,
+        'tag_list': existing_tags,
     }
 
     return render(request, 'add_edit_recipe.html', context)
 
 def search(request):
-    text_search_form = RecipeTextFilter(request.GET, queryset=Recipe.objects.all().order_by('-_date_created'))
+    search_params = request.GET.copy()
+    if 'is_baking_recipe' not in search_params:
+        # The lack of this key means we should filter to cooking recipes only
+        search_params['is_baking_recipe'] = 'false'
+
+    text_search_form = RecipeTextFilter(search_params, queryset=Recipe.objects.all().order_by('-_date_created'))
     found_recipes = text_search_form.qs.distinct()
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
@@ -423,21 +451,20 @@ def search(request):
     # Separate out the list of tags from the form so we have more control over them in the HTML
     tags = [
         {
-            'name': tag  ,
-            'checked': tag in request.GET.getlist('tag'),
+            'name': tag.name,
+            'checked': tag.name in request.GET.getlist('tag'),
+            'is_cooking_tag': tag.is_cooking_tag,
+            'is_baking_tag': tag.is_baking_tag,
         }
         for tag 
-        in [
-            tag.name 
-            for tag
-            in text_search_form.filters['tag'].extra['queryset']
-        ]
+        in text_search_form.filters['tag'].extra['queryset']
     ]
 
     context = {
         'text_search': text_search_form,
         'recipe_data': recipe_data,
         'tags': tags,
+        'is_baking_recipe': search_params['is_baking_recipe'],
     }
     return render(request, 'search.html', context)
 
@@ -489,6 +516,7 @@ def edit_recipe(request, key):
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
             recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
+            recipe_instance.is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False)
 
             log_debug_message('made recipe instance')
 
@@ -520,11 +548,11 @@ def edit_recipe(request, key):
             log_debug_message('removed tags')
             
             # Extract tags from form data and create new relationships from tag -> recipe
-            # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-            tags = request.POST.getlist('tag')
+            tags = get_only_relevant_tags(recipe_instance, request.POST.getlist('tag'))
+            
             if tags:
-                for tag in tags:
-                    tag_instance = Tag.objects.get(name=tag)
+                # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
+                for tag_instance in tags:
                     tag_instance.recipes.add(recipe_instance)
                     tag_instance.save()
             
@@ -676,6 +704,7 @@ def edit_recipe(request, key):
         existing_foods = [food.name for food in Food.objects.all()]
         existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
         existing_books = [book.name for book in RecipeBook.objects.all()]
+        existing_tags = [tag for tag in Tag.objects.all().order_by('name')]
         
         create_recipe_form = CreateRecipeForm(
             initial=recipe_instance.__dict__,
@@ -683,6 +712,7 @@ def edit_recipe(request, key):
             extra_steps=len(related_steps) - 1,
         )
         create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context via related_tags
+        create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
         if recipe_instance.servings_min:
             create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min)
             if recipe_instance.servings_max:
@@ -724,8 +754,6 @@ def edit_recipe(request, key):
         # If the recipe is from a recipe book, it may have no steps. Populate a blank one for the form.
         if len(step_list) == 0:
             step_list = [{key: '' for key in step_fields}]
-        
-
 
     context = {
         'mode': 'edit',
@@ -737,6 +765,8 @@ def edit_recipe(request, key):
         'food_list': existing_foods,
         'unit_list': existing_units,
         'book_list': existing_books,
+        'tag_list': existing_tags,
+        'is_baking_recipe': str(recipe_instance.is_baking_recipe),
     }
 
     return render(request, 'add_edit_recipe.html', context)

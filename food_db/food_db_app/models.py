@@ -40,6 +40,7 @@ class Recipe(models.Model):
     calories_per_recipe = models.PositiveSmallIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
+    is_baking_recipe = models.BooleanField(default=False)  # Either Cooking or Baking recipe
 
     # foo = models.TextField(max_length=200)
 
@@ -125,6 +126,11 @@ class Tag(models.Model):
         return self.name
     # clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
+
+    # Unlike recipes, which are exclusively a cooking or baking recipe, tags can be used for both.
+    is_cooking_tag = models.BooleanField(default=True)
+    is_baking_tag = models.BooleanField(default=False)
+
     _date_created = models.DateTimeField(default=timezone.now)
 
 class Food(models.Model):

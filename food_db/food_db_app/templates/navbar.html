@@ -2,8 +2,15 @@
 <div id="logo_header">
     <a href="{% url 'index' %}"><img id="logo_img" src="{% static 'img/logo.png' %}"></img></a>
     <h1 id="logo_title">Food DB, biiiitch</h1>
+    <label class="slider_switch" id="baking_switch_label">
+        <input type="checkbox" id="cooking_baking_switch" {% if is_baking_recipe == 'True' %}checked{% endif %}>
+        <div class="slider">
+            <span class="on">Baking</span>
+            <span class="off">Cooking</span>
+        </div>
+    </label>
 </div>
 <br>
 <br style="clear:both" />
-<a class="left_side_of_page" href="{% url 'index' %}">Home</a> | <a href="{% url 'add_recipe' %}">Add a new recipe</a> | <a href="{% url 'manage_food' %}">Food Manager</a> | <a href="{% url 'search' %}">Search</a>
+<a class="left_side_of_page" href="{% url 'index' %}">Home</a> | <a href="{% url 'add_recipe' %}">Add a new recipe</a> | <a href="{% url 'manage_food' %}">Food Manager</a> | <a href="{% url 'search' %}">Recipes</a>
 <hr>

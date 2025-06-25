@@ -7,6 +7,16 @@ let durationMinutesSearch = document.querySelector("#id_duration_lt_minutes")
 let durationClearButton = document.querySelector(".clear_duration_search_button")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
+// These swap functions are defined in swap_cooking_baking.js
+function swapCookingOrBakingSearch() {
+    stealthSubmit(); 
+    swapCookingOrBakingTags();
+    swapCookingOrBakingColors(isBakingInput.checked);
+}
+
+swapCookingOrBakingTags()  // Run on page setup to set tags to cooking
+swapCookingOrBakingColors(isBakingInput.checked) // Also set colors on page setup
+isBakingInput.addEventListener('change', swapCookingOrBakingSearch)
 
 async function stealthSubmit(e) {
     // An async 'form submission' rather than an actual form submission that loads
@@ -15,6 +25,7 @@ async function stealthSubmit(e) {
     // HTML, rather than actually moving to a new URL. It's pretty brute force but
     // hey, what are side projects for?
 
+    let isBakingSearch = isBakingInput.checked
     let titleSearchValue = titleSearch.value
     let ingredientSearchValue = ingredientSearch.value
     let durationHoursSearchValue = parseInt(durationHoursSearch.value)
@@ -44,6 +55,7 @@ async function stealthSubmit(e) {
         title: titleSearchValue,
         ingredient: ingredientSearchValue,
         duration_lt: durationSearchValue,
+        is_baking_recipe: isBakingSearch,
     }
 
     // Format params as URL query string

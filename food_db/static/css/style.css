@@ -1,6 +1,12 @@
+:root {
+    --baking-color: rgba(228, 40, 156, 1);
+    --cooking-color: rgba(40, 100, 228, 1);
+}
+
 #logo_header {
     float: left;
-    display: table
+    display: flex;
+    align-items: center;
 }
 #logo_img {
     height: 80px;
@@ -9,8 +15,8 @@
 #logo_title {
     vertical-align: bottom;
     display: table-cell;
-    padding-bottom: 0.3rem;
     padding-left: 0.5rem;
+    margin: 0;
 }
 
 
@@ -678,4 +684,76 @@ button.merge_selected {
     width: 100%;
     height: 100%;
     pointer-events: none; /* Allow clicks to pass through */
+}
+
+/* Slider switch for cooking/baking mode */
+
+.slider_switch {
+    position: relative;
+    /* display: inline-block; This is what it is set to on pages where it is visible */ 
+    display: none;
+    width: 130px;
+    height: 34px;
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.slider_switch input {
+    display:none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--cooking-color);
+    border-radius: 34px;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--baking-color);
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(95px);
+    -ms-transform: translateX(95px);
+    transform: translateX(95px);
+}
+
+.on {
+    display: none;
+}
+
+.on, .off {
+    color: white;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+}
+
+input:checked+ .slider .on {
+    display: block;
+}
+
+input:checked + .slider .off {
+    display: none;
 }

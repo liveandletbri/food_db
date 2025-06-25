@@ -166,4 +166,9 @@ async function validateAddRecipe(e) {
     }
 }
 
+isBakingInput.addEventListener('change', function() {
+    // Set the value of the hidden input to match the switch
+    document.getElementById('id_is_baking_recipe').checked = isBakingInput.checked
+})
+
 submitRecipeButton.addEventListener('click', validateAddRecipe)

@@ -13,11 +13,17 @@
             <td id="id_tags-label">{{create_recipe_form.tags.label}}</td>
             <td class="tags_row" id="tags_cell">
                 <label class="tags_row"><ul>
-                    {% for value, text in create_recipe_form.tags.field.choices %}
+                    {% for tag in tag_list %}
                     
-                        <div class="ui slider checkbox tag_check">
-                            <input id="id_tags_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ text }}"{% if text in checked_tags %} checked="checked"{% endif %}>
-                            {{ text }}
+                        <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
+                            <input 
+                                id="id_tags_{{ forloop.counter0 }}" 
+                                name="tag" 
+                                type="checkbox" 
+                                value="{{ tag.name }}"
+                                {% if tag.name in checked_tags %} checked="checked"{% endif %}
+                            >
+                            {{ tag.name }}
                         </div>
                         <!-- {% if forloop.counter|divisibleby:2 %}</ul><ul>{% endif %} -->
                     {% endfor %}
@@ -39,11 +45,20 @@
     <div id="add-tag-form" class="hide">
         <h2>Add a tag</h2>
             <table>
-                <tr class="spaceUnder">
+                <tr>
                     <td>Tag</td>
                     <td>{{create_recipe_form.new_tag}}</td>
                 </tr>
+                <tr>
+                    <td>Related to cooking?</td>
+                    <td>{{create_recipe_form.is_cooking_tag}}</td>
+                </tr>
+                <tr class="spaceUnder">
+                    <td>Related to baking?</td>
+                    <td>{{create_recipe_form.is_baking_tag}}</td>
+                </tr>
             </table>
+            <span id="cooking_or_baking_tag_tooltip" class="form_validate_tooltip tooltip">Tags have to be related to cooking, baking, or both, but not neither.</span>
         <!-- Using type="button" prevents clicking this from counting as a form submission -->
         <button id="add_tag_button" type="button">Add tag</button>
         <hr>
@@ -124,7 +139,8 @@
             </td>
         </tr>
     </table>
-    
+    <!-- This is an input to the form, but its value is set in recipe_add_form_validate.js. The user changes the switch on the navbar, and then this input's value is set to match it. This input is invisble. -->
+    <input style="display: none;" type="checkbox" name="is_baking_recipe" id="id_is_baking_recipe">
     <h2>
         Ingredients
         <button id="show_ingred_parse_button" class="header_button" type="button" onclick="showIngredientParserOnClick()">Parse ingredients from text</button>
@@ -182,21 +198,19 @@
 
     <h2 id = "recipe_steps_header">
         Recipe
-        {% if mode == 'edit' %}<i id="markdown_help_icon" class="fa-regular fa-circle-question fa-2xs"></i>{% endif %}
+        <i id="markdown_help_icon" class="fa-regular fa-circle-question fa-2xs"></i>
     </h2>
-    {% if mode == 'edit' %}
-        <span id="markdown_help_tooltip" class="tooltip">
-            You can format the text of your recipe steps using Markdown syntax. You can google the full set of rules, but here are some of the most common tricks:<br><br>
-            <p id="markdown_help_indented_text">• **Double asterisks** make text <b>bold</b><br>
-            • *Single asterisks* or _underscores_ make it <i>italic</i>.<br>
-            • Use hyphens or asterisks to create bullet points<br>
-            • Make headings by starting a line with 1-4 hash symbols (#), like this:<br><br>
-            </p><p id="markdown_help_centered_text">
-            # This is a large header<br>
-            #### This is a small one<br>
-            This is the normal text</p>
-        </span>
-    {% endif %}
+    <span id="markdown_help_tooltip" class="tooltip">
+        You can format the text of your recipe steps using Markdown syntax. You can google the full set of rules, but here are some of the most common tricks:<br><br>
+        <p id="markdown_help_indented_text">• **Double asterisks** make text <b>bold</b><br>
+        • *Single asterisks* or _underscores_ make it <i>italic</i>.<br>
+        • Use hyphens or asterisks to create bullet points<br>
+        • Make headings by starting a line with 1-4 hash symbols (#), like this:<br><br>
+        </p><p id="markdown_help_centered_text">
+        # This is a large header<br>
+        #### This is a small one<br>
+        This is the normal text</p>
+    </span>
     {{create_recipe_form.extra_step_count}}
     <table id="step_table" class="form-table">
         {% for step in step_list %}
@@ -222,11 +236,11 @@
     <button type="button" id="submit_recipe_button" name="submitrecipe">{% if mode == 'add' %}Create {% else %}Update {% endif %}recipe!</button>
 </form>
 
-
+<script src="{% static 'js/swap_cooking_baking.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 <script src="{% static 'js/ingredient_parse.js' %}"></script>
 <script src="{% static 'js/recipe_add_form_validate.js' %}"></script>
-<script src="{% static 'js/create_tag.js' %}"></script>
+<script src="{% static 'js/recipe_tagging.js' %}"></script>
 <script src="{% static 'js/delete_image.js' %}"></script>
 {% endblock content %}

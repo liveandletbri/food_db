@@ -83,10 +83,13 @@ class CreateRecipeForm(forms.Form):
     calories_per_recipe = forms.IntegerField(required=False)
     notes = forms.CharField(required=False)
     images = forms.ImageField(required=False)
+    is_baking_recipe = forms.BooleanField(required=False, initial=False)
     tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple())
     
     # Tag fields
     new_tag = forms.CharField(required=False)
+    is_cooking_tag = forms.BooleanField(required=False, initial=True, label='Cooking Tag')
+    is_baking_tag = forms.BooleanField(required=False, initial=False, label='Baking Tag')
 
     # Ingredient fields
     ingred_0_quantity = forms.DecimalField(required=False)
