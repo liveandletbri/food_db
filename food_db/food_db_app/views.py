@@ -23,6 +23,45 @@ from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 LAST_DEBUG_LOG_START_TIME = None
 LAST_DEBUG_LOG_TIME = None
 
+class RecipeIngredientData:
+    def __init__(self, recipe, multiplier):
+        self.recipe = recipe
+        self.multiplier = multiplier
+
+        # Get list of ingredient categories
+        ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
+        self.ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
+        self.ingredients_have_categories = self.ingredient_categories != ['']
+
+        # Store ingredients in ingreds_by_category, where keys are the ingredient category
+        self.ingreds_by_category = {}
+        for cat in ingredient_category_instances:
+            ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
+            ingreds = [
+                {
+                    'quantity': self.stringify_ingredient_quantity(ingred),
+                    'food': ingred.food.name,
+                    'notes': ingred.notes,
+                    'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
+                }
+                for ingred in ingred_instances
+            ]
+            self.ingreds_by_category[cat.name] = ingreds
+        
+        # Assemble grocery list (foods by food category)
+        self.grocery_list_dict = defaultdict(list)
+        for ingred_list in self.ingreds_by_category.values():
+            for ingred in ingred_list:
+                self.grocery_list_dict[ingred['food_category']].append(ingred)
+    
+    def stringify_ingredient_quantity(self, ingred):
+        if ingred.quantity:
+            # Apply multiplier to ingredient quantities
+            quant = str(round(ingred.quantity * Decimal(self.multiplier),2)).rstrip('0').rstrip('.')
+            return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
+        else:
+            return ''
+
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
     hours = floor(float(minutes)/60.0)
@@ -140,37 +179,11 @@ def recipe_detail(request, key):
 
     images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
 
-    # Get list of ingredient categories
-    ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
-    ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
-    ingredients_have_categories = ingredient_categories != ['']
-
-    def stringify_ingredient_quantity(ingred):
-        if ingred.quantity:
-            # Apply multiplier to ingredient quantities
-            quant = str(round(ingred.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
-            return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
-        else:
-            return ''
-
-    # Store ingredients in ingreds_by_category, where keys are the ingredient category
-    ingreds_by_category = {}
-    for cat in ingredient_category_instances:
-        ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
-        ingreds = [
-            {
-                'quantity': stringify_ingredient_quantity(ingred),
-                'food': ingred.food.name,
-                'notes': ingred.notes,
-                'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
-            }
-            for ingred in ingred_instances
-        ]
-        ingreds_by_category[cat.name] = ingreds
+    ingred_data = RecipeIngredientData(recipe, multiplier)
     
     # Assemble grocery list (foods by food category)
     grocery_list_dict = defaultdict(list)
-    for ingred_list in ingreds_by_category.values():
+    for ingred_list in ingred_data.ingreds_by_category.values():
         for ingred in ingred_list:
             grocery_list_dict[ingred['food_category']].append(ingred)
     
@@ -209,9 +222,9 @@ def recipe_detail(request, key):
         'recipe': recipe,
         'calorie_string': calorie_string,
         'images': images,
-        'ingredients_have_categories': ingredients_have_categories,
-        'ingredient_categories': ingredient_categories,
-        'ingredients': dict(ingreds_by_category),
+        'ingredients_have_categories': ingred_data.ingredients_have_categories,
+        'ingredient_categories': ingred_data.ingredient_categories,
+        'ingredients': dict(ingred_data.ingreds_by_category),
         'grocery_list': grocery_list_str,
         'steps': steps,
         'multiplier': multiplier,
