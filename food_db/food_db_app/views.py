@@ -106,6 +106,7 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
+    child_recipes = recipe.child_recipes.all()
     
     # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
     if recipe.servings_min and recipe.calories_per_recipe:
@@ -184,11 +185,7 @@ def recipe_detail(request, key):
         if i < len(grocery_list_dict) - 1:
             grocery_list_str += '\n\n'
 
-    # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
-    for step in steps:
-        # increment by one to make the base-zero index look human-friendly
-        step.order_number += 1
     
     if steps.count() == 1 and steps[0].description == '':
         # If there is only one step and it is blank, then there aren't actually any steps. Not totally sure why this happens.
@@ -385,7 +382,7 @@ def add_recipe(request):
                     step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                     step_instance = RecipeStep(
                         recipe=recipe_instance,
-                        order_number=i,
+                        order_number=i + 1,
                         description=step_description,
                     )
                     step_instances.append(step_instance)
@@ -674,7 +671,7 @@ def edit_recipe(request, key):
                 step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                 step_instance = RecipeStep(
                     recipe=recipe_instance,
-                    order_number=i,
+                    order_number=i + 1,
                     description=step_description,
                 )
                 step_instances.append(step_instance)
