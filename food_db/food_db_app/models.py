@@ -53,6 +53,10 @@ class Recipe(models.Model):
     # def get_foo(self):
     #     return json.loads(self.foo)
 
+    @property
+    def has_children(self):
+        return self.child_recipes.count() > 0
+
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
 
