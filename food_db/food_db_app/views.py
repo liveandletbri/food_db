@@ -189,7 +189,7 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
-    child_recipes = recipe.child_recipes.all()
+    child_recipe_instances = recipe.child_recipes.all()
     
     # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
     if recipe.servings_min and recipe.calories_per_recipe:
@@ -232,9 +232,21 @@ def recipe_detail(request, key):
             grocery_list_dict[ingred['food_category']].append(ingred)
     
     # If there are child recipes, gather their ingredient data too
+    child_recipes = {}
+    child_recipe_ingred_data = []
+    for i, rec in enumerate(child_recipe_instances):
+        ingred_data = RecipeIngredientData(rec, multiplier)
+        child_recipe_ingred_data.append(ingred_data)
+        child_recipes[f"child_{i}"] = {
+            'title': rec.title,
+            'ingreds_by_category': ingred_data.ingreds_by_category,
+            'ingredients_have_categories': ingred_data.ingredients_have_categories,
+            'ingredient_categories': ingred_data.ingredient_categories,
+            'steps': RecipeStep.objects.filter(recipe=rec).order_by('order_number')
+        }
     
     # convert grocery list dictionary into string
-    groceries = GroceryList([ingred_data] + [RecipeIngredientData(recipe, multiplier) for recipe in child_recipes], multiplier)
+    groceries = GroceryList([ingred_data] + child_recipe_ingred_data, multiplier)
 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     
@@ -270,6 +282,8 @@ def recipe_detail(request, key):
         'last_cooked_date': last_cooked_date,
         'has_steps': has_steps,
         'is_baking_recipe': str(recipe.is_baking_recipe),
+        'has_children': recipe.has_children,
+        'child_recipes': child_recipes,
     }
     return render(request, 'recipe_detail.html', context)
 
