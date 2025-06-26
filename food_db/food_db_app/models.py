@@ -43,6 +43,7 @@ class Recipe(models.Model):
     notes = models.TextField(blank=True)
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
     is_baking_recipe = models.BooleanField(default=False)  # Either Cooking or Baking recipe
+    child_recipes = models.ManyToManyField('self', blank=True)
 
     # foo = models.TextField(max_length=200)
 
