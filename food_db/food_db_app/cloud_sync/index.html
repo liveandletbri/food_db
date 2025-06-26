@@ -27,12 +27,9 @@
           value.childNodes.forEach((value1, index1, listObj1) => {
             value1.childNodes.forEach((value2, index2, listObj2) => {
               if (
-                value2.localName === 'Key' && (
-                  value2.textContent !== 'index.html'
-                  && ! value2.textContent.startsWith('db_backup')
-                ) 
+                value2.localName === 'Key' && value2.textContent.startsWith('recipe/')
               ){
-                var fileName = value2.textContent
+                var fileName = value2.textContent.replace('recipe/', '')
                 var url = window.location + fileName
                 var urlCleaned = url.replace("'", "%27")
                 document.writeln("<a href='" + urlCleaned + "'>" + fileName + "</a> <br>")

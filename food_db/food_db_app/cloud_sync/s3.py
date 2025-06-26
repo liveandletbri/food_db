@@ -22,7 +22,7 @@ class S3Sync():
         recipe_html = convert_recipe_to_html(recipe, self.bucket_url)
         print(f'Uploading "{title}" to S3 bucket {self.bucket_name}')
         self.s3.put_object(
-            Key=title,
+            Key=f"recipe/{title}",
             Body=recipe_html,
             ContentType='text/html'
         )
@@ -34,7 +34,7 @@ class S3Sync():
     
     def delete_recipe(self, recipe_title):
         print(f'Attempting to delete recipe "{recipe_title}" from S3 bucket {self.bucket_name}')
-        recipe = self.s3.Object(recipe_title)
+        recipe = self.s3.Object(f"recipe/{recipe_title}")
         recipe.delete()
         print(f'Successfully deleted "{recipe_title}"')
 
