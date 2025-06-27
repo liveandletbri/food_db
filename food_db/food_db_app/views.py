@@ -2,7 +2,7 @@ import json
 import re
 import requests
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
@@ -189,7 +189,7 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
-    child_recipe_instances = recipe.children
+    child_recipes = recipe.children
     
     # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
     if recipe.servings_min and recipe.calories_per_recipe:
@@ -225,20 +225,12 @@ def recipe_detail(request, key):
 
     ingred_data = RecipeIngredientData(recipe, multiplier)
     
-    # Assemble grocery list (foods by food category)
-    grocery_list_dict = defaultdict(list)
-    for ingred_list in ingred_data.ingreds_by_category.values():
-        for ingred in ingred_list:
-            grocery_list_dict[ingred['food_category']].append(ingred)
-    
     # If there are child recipes, gather their ingredient data too
-    child_recipes = {}
-    child_recipe_ingred_data = []
-    for i, rec in enumerate(child_recipe_instances):
+    recipes = OrderedDict()  # use an ordered dict so that child recipes are displayed in the order they were added
+    for rec in child_recipes + [recipe]:
         ingred_data = RecipeIngredientData(rec, multiplier)
-        child_recipe_ingred_data.append(ingred_data)
-        child_recipes[f"child_{i}"] = {
-            'title': rec.title,
+        recipes[rec.title] = {
+            'ingred_data': ingred_data,
             'ingreds_by_category': ingred_data.ingreds_by_category,
             'ingredients_have_categories': ingred_data.ingredients_have_categories,
             'ingredient_categories': ingred_data.ingredient_categories,
@@ -246,7 +238,7 @@ def recipe_detail(request, key):
         }
     
     # convert grocery list dictionary into string
-    groceries = GroceryList([ingred_data] + child_recipe_ingred_data, multiplier)
+    groceries = GroceryList([rec['ingred_data'] for rec in recipes.values()], multiplier)
 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
     

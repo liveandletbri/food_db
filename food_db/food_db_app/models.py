@@ -82,7 +82,7 @@ class Recipe(models.Model):
 
     @property
     def children(self):
-        return ParentChildRecipe.objects.filter(parent_recipe=self)
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self).order_by('order_number')]
 
     def add_child(self, child_recipe):
         '''Adds a child recipe to this recipe.'''
