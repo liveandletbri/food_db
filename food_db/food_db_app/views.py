@@ -189,7 +189,7 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
-    child_recipe_instances = recipe.child_recipes.all()
+    child_recipe_instances = recipe.children
     
     # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
     if recipe.servings_min and recipe.calories_per_recipe:
