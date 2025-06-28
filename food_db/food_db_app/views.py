@@ -69,7 +69,6 @@ class GroceryList:
     """Converts ingredient data from one or many recipes into a grocery list,
     represented as a string."""
     def __init__(self, ingred_data_list: list[RecipeIngredientData], multiplier):
-        self.food_quantity_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # food_category -> food -> unit of measurement -> list of quantities
         self.grocery_list_dict = defaultdict(list)  # food_category -> list of ingredients, after quantities are summed
         self.multiplier = multiplier
         for ingred_data in ingred_data_list:
@@ -77,15 +76,17 @@ class GroceryList:
         self._set_grocery_list_str()
 
     def _sum_food_quantities(self, ingred_data: RecipeIngredientData):
+        food_quantity_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # food_category -> food -> unit of measurement -> list of quantities
+        
         # first, gather foods by food category, and if there are multiple ingredients with the same food, record each quantity
         for ingred_list in ingred_data.ingreds_by_category.values():
             for ingred in ingred_list:
-                self.food_quantity_dict[ingred['food_category']][ingred['food']][ingred['unit_of_measurement']].append(ingred['quantity_raw'])
+                food_quantity_dict[ingred['food_category']][ingred['food']][ingred['unit_of_measurement']].append(ingred['quantity_raw'])
 
         # for cases where there are multiple ingredients with the same food and unit of measurement, sum the quantities
-        for food_category, food_dict in self.food_quantity_dict.items():
-            for food, units in food_dict.items():
-                for unit_of_measurement, quantities in units.items():
+        for food_category, food_dict in dict(food_quantity_dict).items():
+            for food, units in dict(food_dict).items():
+                for unit_of_measurement, quantities in dict(units).items():
                     summed_quantity = sum(quantities)
                     self.grocery_list_dict[food_category].append({
                         'food': food,
