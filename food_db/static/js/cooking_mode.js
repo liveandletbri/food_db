@@ -4,9 +4,10 @@ emptyVideo.loop = true
 let cookingModeContainer = document.getElementById('cooking_mode_container')
 let cookingModeTitle = document.getElementById('cooking_mode_title')
 let cookingModeSubtitle = document.getElementById('cooking_mode_subtitle')
-let stepsTable = document.getElementById('steps_table')
+let stepsTables = document.querySelectorAll('.steps_table')
+let bottomStepsTable = stepsTables[stepsTables.length - 1]
 let defaultBottomMargin = '100px'
-stepsTable.style.marginBottom = defaultBottomMargin
+bottomStepsTable.style.marginBottom = defaultBottomMargin
 
 
 function delay(ms) {
@@ -22,7 +23,7 @@ async function tooltipResetAnimation() {
 async function enterCookingMode() {
     await tooltipResetAnimation()
     emptyVideo.play()
-    stepsTable.style.marginBottom = `150px`
+    bottomStepsTable.style.marginBottom = `150px`
     cookingModeTitle.innerText = 'Cooking Mode'
     cookingModeSubtitle.innerText = 'Your screen will stay awake while you cook 👨‍🍳🤌'
 
@@ -33,7 +34,7 @@ async function enterCookingMode() {
 async function exitCookingMode() {
     await tooltipResetAnimation()
     emptyVideo.pause()
-    stepsTable.style.marginBottom = defaultBottomMargin
+    bottomStepsTable.style.marginBottom = defaultBottomMargin
     cookingModeTitle.innerText = 'Enable Cooking Mode'
     cookingModeSubtitle.innerText = ''
 
