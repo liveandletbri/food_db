@@ -31,11 +31,10 @@ class RecipeIngredientData:
 
         # Get list of ingredient categories
         ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
-        self.ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
-        self.ingredients_have_categories = self.ingredient_categories != ['']
+        self.ingredients_have_categories = [cat.name or '' for cat in ingredient_category_instances if cat] != ['']
 
         # Store ingredients in ingreds_by_category, where keys are the ingredient category
-        self.ingreds_by_category = {}
+        self.ingreds_by_category = OrderedDict()  # use an ordered dict to preserve the order of ingredient categories
         for cat in ingredient_category_instances:
             ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
             ingreds = [
@@ -230,10 +229,10 @@ def recipe_detail(request, key):
     for rec in child_recipes + [recipe]:
         ingred_data = RecipeIngredientData(rec, multiplier)
         recipes[rec.title] = {
+            'clean_key': rec.clean_key,
             'ingred_data': ingred_data,
             'ingreds_by_category': ingred_data.ingreds_by_category,
             'ingredients_have_categories': ingred_data.ingredients_have_categories,
-            'ingredient_categories': ingred_data.ingredient_categories,
             'steps': RecipeStep.objects.filter(recipe=rec).order_by('order_number')
         }
     
@@ -262,20 +261,16 @@ def recipe_detail(request, key):
 
     context = {
         'recipe': recipe,
+        'recipe_ingreds_and_steps': recipes,
         'calorie_string': calorie_string,
         'images': images,
-        'ingredients_have_categories': ingred_data.ingredients_have_categories,
-        'ingredient_categories': ingred_data.ingredient_categories,
-        'ingredients': dict(ingred_data.ingreds_by_category),
         'grocery_list': groceries.grocery_list_str,
-        'steps': steps,
         'multiplier': multiplier,
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
         'has_steps': has_steps,
         'is_baking_recipe': str(recipe.is_baking_recipe),
         'has_children': recipe.has_children,
-        'child_recipes': child_recipes,
     }
     return render(request, 'recipe_detail.html', context)
 

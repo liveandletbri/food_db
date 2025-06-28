@@ -99,82 +99,81 @@
     </tr>
     {% endif %}
 </table>
-{% if has_steps %}
+{% if has_steps or has_children %}
     <div id="ingredients_header">
         <h2>Ingredients</h2>
         <button type="button" id="show_groceries_button">Show grocery list</button>
     </div>
-    <table id="recipe_detail_ingredients_table">
-        <thead><tr>
-            {% if ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
-            <th class="recipe_detail_ingredient_food">Ingredient</th>
-            <th class="recipe_detail_ingredient_notes">Notes</th>
-        </tr></thead>
-        {% for category in ingredient_categories %}
-        <!-- A little hacky, would love to redo later. Jinja can't take a variable for a dictionary key,
-         so I can't do something like ingredients[category] as I would in Python. Instead, this awkward
-         double for loop allows me to maintain the order of categories set in ingredient_categories
-         while still accessing the ingredient_list -->
-            {% for cat, ingredient_list in ingredients.items %}
-                {% if cat == category %} 
-                    <tbody class="ingredient_category_tbody">
-                        {% if ingredients_have_categories %}
-                            <tr draggable="true" 
-                                ondrop="handleDrop(event)" 
-                                ondragover="handleDragOver(event)" 
-                                ondragstart="handleDragStart(event)"
-                                class="ingredient_category_row"
-                                data-ingredient_category="{{ category }}" 
+    {% for title, recipe_ingred_data in recipe_ingreds_and_steps.items %}
+        {% if has_children %}<h3>Ingredients for {{ title }}</h3>{% endif %}
+        <table class="recipe_detail_ingredients_table" id="{{ recipe_ingred_data.clean_key }}_ingredients_table">
+            <thead><tr>
+                {% if recipe_ingred_data.ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
+                <th class="recipe_detail_ingredient_food">Ingredient</th>
+                <th class="recipe_detail_ingredient_notes">Notes</th>
+            </tr></thead>
+            {% for category, ingredient_list in recipe_ingred_data.ingreds_by_category.items %}
+                <tbody class="ingredient_category_tbody">
+                    {% if recipe_ingred_data.ingredients_have_categories %}
+                        <tr draggable="true" 
+                            ondrop="handleDrop(event)" 
+                            ondragover="handleDragOver(event)" 
+                            ondragstart="handleDragStart(event)"
+                            class="ingredient_category_row"
+                            data-ingredient_category="{{ category }}" 
+                            data-clean_key="{{ recipe_ingred_data.clean_key }}"
+                        >
+                            <td 
+                                rowspan="{{ ingredient_list | length }}" 
+                                class="recipe_detail_ingredient_category_td"
+                                data-ingredient_category="{{ category }}"
+                                style="background-color:  {% spaceless %}
+                                    {% if forloop.counter|divisibleby:'2' %}
+                                        transparent
+                                    {% else %}
+                                        var(--table-row-color)
+                                    {% endif %}
+                                    {% endspaceless %};"
                             >
-                                <td 
-                                    rowspan="{{ ingredient_list | length }}" 
-                                    class="recipe_detail_ingredient_category_td"
-                                    data-ingredient_category="{{ category }}"
-                                    style="background-color:  {% spaceless %}
-                                        {% if forloop.counter|divisibleby:'2' %}
-                                            transparent
-                                        {% else %}
-                                            var(--table-row-color)
-                                        {% endif %}
-                                        {% endspaceless %};"
-                                >
-                                    <i class="fa-solid fa-grip-vertical grip-icon"></i>
-                                    <span>&#160;&#160;&#160;{% if category != '' %}{{ category }}{% else %}Misc{% endif %}</span>
-                                </td>
+                                <i class="fa-solid fa-grip-vertical grip-icon"></i>
+                                <span>&#160;&#160;&#160;{% if category != '' %}{{ category }}{% else %}Misc{% endif %}</span>
+                            </td>
+                    {% endif %}
+                    {% for ingredient in ingredient_list %}
+                        <!-- This syntax should work as 
+                            if (ingredients_have_categories and not forloop.first)
+                            or (not ingredients_have_categories)
+                        -->
+                        {% if recipe_ingred_data.ingredients_have_categories and not forloop.first or not recipe_ingred_data.ingredients_have_categories %} 
+                            <tr data-ingredient_category="{{ category }}">
                         {% endif %}
-                        {% for ingredient in ingredient_list %}
-                            <!-- This syntax should work as 
-                                if (ingredients_have_categories and not forloop.first)
-                                or (not ingredients_have_categories)
-                            -->
-                            {% if ingredients_have_categories and not forloop.first or not ingredients_have_categories %} 
-                                <tr data-ingredient_category="{{ category }}">
-                            {% endif %}
-                                <td class="recipe_detail_ingredient_food">{{ ingredient.quantity }} {{ ingredient.food }}</td>
-                                <td class="recipe_detail_ingredient_notes"
-                                    data-food_category="{{ ingredient.food_category }}"
-                                    data-quantity="{{ ingredient.quantity }}" 
-                                    data-food="{{ ingredient.food }}"
-                                >
-                                    {{ ingredient.notes }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                {% endif %}
+                            <td class="recipe_detail_ingredient_food">{{ ingredient.quantity }} {{ ingredient.food }}</td>
+                            <td class="recipe_detail_ingredient_notes"
+                                data-food_category="{{ ingredient.food_category }}"
+                                data-quantity="{{ ingredient.quantity }}" 
+                                data-food="{{ ingredient.food }}"
+                            >
+                                {{ ingredient.notes }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
             {% endfor %}
-        {% endfor %}
-    </table>
+        </table>
+    {% endfor %}
 
     <h2>Steps</h2>
-    <table id="steps_table">
-        {% for step in steps %}
-            <tr>
-                <td class="step_number">{{ step.order_number }}.</td>
-                <td class="step_description_text">{{ step.description | markdown | safe }}</td>
-            </tr>
+        {% for title, recipe_step_data in recipe_ingreds_and_steps.items %}
+            {% if has_children %}<h3>Steps for {{ title }}</h3>{% endif %}
+            <table class="steps_table">
+            {% for step in recipe_step_data.steps %}
+                <tr>
+                    <td class="step_number">{{ step.order_number }}.</td>
+                    <td class="step_description_text">{{ step.description | markdown | safe }}</td>
+                </tr>
+            {% endfor %}
+            </table>
         {% endfor %}
-    </table>
     <div id="grocery_list_modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
