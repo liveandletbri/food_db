@@ -166,9 +166,14 @@ async function validateAddRecipe(e) {
     }
 }
 
-isBakingInput.addEventListener('change', function() {
-    // Set the value of the hidden input to match the switch
+function updateHiddenIsBakingInput() {
+    // Update form input (which is invisible) to match navbar switch
     document.getElementById('id_is_baking_recipe').checked = isBakingInput.checked
-})
+}
+
+window.onload = function() {
+    updateHiddenIsBakingInput() // make them match on on page load
+}
+isBakingInput.addEventListener('change', updateHiddenIsBakingInput)
 
 submitRecipeButton.addEventListener('click', validateAddRecipe)

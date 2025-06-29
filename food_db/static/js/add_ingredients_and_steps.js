@@ -21,7 +21,8 @@ function addListenersToRowButtons() {
 }
 
 // Need to wait for "onload" to be after all the SVGs are rendered by Font Awesome magic
-window.onload = function() {
+function onLoadSetup() {
+    console.log("Adding listeners to row buttons")
     addListenersToRowButtons()
 
     let markdownHelpIcon = document.querySelector("#markdown_help_icon")
@@ -33,6 +34,8 @@ window.onload = function() {
     markdownHelpTooltip.style.left = `${recipeStepsHeader.offsetLeft + 180}px`;
     markdownHelpTooltip.style.top = `${recipeStepsHeader.offsetTop + 8}px`;
 }
+
+window.addEventListener('load', onLoadSetup)
 
 function getHighestIngredientNumber () {
     // Since you can delete and add rows in the middle of the table, we need to find the highest ingredient ID number and increment that for the new row
