@@ -1,14 +1,26 @@
 let emptyVideo = document.getElementById('video_empty')
 emptyVideo.loop = true
 
+let recipeHasChildren = JSON.parse(recipeHasChildrenRaw.textContent)
+
 let cookingModeContainer = document.getElementById('cooking_mode_container')
 let cookingModeTitle = document.getElementById('cooking_mode_title')
 let cookingModeSubtitle = document.getElementById('cooking_mode_subtitle')
-let stepsTables = document.querySelectorAll('.steps_table')
-let bottomStepsTable = stepsTables[stepsTables.length - 1]
 let defaultBottomMargin = '100px'
-bottomStepsTable.style.marginBottom = defaultBottomMargin
+adjustBottomMargin(defaultBottomMargin)
 
+
+function adjustBottomMargin(marginPx) {
+    if (recipeHasChildren) {
+        let collapsibleDetails = document.querySelectorAll('.child_recipe_details')
+        let bottomCollapsibleDetail = collapsibleDetails[collapsibleDetails.length - 1]
+        bottomCollapsibleDetail.style.marginBottom = marginPx
+    } else {
+        let stepsTables = document.querySelectorAll('.steps_table')
+        let bottomStepsTable = stepsTables[stepsTables.length - 1]
+        bottomStepsTable.style.marginBottom = marginPx
+    }
+}
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -23,7 +35,7 @@ async function tooltipResetAnimation() {
 async function enterCookingMode() {
     await tooltipResetAnimation()
     emptyVideo.play()
-    bottomStepsTable.style.marginBottom = `150px`
+    adjustBottomMargin('150px')
     cookingModeTitle.innerText = 'Cooking Mode'
     cookingModeSubtitle.innerText = 'Your screen will stay awake while you cook 👨‍🍳🤌'
 
@@ -34,7 +46,7 @@ async function enterCookingMode() {
 async function exitCookingMode() {
     await tooltipResetAnimation()
     emptyVideo.pause()
-    bottomStepsTable.style.marginBottom = defaultBottomMargin
+    adjustBottomMargin(defaultBottomMargin)
     cookingModeTitle.innerText = 'Enable Cooking Mode'
     cookingModeSubtitle.innerText = ''
 
