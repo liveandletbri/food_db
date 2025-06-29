@@ -23,6 +23,30 @@ class PathAndRename(object):
 
 rename_image_recipe = PathAndRename("images/recipes/")
 
+class ParentChildRecipe(models.Model):
+    def __str__(self):
+        return f'Parent: {self.parent_recipe.title} - Child: {self.child_recipe.title}'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['parent_recipe', 'child_recipe'], name='unique_parent_child_recipe')
+        ]
+    parent_recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+        related_name='child_relationship',
+    )
+    child_recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+        related_name='parent_relationship',
+    )
+    order_number = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Order number for the child recipe when displayed on page for parent recipe. Lower numbers appear first.",
+    )
+    _date_created = models.DateTimeField(default=timezone.now)
+
 class Recipe(models.Model):
     def __str__(self):
         return self.title
@@ -51,6 +75,29 @@ class Recipe(models.Model):
 
     # def get_foo(self):
     #     return json.loads(self.foo)
+
+    @property
+    def has_children(self):
+        return self.child_relationship.count() > 0
+
+    @property
+    def children(self):
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self).order_by('order_number')]
+
+    def add_child(self, child_recipe):
+        '''Adds a child recipe to this recipe.'''
+        if not isinstance(child_recipe, Recipe):
+            raise ValueError("child_recipe must be an instance of Recipe")
+        existing_children = ParentChildRecipe.objects.filter(parent_recipe=self)
+        if existing_children.count() > 0:
+            order_number = ParentChildRecipe.objects.aggregate(max_order=models.Max('order_number'))['max_order'] + 1
+        else:
+            order_number = 0
+        ParentChildRecipe.objects.create(
+            parent_recipe=self,
+            child_recipe=child_recipe,
+            order_number=order_number,
+        )
 
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)

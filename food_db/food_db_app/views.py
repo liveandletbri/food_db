@@ -2,7 +2,7 @@ import json
 import re
 import requests
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
@@ -22,6 +22,89 @@ from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 LAST_DEBUG_LOG_START_TIME = None
 LAST_DEBUG_LOG_TIME = None
+
+class RecipeIngredientData:
+    """Assembles lists and dicts needed to display ingredients in the recipe detail view."""
+    def __init__(self, recipe, multiplier):
+        self.recipe = recipe
+        self.multiplier = multiplier
+
+        # Get list of ingredient categories
+        ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
+        self.ingredients_have_categories = [cat.name or '' for cat in ingredient_category_instances if cat] != ['']
+
+        # Store ingredients in ingreds_by_category, where keys are the ingredient category
+        self.ingreds_by_category = OrderedDict()  # use an ordered dict to preserve the order of ingredient categories
+        for cat in ingredient_category_instances:
+            ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
+            ingreds = [
+                {
+                    'quantity': self.stringify_ingredient_quantity(ingred.quantity, ingred.unit_of_measurement.name or '', self.multiplier),  # set a stringified quantity that can be displayed in web template
+                    'quantity_raw': ingred.quantity if ingred.quantity else 0,  # leave raw quantity for grocery list calculation
+                    'unit_of_measurement': ingred.unit_of_measurement.name if ingred.unit_of_measurement else '',
+                    'food': ingred.food.name,
+                    'notes': ingred.notes,
+                    'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
+                }
+                for ingred in ingred_instances
+            ]
+            self.ingreds_by_category[cat.name] = ingreds
+        
+        # Assemble grocery list (foods by food category)
+        self.grocery_list_dict = defaultdict(list)
+        for ingred_list in self.ingreds_by_category.values():
+            for ingred in ingred_list:
+                self.grocery_list_dict[ingred['food_category']].append(ingred)
+    
+    @staticmethod
+    def stringify_ingredient_quantity(quantity, unit, multiplier):
+        if quantity:
+            # Apply multiplier to ingredient quantities
+            quant = str(round(quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
+            return f"{quant} {unit}{'s' if quantity > 1 and unit != '' else ''}"
+        else:
+            return ''
+
+class GroceryList:
+    """Converts ingredient data from one or many recipes into a grocery list,
+    represented as a string."""
+    def __init__(self, ingred_data_list: list[RecipeIngredientData], multiplier):
+        self.grocery_list_dict = defaultdict(list)  # food_category -> list of ingredients, after quantities are summed
+        self.multiplier = multiplier
+        for ingred_data in ingred_data_list:
+            self._sum_food_quantities(ingred_data)
+        self._set_grocery_list_str()
+
+    def _sum_food_quantities(self, ingred_data: RecipeIngredientData):
+        food_quantity_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # food_category -> food -> unit of measurement -> list of quantities
+        
+        # first, gather foods by food category, and if there are multiple ingredients with the same food, record each quantity
+        for ingred_list in ingred_data.ingreds_by_category.values():
+            for ingred in ingred_list:
+                food_quantity_dict[ingred['food_category']][ingred['food']][ingred['unit_of_measurement']].append(ingred['quantity_raw'])
+
+        # for cases where there are multiple ingredients with the same food and unit of measurement, sum the quantities
+        for food_category, food_dict in dict(food_quantity_dict).items():
+            for food, units in dict(food_dict).items():
+                for unit_of_measurement, quantities in dict(units).items():
+                    summed_quantity = sum(quantities)
+                    self.grocery_list_dict[food_category].append({
+                        'food': food,
+                        'quantity': RecipeIngredientData.stringify_ingredient_quantity(summed_quantity, unit_of_measurement, self.multiplier),
+                    })
+
+    def _set_grocery_list_str(self):
+        # convert grocery list dictionary into string
+        self.grocery_list_str = ''
+        for i, (food_category, ingred_list_unsorted) in enumerate(self.grocery_list_dict.items()):
+            ingred_list = sorted(ingred_list_unsorted, key=lambda x: x['food'].lower())  # sort by food name
+            if food_category == '':
+                food_category = 'Unknown'
+            self.grocery_list_str += f'{food_category}:\n'
+            self.grocery_list_str += '\n'.join([f'- {ingred["quantity"] + " " if ingred["quantity"] != "" else ""}{ingred["food"]}' for ingred in ingred_list])
+            # add double line breaks on all but final food category
+            if i < len(self.grocery_list_dict) - 1:
+                self.grocery_list_str += '\n\n'
 
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
@@ -106,6 +189,7 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
+    child_recipes = recipe.children
     
     # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
     if recipe.servings_min and recipe.calories_per_recipe:
@@ -139,56 +223,24 @@ def recipe_detail(request, key):
 
     images = [recipe_image.image for recipe_image in RecipeImage.objects.filter(recipe=recipe)]
 
-    # Get list of ingredient categories
-    ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
-    ingredient_categories = [cat.name or '' for cat in ingredient_category_instances if cat]
-    ingredients_have_categories = ingredient_categories != ['']
-
-    def stringify_ingredient_quantity(ingred):
-        if ingred.quantity:
-            # Apply multiplier to ingredient quantities
-            quant = str(round(ingred.quantity * Decimal(multiplier),2)).rstrip('0').rstrip('.')
-            return f"{quant} {ingred.unit_of_measurement.name or ''}{'s' if ingred.quantity > 1 and ingred.unit_of_measurement.name != '' else ''}"
-        else:
-            return ''
-
-    # Store ingredients in ingreds_by_category, where keys are the ingredient category
-    ingreds_by_category = {}
-    for cat in ingredient_category_instances:
-        ingred_instances = list(Ingredient.objects.filter(recipe=recipe, ingredient_category=cat))
-        ingreds = [
-            {
-                'quantity': stringify_ingredient_quantity(ingred),
-                'food': ingred.food.name,
-                'notes': ingred.notes,
-                'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
-            }
-            for ingred in ingred_instances
-        ]
-        ingreds_by_category[cat.name] = ingreds
+    ingred_data = RecipeIngredientData(recipe, multiplier)
     
-    # Assemble grocery list (foods by food category)
-    grocery_list_dict = defaultdict(list)
-    for ingred_list in ingreds_by_category.values():
-        for ingred in ingred_list:
-            grocery_list_dict[ingred['food_category']].append(ingred)
+    # If there are child recipes, gather their ingredient data too
+    recipes = OrderedDict()  # use an ordered dict so that child recipes are displayed in the order they were added
+    for rec in child_recipes + [recipe]:
+        ingred_data = RecipeIngredientData(rec, multiplier)
+        recipes[rec.title] = {
+            'clean_key': rec.clean_key,
+            'ingred_data': ingred_data,
+            'ingreds_by_category': ingred_data.ingreds_by_category,
+            'ingredients_have_categories': ingred_data.ingredients_have_categories,
+            'steps': RecipeStep.objects.filter(recipe=rec).order_by('order_number')
+        }
     
     # convert grocery list dictionary into string
-    grocery_list_str = ''
-    for i, (food_category, ingred_list) in enumerate(grocery_list_dict.items()):
-        if food_category == '':
-            food_category = 'Unknown'
-        grocery_list_str += f'{food_category}:\n'
-        grocery_list_str += '\n'.join([f'- {ingred["quantity"] + " " if ingred["quantity"] != "" else ""}{ingred["food"]}' for ingred in ingred_list])
-        # add double line breaks on all but final food category
-        if i < len(grocery_list_dict) - 1:
-            grocery_list_str += '\n\n'
+    groceries = GroceryList([rec['ingred_data'] for rec in recipes.values()], multiplier)
 
-    # Order steps and increment the base-zero order_number 
     steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
-    for step in steps:
-        # increment by one to make the base-zero index look human-friendly
-        step.order_number += 1
     
     if steps.count() == 1 and steps[0].description == '':
         # If there is only one step and it is blank, then there aren't actually any steps. Not totally sure why this happens.
@@ -210,18 +262,16 @@ def recipe_detail(request, key):
 
     context = {
         'recipe': recipe,
+        'recipe_ingreds_and_steps': recipes,
         'calorie_string': calorie_string,
         'images': images,
-        'ingredients_have_categories': ingredients_have_categories,
-        'ingredient_categories': ingredient_categories,
-        'ingredients': dict(ingreds_by_category),
-        'grocery_list': grocery_list_str,
-        'steps': steps,
+        'grocery_list': groceries.grocery_list_str,
         'multiplier': multiplier,
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
         'has_steps': has_steps,
         'is_baking_recipe': str(recipe.is_baking_recipe),
+        'has_children': recipe.has_children,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -385,7 +435,7 @@ def add_recipe(request):
                     step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                     step_instance = RecipeStep(
                         recipe=recipe_instance,
-                        order_number=i,
+                        order_number=i + 1,
                         description=step_description,
                     )
                     step_instances.append(step_instance)
@@ -674,7 +724,7 @@ def edit_recipe(request, key):
                 step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
                 step_instance = RecipeStep(
                     recipe=recipe_instance,
-                    order_number=i,
+                    order_number=i + 1,
                     description=step_description,
                 )
                 step_instances.append(step_instance)
