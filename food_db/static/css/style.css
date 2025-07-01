@@ -765,11 +765,11 @@ input:checked + .slider .off {
 }
 .child_recipe_details {
     margin-left: 20px;
-  width: 95%;
-  margin: 0 auto 2rem auto;;
-  border-radius: 5px;
-  overflow: hidden;
-  box-shadow: 0 .1rem 1rem -.5rem rgba(0,0,0,.4);
+    width: 95%;
+    margin: 0 auto 2rem auto;;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 .1rem 1rem -.5rem rgba(0,0,0,.4);
 }
 .child_recipe_details > .recipe_detail_ingredients_table {
     margin: 0; /* Most tables have a 2rem margin at the bottom, but I added this margin to the details element instead */
@@ -779,9 +779,36 @@ input:checked + .slider .off {
 }
 /* Animations for open/close */
 details summary {
-  transition: margin 150ms ease-out;
+    transition: margin 150ms ease-out;
+}
+details[open] summary {
+    margin-bottom: 10px;
 }
 
-details[open] summary {
-  margin-bottom: 10px;
+/* Attaching child recipes */
+#recipe_search_input {
+    width: 50%;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;;
+}
+#child_recipes_div {
+    margin-left: 20px;
+    margin-bottom: 2rem;
+}
+.attached_child_recipe_div {
+    display: flex;
+    align-items: center;
+}
+#add_child_recipe_button {
+    cursor: pointer;
+}
+.delete_child_recipe_button {
+    margin-left: 8px;
+    cursor: pointer;
+}
+.move_child_recipe_button {
+    margin-left: 12px;
+    cursor: pointer;
+    color: #808080;
 }

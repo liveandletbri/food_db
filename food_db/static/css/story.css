@@ -3021,6 +3021,11 @@ input::-moz-focus-inner {
 			background-color: var(--table-row-color) !important;
 		}
 		
+		/* force row to be transparent with <tr class="transparent"> */
+		table tbody tr.transparent {
+			background-color: transparent !important;
+		}
+		
 		/* force first td in the tr to be white <tr class="ingredient_category_row"> */
 		table tbody tr.ingredient_category_row {
 			background-color: transparent;

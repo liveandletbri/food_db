@@ -281,6 +281,7 @@ def add_recipe(request):
     existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
     existing_books = [book.name for book in RecipeBook.objects.all()]
     existing_tags = [tag for tag in Tag.objects.all().order_by('name')]
+    existing_recipes = {recipe.title: recipe.clean_key for recipe in Recipe.objects.all().order_by('title')}
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
@@ -472,6 +473,7 @@ def add_recipe(request):
         'unit_list': existing_units,
         'book_list': existing_books,
         'tag_list': existing_tags,
+        'recipe_list': existing_recipes,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -525,6 +527,7 @@ def edit_recipe(request, key):
     log_debug_message('edit_recipe() called', restart_timer=True)
     recipe_instance = get_object_or_404(Recipe, clean_key=key)
     existing_recipe_title = deepcopy(recipe_instance.title)  # Make a copy of the title so we can check if it was changed later
+    existing_recipes = {recipe.title: recipe.clean_key for recipe in Recipe.objects.all().order_by('title')}
 
     # If this is a POST request then process the Form data similarly to an add_recipe request, 
     if request.method == 'POST':
@@ -820,6 +823,7 @@ def edit_recipe(request, key):
         'unit_list': existing_units,
         'book_list': existing_books,
         'tag_list': existing_tags,
+        'recipe_list': existing_recipes,
         'is_baking_recipe': str(recipe_instance.is_baking_recipe),
     }
 

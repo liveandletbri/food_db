@@ -3,6 +3,7 @@
 {% block content %}
 
 {{ mode|json_script:"addOrEditModeRaw" }}
+{{ recipe_list|json_script:"existingRecipesRaw" }}
 
 <h1>{% if mode == 'add' %}Add a recipe{% else %}Edit recipe: {{create_recipe_form.title.value}}{% endif %}</h1>
 <!-- Action tells which URL to reroute to on form submission. Leaving it blank means stay on this page -->
@@ -139,6 +140,32 @@
             </td>
         </tr>
     </table>
+
+    <!-- On the search page, I use a form for searching recipes. Since this is in the middle of the add/edit form,
+    and you can't nest forms, I am using Javascript to manage the GET requests of the search and the injection of
+    the results. -->
+    <h2>Linked Sub-Recipes</h2>
+    <h4>You can search for recipes here that make up components of this parent recipe. A parent recipe does not need ingredients or steps if it's made up of child recipes, but you can add ingredients/steps to the parent recipe as well (like for topping and/or assembly instructions). Drag the sub-recipes to determine the order they are displayed in. Anything you add to the parent recipe here will always be shown last.</h4>
+    <div style="display: flex;">
+        <input type="text" id="recipe_search_input" placeholder="Search for a recipe to add as a child recipe" list="list__recipe-list">
+        <img id="add_child_recipe_button" src="{% static 'img/plus-icon.svg' %}" width="30" height="30" alt="Attach sub-recipe"/>
+        <datalist id="list__recipe-list">
+            {% for rec_title, key in recipe_list.items %}
+            <option value="{{ rec_title }}">
+            {% endfor %}
+        </datalist>
+    </div>
+    <div id="child_recipes_div" class="left_side_of_page">
+        <!-- Child recipes will go here -->
+    </div>
+    <!-- This is an example of a child recipe that is set to be invisible. The Javascript in add_child_recipe.js will clone it when adding new children. -->
+    <div id="example_child_recipe" style="display: none;" data-recipe_name="Recipe Name" class="attached_child_recipe_div">
+        <a href="" target="_blank">Recipe Name</a>
+        <i class="fa-solid fa-arrow-up move_child_recipe_button move_child_recipe_up_button" title="Move up"></i>
+        <i class="fa-solid fa-arrow-down move_child_recipe_button move_child_recipe_down_button" title="Move down"></i>
+        <img class="delete_child_recipe_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>
+    </div>
+
     <!-- This is an input to the form, but its value is set in recipe_add_form_validate.js. The user changes the switch on the navbar, and then this input's value is set to match it. This input is invisble. -->
     <input style="display: none;" type="checkbox" name="is_baking_recipe" id="id_is_baking_recipe">
     <h2>
@@ -237,6 +264,7 @@
 </form>
 
 <script src="{% static 'js/swap_cooking_baking.js' %}"></script>
+<script src="{% static 'js/add_child_recipe.js' %}"></script>
 <script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/add_ingredients_and_steps.js' %}"></script>
 <script src="{% static 'js/ingredient_parse.js' %}"></script>

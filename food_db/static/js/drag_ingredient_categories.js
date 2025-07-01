@@ -45,7 +45,7 @@ function parseIngredTables(tableNodeList) {
     }, {})
 }
 
-async function handleDrop(e) {
+async function handleDragIngredCategoryDrop(e) {
     let targetElement = e.target;
     if (targetElement.nodeName == "TD") {
         // Target the parent row so we can standardize the code below
@@ -105,7 +105,7 @@ async function handleDrop(e) {
     }
 }
 
-function handleDragStart(e) {
+function handleDragIngredCategoryStart(e) {
     source = e.target;
     if (source.nodeName == "TD") {
         // Target the parent row
@@ -119,6 +119,6 @@ function handleDragStart(e) {
     e.dataTransfer.effectAllowed = 'move';
 }
 
-function handleDragOver(e) {
+function handleDragIngredCategoryOver(e) {
     e.preventDefault(); // Necessary. Allows us to drop.
 }

@@ -119,9 +119,9 @@
                 <tbody class="ingredient_category_tbody">
                     {% if recipe_ingred_data.ingredients_have_categories %}
                         <tr draggable="true" 
-                            ondrop="handleDrop(event)" 
-                            ondragover="handleDragOver(event)" 
-                            ondragstart="handleDragStart(event)"
+                            ondrop="handleDragIngredCategoryDrop(event)" 
+                            ondragover="handleDragIngredCategoryOver(event)" 
+                            ondragstart="handleDragIngredCategoryStart(event)"
                             class="ingredient_category_row"
                             data-ingredient_category="{{ category }}" 
                             data-clean_key="{{ recipe_ingred_data.clean_key }}"

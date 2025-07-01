@@ -2,6 +2,8 @@
 {% load static %}
 {% block content %}
 
+{{ recipe_data|json_script:"searchResultsRaw" }}
+
 <form class="left_side_of_page" id="search_form" method="get">
     <div>
         <label>{{ text_search.form.title.label }}:</label>
