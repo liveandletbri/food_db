@@ -690,12 +690,26 @@ button.merge_selected {
 
 .slider_switch {
     position: relative;
-    /* display: inline-block; This is what it is set to on pages where it is visible */ 
+    /* display: inline-block; This is what JS sets it to on pages where it is visible */ 
     display: none;
     width: 130px;
     height: 34px;
-    margin-left: 20px;
     margin-top: 5px;
+}
+
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    .slider_switch {
+        margin-left: 20px;
+        width: 130px;
+    }
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    .slider_switch {
+        margin-left: 5px;
+        width: 110px;
+    }
 }
 
 .slider_switch input {
@@ -731,11 +745,21 @@ button.merge_selected {
 input:checked + .slider {
     background-color: var(--baking-color);
 }
-
-input:checked + .slider:before {
-    -webkit-transform: translateX(95px);
-    -ms-transform: translateX(95px);
-    transform: translateX(95px);
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    input:checked + .slider:before {
+        -webkit-transform: translateX(95px);
+        -ms-transform: translateX(95px);
+        transform: translateX(95px);
+    }
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    input:checked + .slider:before {
+        -webkit-transform: translateX(76px);
+        -ms-transform: translateX(76px);
+        transform: translateX(76px);
+    }
 }
 
 .on {
