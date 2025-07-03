@@ -26,11 +26,12 @@
         oDOM.childNodes.forEach((value, index, listObj) => {
           value.childNodes.forEach((value1, index1, listObj1) => {
             value1.childNodes.forEach((value2, index2, listObj2) => {
+              var fullKey =  value2.textContent
               if (
-                value2.localName === 'Key' && value2.textContent.startsWith('recipe/')
+                value2.localName === 'Key' && fullKey.startsWith('recipe/')
               ){
-                var fileName = value2.textContent.replace('recipe/', '')
-                var url = window.location + fileName
+                var fileName = fullKey.replace('recipe/', '')
+                var url = window.location + fullKey
                 var urlCleaned = url.replace("'", "%27")
                 document.writeln("<a href='" + urlCleaned + "'>" + fileName + "</a> <br>")
               }
