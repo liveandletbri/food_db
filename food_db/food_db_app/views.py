@@ -444,6 +444,15 @@ def add_recipe(request):
                 RecipeStep.objects.bulk_create(step_instances)
             log_debug_message(f'finished steps')
 
+            child_recipe_keys = request.POST.getlist('child_recipe')
+            child_recipe_keys.remove('recipe_key')  # this is the example value and can be ignored
+            if len(child_recipe_keys) > 0:
+                for child_recipe_key in child_recipe_keys:
+                    child_recipe = Recipe.objects.get(clean_key=child_recipe_key)
+                    recipe_instance.add_child(child_recipe)
+
+            log_debug_message('created child recipes')
+
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
@@ -737,6 +746,18 @@ def edit_recipe(request, key):
                 RecipeStep.objects.bulk_create(step_instances)
 
             log_debug_message(f'finished steps')
+
+            child_recipe_keys = request.POST.getlist('child_recipe')
+            child_recipe_keys.remove('recipe_key')  # this is the example value and can be ignored
+            if len(child_recipe_keys) > 0:
+                # First remove existing child recipes
+                recipe_instance.remove_all_children()
+                # Add the ones declared here
+                for child_recipe_key in child_recipe_keys:
+                    child_recipe = Recipe.objects.get(clean_key=child_recipe_key)
+                    recipe_instance.add_child(child_recipe)
+
+            log_debug_message('created child recipes')
 
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:

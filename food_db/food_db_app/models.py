@@ -98,6 +98,9 @@ class Recipe(models.Model):
             child_recipe=child_recipe,
             order_number=order_number,
         )
+    
+    def remove_all_children(self):
+        ParentChildRecipe.objects.filter(parent_recipe=self).delete()
 
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)

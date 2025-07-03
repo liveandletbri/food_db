@@ -45,6 +45,10 @@ function attachChildRecipe(e) {
     recipeLink.setAttribute('href', recipeUrl)
     recipeLink.textContent = recipeTitleInput
 
+    // Add recipe key to hidden input
+    let childRecipeInput = childRecipe.querySelectorAll('input')[0]
+    childRecipeInput.setAttribute('value', recipeKey)
+
     childRecipeContainer.appendChild(childRecipe)
     childRecipeSearchInput.value = ''
     addListenersToChildRecipeButtons()
