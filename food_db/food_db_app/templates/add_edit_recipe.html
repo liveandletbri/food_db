@@ -157,6 +157,17 @@
     </div>
     <div id="child_recipes_div" class="left_side_of_page">
         <!-- Child recipes will go here -->
+        {% if mode == 'edit' %}
+            {% for child_recipe in child_recipes %}
+                <div name="child_recipe" data-recipe_name="{{ child_recipe.title }}" class="attached_child_recipe_div">
+                    <input type="hidden" name="child_recipe" value="{{ child_recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
+                    <a href="" target="_blank">{{ child_recipe.title }}</a>
+                    <i class="fa-solid fa-arrow-up move_child_recipe_button move_child_recipe_up_button" title="Move up"></i>
+                    <i class="fa-solid fa-arrow-down move_child_recipe_button move_child_recipe_down_button" title="Move down"></i>
+                    <img class="delete_child_recipe_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
     <!-- This is an example of a child recipe that is set to be invisible. The Javascript in add_child_recipe.js will clone it when adding new children. -->
     <div id="example_child_recipe" name="child_recipe" style="display: none;" data-recipe_name="Recipe Name" class="attached_child_recipe_div">

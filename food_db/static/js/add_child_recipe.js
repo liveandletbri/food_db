@@ -13,6 +13,8 @@ function addListenersToChildRecipeButtons() {
     deleteButtons.forEach(btn => btn.addEventListener('click', deleteChildRecipe, btn))
 }
 
+addListenersToChildRecipeButtons()
+
 function attachChildRecipe(e) {
     e.preventDefault()  // This textbox is in a form and I don't want Enter to trigger form submission
     let childRecipe = exampleChildRecipe.cloneNode(true)

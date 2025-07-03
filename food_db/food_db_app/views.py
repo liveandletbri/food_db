@@ -778,6 +778,7 @@ def edit_recipe(request, key):
         related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
+        child_recipes = recipe_instance.children
 
         existing_foods = [food.name for food in Food.objects.all()]
         existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
@@ -846,6 +847,7 @@ def edit_recipe(request, key):
         'tag_list': existing_tags,
         'recipe_list': existing_recipes,
         'is_baking_recipe': str(recipe_instance.is_baking_recipe),
+        'child_recipes': child_recipes,
     }
 
     return render(request, 'add_edit_recipe.html', context)
