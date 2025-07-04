@@ -50,11 +50,11 @@ async function submitAndHideTagForm(){
         // Render the response text as an html element, then extract the new search result div from its innards
         let responseHtml = document.createElement('html');
         responseHtml.innerHTML = pageResponse;
-        let reponseTags = responseHtml.querySelector('#tags_table');
+        let responseTags = responseHtml.querySelector('#tags_table');
         let tagsTable = document.getElementById('tags_table')
 
         // Frankenstein it right into our existing page, using swapCookingOrBakingTags from swap_cooking_baking.js
-        tagsTable.innerHTML = swapCookingOrBakingTags(isBakingInput, reponseTags.innerHTML)
+        tagsTable.innerHTML = swapCookingOrBakingTags(responseTags.innerHTML)
     }
 }
 
