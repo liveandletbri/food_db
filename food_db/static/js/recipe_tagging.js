@@ -54,7 +54,7 @@ async function submitAndHideTagForm(){
         let tagsTable = document.getElementById('tags_table')
 
         // Frankenstein it right into our existing page, using swapCookingOrBakingTags from swap_cooking_baking.js
-        tagsTable.innerHTML = swapCookingOrBakingTags(responseTags.innerHTML)
+        tagsTable.innerHTML = swapCookingOrBakingTags(responseTags).innerHTML
     }
 }
 

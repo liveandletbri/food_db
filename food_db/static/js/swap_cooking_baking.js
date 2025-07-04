@@ -22,6 +22,7 @@ function swapCookingOrBakingTags(element) {
             div.style.display = 'block'
         }
     }
+    return element
 }
 
 function swapCookingOrBakingColors(isBaking) {
