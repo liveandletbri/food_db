@@ -379,16 +379,23 @@ def add_recipe(request):
                     ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                     # Check if food specified in ingredient already exists. If not, create it.
-                    existing_foods = [food.clean_key for food in Food.objects.all()]
-                    selected_food = sanitize_string(ingred['food'])
-                    if 'salt' in selected_food and 'pepper' in selected_food:
-                        selected_food = 'salt-and-pepper'
-                    if selected_food not in existing_foods:
-                        new_food = Food(
-                            name=ingred['food'],
-                            clean_key=selected_food,
-                        )
-                        new_food.save()
+                    existing_food_keys = [food.clean_key for food in Food.objects.all()]
+                    existing_food_names = [food.name for food in Food.objects.all()]
+                    selected_food_name = ingred['food']
+                    selected_food_key = sanitize_string(selected_food_name)
+                    if 'salt' in selected_food_key and 'pepper' in selected_food_key:
+                        selected_food_key = 'salt-and-pepper'
+                    if selected_food_key not in existing_food_keys:
+                        # Sometimes, when foods are merged, the clean_key no longer matches the name, so just checking keys
+                        # may not be sufficient. Do a second check by name to ensure food name uniqueness.
+                        if selected_food_name in existing_food_names:
+                            selected_food_key = Food.objects.get(name=selected_food_name).clean_key
+                        else:
+                            new_food = Food(
+                                name=selected_food_name,
+                                clean_key=selected_food_key,
+                            )
+                            new_food.save()
                     
                     # Same for unit of measurement
                     existing_units = [unit.clean_key for unit in UnitOfMeasurement.objects.all()]
@@ -418,7 +425,7 @@ def add_recipe(request):
                     
                     # Save ingredient
                     ingredient_instance = Ingredient(
-                        food=Food.objects.get(clean_key=selected_food),
+                        food=Food.objects.get(clean_key=selected_food_key),
                         recipe=recipe_instance,
                         unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                         quantity=ingred['quantity'],
@@ -672,16 +679,23 @@ def edit_recipe(request, key):
                 ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
 
                 # Check if food specified in ingredient already exists. If not, create it.
-                existing_foods = [food.clean_key for food in Food.objects.all()]
-                selected_food = sanitize_string(ingred['food'])
-                if 'salt' in selected_food and 'pepper' in selected_food:
-                    selected_food = 'salt-and-pepper'
-                if selected_food not in existing_foods:
-                    new_food = Food(
-                        name=ingred['food'],
-                        clean_key=selected_food,
-                    )
-                    new_food.save()
+                existing_food_keys = [food.clean_key for food in Food.objects.all()]
+                existing_food_names = [food.name for food in Food.objects.all()]
+                selected_food_name = ingred['food']
+                selected_food_key = sanitize_string(selected_food_name)
+                if 'salt' in selected_food_key and 'pepper' in selected_food_key:
+                    selected_food_key = 'salt-and-pepper'
+                if selected_food_key not in existing_food_keys:
+                    # Sometimes, when foods are merged, the clean_key no longer matches the name, so just checking keys
+                    # may not be sufficient. Do a second check by name to ensure food name uniqueness.
+                    if selected_food_name in existing_food_names:
+                        selected_food_key = Food.objects.get(name=selected_food_name).clean_key
+                    else:
+                        new_food = Food(
+                            name=selected_food_name,
+                            clean_key=selected_food_key,
+                        )
+                        new_food.save()
                 
                 # Same for unit of measurement
                 existing_units = [unit.clean_key for unit in UnitOfMeasurement.objects.all()]
@@ -711,7 +725,7 @@ def edit_recipe(request, key):
                 
                 # Create ingredient instance
                 ingredient_instance = Ingredient(
-                    food=Food.objects.get(clean_key=selected_food),
+                    food=Food.objects.get(clean_key=selected_food_key),
                     recipe=recipe_instance,
                     unit_of_measurement=UnitOfMeasurement.objects.get(clean_key=selected_unit),
                     quantity=ingred['quantity'],
