@@ -9,6 +9,7 @@ let durationInput = document.querySelector("#id_duration_minutes")
 let servingsInput = document.querySelector("#id_servings")
 let caloriesInput = document.querySelector("#id_calories_per_recipe")
 let notesInput = document.querySelector("#id_notes")
+let childRecipeCollection = document.getElementById('child_recipes_div')
 
 // These are declared in other scripts loaded in the same page
 // let ingredTable = document.querySelector("#ingred-table")
@@ -81,9 +82,11 @@ async function validateAddRecipe(e) {
         }
     }
 
-    // Recipe book and page OR ingredient and step
+    let noChildren = childRecipeCollection.children.length == 0
+
+    // Recipe book and page OR ingredient and step OR child recipe
     if (
-        ((recipeBook == '' || recipeBookPage == '') && (ingredFood == '' || step == '')) ||
+        ((recipeBook == '' || recipeBookPage == '') && (ingredFood == '' || step == '') && noChildren) ||
         (recipeBook == '' && recipeBookPage != '') ||
         (recipeBook != '' && recipeBookPage == '')
     ) {
