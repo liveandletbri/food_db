@@ -77,6 +77,21 @@ class Recipe(models.Model):
     #     return json.loads(self.foo)
 
     @property
+    def has_ingredients(self):
+        if Ingredient.objects.filter(recipe=self).count() == 0:
+            return False
+        elif Ingredient.objects.filter(recipe=self).count() > 1:
+            return True
+        elif Ingredient.objects.filter(recipe=self).count() == 1:
+            ingredient = Ingredient.objects.filter(recipe=self).first()
+            if ingredient.food is None or ingredient.food.name == '':
+                return False
+            else:
+                return True
+        # If we somehow get here, return a confusing value
+        return 'wut this shouldn never happen'
+
+    @property
     def has_children(self):
         return self.child_relationship.count() > 0
 

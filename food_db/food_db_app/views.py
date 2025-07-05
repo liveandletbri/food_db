@@ -29,6 +29,8 @@ class RecipeIngredientData:
         self.recipe = recipe
         self.multiplier = multiplier
 
+        self.has_ingredients = recipe.has_ingredients
+
         # Get list of ingredient categories
         ingredient_category_instances = IngredientCategory.objects.filter(recipe=recipe).order_by('order_number')
         self.ingredients_have_categories = [cat.name or '' for cat in ingredient_category_instances if cat] != ['']

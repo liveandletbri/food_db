@@ -108,61 +108,63 @@
         <button type="button" id="show_groceries_button">Show grocery list</button>
     </div>
     {% for title, recipe_ingred_data in recipe_ingreds_and_steps.items %}
-        {% if has_children %}<details class="child_recipe_details" open><summary class="child_recipe_summary_title">Ingredients for {{ title }}</summary>{% endif %}
-        <table class="recipe_detail_ingredients_table" id="{{ recipe_ingred_data.clean_key }}_ingredients_table">
-            <thead><tr>
-                {% if recipe_ingred_data.ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
-                <th class="recipe_detail_ingredient_food">Ingredient</th>
-                <th class="recipe_detail_ingredient_notes">Notes</th>
-            </tr></thead>
-            {% for category, ingredient_list in recipe_ingred_data.ingreds_by_category.items %}
-                <tbody class="ingredient_category_tbody">
-                    {% if recipe_ingred_data.ingredients_have_categories %}
-                        <tr draggable="true" 
-                            ondrop="handleDragIngredCategoryDrop(event)" 
-                            ondragover="handleDragIngredCategoryOver(event)" 
-                            ondragstart="handleDragIngredCategoryStart(event)"
-                            class="ingredient_category_row"
-                            data-ingredient_category="{{ category }}" 
-                            data-clean_key="{{ recipe_ingred_data.clean_key }}"
-                        >
-                            <td 
-                                rowspan="{{ ingredient_list | length }}" 
-                                class="recipe_detail_ingredient_category_td"
-                                data-ingredient_category="{{ category }}"
-                                style="background-color:  {% spaceless %}
-                                    {% if forloop.counter|divisibleby:'2' %}
-                                        transparent
-                                    {% else %}
-                                        var(--table-row-color)
-                                    {% endif %}
-                                    {% endspaceless %};"
+        {% if recipe_ingred_data.ingred_data.has_ingredients %}
+            {% if has_children %}<details class="child_recipe_details" open><summary class="child_recipe_summary_title">Ingredients for {{ title }}</summary>{% endif %}
+            <table class="recipe_detail_ingredients_table" id="{{ recipe_ingred_data.clean_key }}_ingredients_table">
+                <thead><tr>
+                    {% if recipe_ingred_data.ingredients_have_categories %}<th class="recipe_detail_ingredient_category">Category</th>{% endif %}
+                    <th class="recipe_detail_ingredient_food">Ingredient</th>
+                    <th class="recipe_detail_ingredient_notes">Notes</th>
+                </tr></thead>
+                {% for category, ingredient_list in recipe_ingred_data.ingreds_by_category.items %}
+                    <tbody class="ingredient_category_tbody">
+                        {% if recipe_ingred_data.ingredients_have_categories %}
+                            <tr draggable="true" 
+                                ondrop="handleDragIngredCategoryDrop(event)" 
+                                ondragover="handleDragIngredCategoryOver(event)" 
+                                ondragstart="handleDragIngredCategoryStart(event)"
+                                class="ingredient_category_row"
+                                data-ingredient_category="{{ category }}" 
+                                data-clean_key="{{ recipe_ingred_data.clean_key }}"
                             >
-                                <i class="fa-solid fa-grip-vertical grip-icon"></i>
-                                <span>&#160;&#160;&#160;{% if category != '' %}{{ category }}{% else %}Misc{% endif %}</span>
-                            </td>
-                    {% endif %}
-                    {% for ingredient in ingredient_list %}
-                        <!-- This syntax should work as 
-                            if (ingredients_have_categories and not forloop.first)
-                            or (not ingredients_have_categories)
-                        -->
-                        {% if recipe_ingred_data.ingredients_have_categories and not forloop.first or not recipe_ingred_data.ingredients_have_categories %} 
-                            <tr data-ingredient_category="{{ category }}">
+                                <td 
+                                    rowspan="{{ ingredient_list | length }}" 
+                                    class="recipe_detail_ingredient_category_td"
+                                    data-ingredient_category="{{ category }}"
+                                    style="background-color:  {% spaceless %}
+                                        {% if forloop.counter|divisibleby:'2' %}
+                                            transparent
+                                        {% else %}
+                                            var(--table-row-color)
+                                        {% endif %}
+                                        {% endspaceless %};"
+                                >
+                                    <i class="fa-solid fa-grip-vertical grip-icon"></i>
+                                    <span>&#160;&#160;&#160;{% if category != '' %}{{ category }}{% else %}Misc{% endif %}</span>
+                                </td>
                         {% endif %}
-                            <td class="recipe_detail_ingredient_food">{{ ingredient.quantity }} {{ ingredient.food }}</td>
-                            <td class="recipe_detail_ingredient_notes"
-                                data-food_category="{{ ingredient.food_category }}"
-                                data-quantity="{{ ingredient.quantity }}" 
-                                data-food="{{ ingredient.food }}"
-                            >
-                                {{ ingredient.notes }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            {% endfor %}
-        </table>{% if has_children %}</details>{% endif %}
+                        {% for ingredient in ingredient_list %}
+                            <!-- This syntax should work as 
+                                if (ingredients_have_categories and not forloop.first)
+                                or (not ingredients_have_categories)
+                            -->
+                            {% if recipe_ingred_data.ingredients_have_categories and not forloop.first or not recipe_ingred_data.ingredients_have_categories %} 
+                                <tr data-ingredient_category="{{ category }}">
+                            {% endif %}
+                                <td class="recipe_detail_ingredient_food">{{ ingredient.quantity }} {{ ingredient.food }}</td>
+                                <td class="recipe_detail_ingredient_notes"
+                                    data-food_category="{{ ingredient.food_category }}"
+                                    data-quantity="{{ ingredient.quantity }}" 
+                                    data-food="{{ ingredient.food }}"
+                                >
+                                    {{ ingredient.notes }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                {% endfor %}
+            </table>{% if has_children %}</details>{% endif %}
+        {% endif %}
     {% endfor %}
 
     <h2>Steps</h2>
