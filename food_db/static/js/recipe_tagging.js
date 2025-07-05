@@ -71,4 +71,6 @@ swapCookingOrBakingColors(isBakingInput.checked)
 isBakingInput.addEventListener('change', function() {
     swapCookingOrBakingTags(document.getElementById('tags_table'))
     swapCookingOrBakingColors(isBakingInput.checked)
+    isCookingTagInput.checked = ! isBakingInput.checked
+    isBakingTagInput.checked = isBakingInput.checked
 })
