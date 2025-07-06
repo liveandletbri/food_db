@@ -33,6 +33,10 @@ async function submitAndHideTagForm(){
             tag_name: newTagName.value,
             is_cooking_tag: isCookingTag,
             is_baking_tag: isBakingTag,
+            fill_color: testTagFillColorChooser.value,
+            text_color: testTagTextColorChooser.value,
+            border_color: testTagBorderColorChooser.value,
+            has_border: testTagBorderCheckbox.checked,
         })
     })
     .then(function(response) {
@@ -80,6 +84,10 @@ isBakingInput.addEventListener('change', function() {
     isCookingTagInput.checked = ! isBakingInput.checked
     isBakingTagInput.checked = isBakingInput.checked
 })
+
+// Also do this on page load
+isCookingTagInput.checked = ! isBakingInput.checked
+isBakingTagInput.checked = isBakingInput.checked
 
 function updateTestTag() {
     if (newTagName.value.length > 0) {

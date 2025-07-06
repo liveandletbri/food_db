@@ -915,7 +915,15 @@ def manage_food(request):
 def add_tag(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        tag_instance = Tag(name=data['tag_name'], is_cooking_tag=data['is_cooking_tag'], is_baking_tag=data['is_baking_tag'])
+        tag_instance = Tag(
+            name=data['tag_name'],
+            is_cooking_tag=data['is_cooking_tag'],
+            is_baking_tag=data['is_baking_tag'],
+            fill_color=data['fill_color'],
+            text_color=data['text_color'],
+            border_color=data['border_color'],
+            has_border=data['has_border'],
+        )
         tag_instance.save()
 
         return HttpResponse(status=200)
