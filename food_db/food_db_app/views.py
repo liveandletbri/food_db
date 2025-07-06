@@ -182,6 +182,12 @@ def get_only_relevant_tags(recipe, tag_name_list):
     
     return return_tags
 
+def get_is_baking_cookie(request):
+    """Get the value of the is_baking_mode cookie, which is used to determine whether the user is in baking mode or cooking mode.
+    This persists the status of the baking/cooking switch as the user navigates across pages. This variable is only used on page
+    load."""
+    return str(request.session.get('is_baking_mode', False))
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -492,6 +498,7 @@ def add_recipe(request):
         'book_list': existing_books,
         'tag_list': existing_tags,
         'recipe_list': existing_recipes,
+        'current_is_baking_mode': get_is_baking_cookie(request),
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -500,7 +507,7 @@ def search(request):
     search_params = request.GET.copy()
     if 'is_baking_recipe' not in search_params:
         # The lack of this key means we should filter to cooking recipes only
-        search_params['is_baking_recipe'] = 'false'
+        search_params['is_baking_recipe'] = get_is_baking_cookie(request).lower()
 
     text_search_form = RecipeTextFilter(search_params, queryset=Recipe.objects.all().order_by('-_date_created'))
     found_recipes = text_search_form.qs.distinct()
@@ -537,6 +544,7 @@ def search(request):
         'recipe_data': recipe_data,
         'tags': tags,
         'is_baking_recipe': search_params['is_baking_recipe'],
+        'current_is_baking_mode': get_is_baking_cookie(request),
     }
     return render(request, 'search.html', context)
 
@@ -850,6 +858,9 @@ def edit_recipe(request, key):
         if len(step_list) == 0:
             step_list = [{key: '' for key in step_fields}]
 
+        # Change the cookie for is_baking_mode to match the recipe's is_baking_recipe value
+        request.session['is_baking_mode'] = recipe_instance.is_baking_recipe
+
     context = {
         'mode': 'edit',
         'create_recipe_form': create_recipe_form,
@@ -862,8 +873,8 @@ def edit_recipe(request, key):
         'book_list': existing_books,
         'tag_list': existing_tags,
         'recipe_list': existing_recipes,
-        'is_baking_recipe': str(recipe_instance.is_baking_recipe),
         'child_recipes': child_recipes,
+        'current_is_baking_mode': get_is_baking_cookie(request),
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -1068,5 +1079,14 @@ def edit_food(request):
             return HttpResponse(status=200)
         except IntegrityError:
             return HttpResponse(status=406)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def edit_baking_switch_cookie(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        request.session['is_baking_mode'] = bool(data['is_baking_mode'])
+        return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])

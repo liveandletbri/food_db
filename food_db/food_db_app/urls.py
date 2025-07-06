@@ -37,6 +37,7 @@ urlpatterns = [
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
     path('delete_food_category/', views.delete_food_category, name='delete_food_category'),
     path('delete_food/', views.delete_food, name='delete_food'),
+    path('edit_baking_switch_cookie/', views.edit_baking_switch_cookie, name='edit_baking_switch_cookie'),
     path('edit_food_category/', views.edit_food_category, name='edit_food_category'),
     path('edit_food/', views.edit_food, name='edit_food'),
     path('get_ingredient_category_order_number/', views.get_ingredient_category_order_number, name='get_ingredient_category_order_number'),

@@ -35,3 +35,28 @@ function swapCookingOrBakingColors(isBaking) {
     rowColor = rowColor.replace('1)', '0.1)') // Set alpha to 0.1 for transparency
     root.style.setProperty("--table-row-color", rowColor);
 }
+
+async function updateBakingModeCookie() {
+    let cookieUpdateSuccess = await fetch(`/edit_baking_switch_cookie/`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            is_baking_mode: isBakingInput.checked,
+        })
+    })
+    .then(function(response) {
+        if (response.status == 200) {
+            return true
+        } else {
+            return false
+        }
+    })
+    console.log(`Baking mode cookie updated: ${cookieUpdateSuccess ? 'success' : 'failure'}`)
+}
+
+let updateBakingModeCookieHandler = () => updateBakingModeCookie()
+
+isBakingInput.addEventListener('change', updateBakingModeCookieHandler);
