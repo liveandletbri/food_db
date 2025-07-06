@@ -39,7 +39,7 @@
                 </div>
             </td>
             <td class="tags_row">
-                <p>Add new tag</p>
+                <p style="cursor: pointer;" onclick="showTagForm()">Add new tag</p>
             </td>
         </tr>
     </table>
@@ -49,6 +49,15 @@
                 <tr>
                     <td>Tag</td>
                     <td>{{create_recipe_form.new_tag}}</td>
+                    <td id="tag_chooser_td" rowspan="3">
+                        <input type="color" class="tag_color_chooser" id="tag_fill_color_chooser" value="#3cc382"><span>Fill</span><br>
+                        <input type="checkbox" id="tag_border_checkbox"><span>Border?</span><br>
+                        <input type="color" class="tag_color_chooser" id="tag_border_color_chooser" value="#000000"><span>Border color</span><br>
+                        <input type="color" class="tag_color_chooser" id="tag_text_color_chooser" value="#ffffff"><span>Text</span><br><br>
+                    </td>
+                    <td id="test_tag_td" rowspan="3">
+                        <span id="test_tag" class="tag_display_label" style="margin-bottom: 20px;">Test</span>
+                    </td>
                 </tr>
                 <tr>
                     <td>Related to cooking?</td>
@@ -59,6 +68,7 @@
                     <td>{{create_recipe_form.is_baking_tag}}</td>
                 </tr>
             </table>
+            
             <span id="cooking_or_baking_tag_tooltip" class="form_validate_tooltip tooltip">Tags have to be related to cooking, baking, or both, but not neither.</span>
         <!-- Using type="button" prevents clicking this from counting as a form submission -->
         <button id="add_tag_button" type="button">Add tag</button>
