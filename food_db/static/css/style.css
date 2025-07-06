@@ -846,6 +846,15 @@ details[open] summary {
     width: 40%;
     vertical-align: middle;
 }
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    #tag_chooser_td {
+        width: 35%;
+    }
+    #test_tag_td {
+        width: 15%;
+    }
+}
 .tag_color_chooser{
     width: 30px;
     height: 30px;
