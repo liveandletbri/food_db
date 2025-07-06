@@ -1,5 +1,6 @@
 import os
 import pytz
+from colorfield.fields import ColorField
 from django.db import models
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
@@ -202,6 +203,10 @@ class Tag(models.Model):
         return self.name
     # clean_key = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
+    fill_color = ColorField(default='#3cc382')
+    border_color = ColorField(default='#000000')
+    text_color = ColorField(default='#ffffff')
+    has_border = models.BooleanField(default=False, help_text='Whether the tag has a border or not')
 
     # Unlike recipes, which are exclusively a cooking or baking recipe, tags can be used for both.
     is_cooking_tag = models.BooleanField(default=True)
