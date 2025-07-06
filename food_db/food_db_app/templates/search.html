@@ -92,7 +92,13 @@
             {% for recipe, data in recipe_data.items %}
             <tr>
                 <td>
-                    <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>{% for tag in data.tags %}<span class="tag_display_label small {{ tag }}">{{ tag }}</span>{% endfor %}<br /></p>
+                    <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>
+                        {% for tag in data.tags %}
+                            <span 
+                                class="tag_display_label small"
+                                style="background-color: {{ tag.fill_color }}; color: {{ tag.text_color }}; {% if tag.has_border %}outline: 2px solid {{ tag.border_color }};{% endif %}"
+                            >{{ tag.name }}</span>
+                        {% endfor %}<br /></p>
                 </td>
                 <td value="{{ data.duration_minutes }}">
                     {{ data.duration_string }}

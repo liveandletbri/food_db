@@ -58,7 +58,10 @@
     <h4>Tags:
     {% for tag in recipe.tags.all %}
         <a href="{% url 'search' %}?tag={{ tag.name }}" style="text-decoration: none;">
-            <span class="tag_display_label {{ tag }}">{{ tag }}</span>
+            <span 
+                class="tag_display_label"
+                style="background-color: {{ tag.fill_color }}; color: {{ tag.text_color }}; {% if tag.has_border %}outline: 2px solid {{ tag.border_color }};{% endif %}"
+            >{{ tag.name }}</span>
         </a>
     {% endfor %}
     </h4>

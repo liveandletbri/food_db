@@ -3,6 +3,12 @@ let isCookingTagInput = document.getElementById('id_is_cooking_tag');
 let isBakingTagInput = document.getElementById('id_is_baking_tag');
 let cookingOrBakingTooltip = document.getElementById('cooking_or_baking_tag_tooltip');
 
+let testTagFillColorChooser = document.getElementById('tag_fill_color_chooser');
+let testTagBorderCheckbox = document.getElementById('tag_border_checkbox');
+let testTagBorderColorChooser = document.getElementById('tag_border_color_chooser');
+let testTagTextColorChooser = document.getElementById('tag_text_color_chooser');
+let testTag = document.getElementById('test_tag');
+
 function showTagForm(){
     document.getElementById('add-tag-form').className="show";
 }
@@ -27,6 +33,10 @@ async function submitAndHideTagForm(){
             tag_name: newTagName.value,
             is_cooking_tag: isCookingTag,
             is_baking_tag: isBakingTag,
+            fill_color: testTagFillColorChooser.value,
+            text_color: testTagTextColorChooser.value,
+            border_color: testTagBorderColorChooser.value,
+            has_border: testTagBorderCheckbox.checked,
         })
     })
     .then(function(response) {
@@ -74,3 +84,25 @@ isBakingInput.addEventListener('change', function() {
     isCookingTagInput.checked = ! isBakingInput.checked
     isBakingTagInput.checked = isBakingInput.checked
 })
+
+// Also do this on page load
+isCookingTagInput.checked = ! isBakingInput.checked
+isBakingTagInput.checked = isBakingInput.checked
+
+function updateTestTag() {
+    if (newTagName.value.length > 0) {
+        testTag.innerText = newTagName.value;
+    } else {
+        testTag.innerText = 'Test';
+    }
+    testTag.style.backgroundColor = testTagFillColorChooser.value;
+    testTag.style.outline = `2px solid ${testTagBorderColorChooser.value}`;
+    testTag.style.outlineStyle = testTagBorderCheckbox.checked ? 'solid' : 'none';
+    testTag.style.color = testTagTextColorChooser.value;
+}
+
+newTagName.addEventListener('input', updateTestTag);
+testTagFillColorChooser.addEventListener('change', updateTestTag);
+testTagBorderCheckbox.addEventListener('change', updateTestTag);
+testTagBorderColorChooser.addEventListener('change', updateTestTag);
+testTagTextColorChooser.addEventListener('change', updateTestTag);

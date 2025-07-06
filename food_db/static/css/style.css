@@ -836,3 +836,32 @@ details[open] summary {
     cursor: pointer;
     color: #808080;
 }
+
+#tag_chooser_td {
+    background: white !important;
+    width: 13%;
+}
+#test_tag_td {
+    background: white !important;
+    width: 40%;
+    vertical-align: middle;
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    #tag_chooser_td {
+        width: 35%;
+    }
+    #test_tag_td {
+        width: 15%;
+    }
+}
+.tag_color_chooser{
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+#tag_border_checkbox {
+    margin-right: 10px;
+    margin-top: 8px;
+    margin-left: 7px;
+}

@@ -43,10 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'colorfield',
     'django_filters',
     'fontawesomefree',
     'rest_framework',
     'food_db_app',
+
 ]
 
 MIDDLEWARE = [
