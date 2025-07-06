@@ -6,6 +6,7 @@ from collections import defaultdict, OrderedDict
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
+from django.core.serializers import serialize
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
@@ -513,7 +514,7 @@ def search(request):
     found_recipes = text_search_form.qs.distinct()
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
-        recipe_data[recipe.title]['tags'] = [tag.name for tag in Tag.objects.filter(recipes=recipe)]
+        recipe_data[recipe.title]['tags'] = [t['fields'] for t in json.loads(serialize('json',Tag.objects.filter(recipes=recipe)))]  # convert Tag to JSON, then dict, because Tag object cannot be implicitly serialized into JSON (which is done on the search template so the data is accessible in Javascript layer)
         recipe_data[recipe.title]['date_created'] = recipe._date_created.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
         recipe_data[recipe.title]['clean_key'] = recipe.clean_key
         recipe_data[recipe.title]['duration_minutes'] = recipe.duration_minutes or 0
