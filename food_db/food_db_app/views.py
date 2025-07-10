@@ -249,18 +249,6 @@ def recipe_detail(request, key):
     # convert grocery list dictionary into string
     groceries = GroceryList([rec['ingred_data'] for rec in recipes.values()], multiplier)
 
-    steps = RecipeStep.objects.filter(recipe=recipe).order_by('order_number')
-    
-    if steps.count() == 1 and steps[0].description == '':
-        # If there is only one step and it is blank, then there aren't actually any steps. Not totally sure why this happens.
-        has_steps = False
-    elif steps.count() == 0:
-        # This is what I'd expect to happen if there are no steps.
-        has_steps = False
-    else:
-        has_steps = True
-
-
     total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe).count()
 
     last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
@@ -278,7 +266,7 @@ def recipe_detail(request, key):
         'multiplier': multiplier,
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
-        'has_steps': has_steps,
+        'has_steps': recipe.has_steps,
         'is_baking_recipe': str(recipe.is_baking_recipe),
         'has_children': recipe.has_children,
     }

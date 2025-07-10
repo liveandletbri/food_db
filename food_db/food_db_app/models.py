@@ -79,18 +79,33 @@ class Recipe(models.Model):
 
     @property
     def has_ingredients(self):
-        if Ingredient.objects.filter(recipe=self).count() == 0:
+        ingreds = Ingredient.objects.filter(recipe=self)
+
+        if ingreds.count() == 0:
             return False
-        elif Ingredient.objects.filter(recipe=self).count() > 1:
+        elif ingreds.count() > 1:
             return True
-        elif Ingredient.objects.filter(recipe=self).count() == 1:
-            ingredient = Ingredient.objects.filter(recipe=self).first()
+        elif ingreds.count() == 1:
+            ingredient = ingreds.first()
             if ingredient.food is None or ingredient.food.name == '':
                 return False
             else:
                 return True
         # If we somehow get here, return a confusing value
-        return 'wut this shouldn never happen'
+        return 'wut this should never happen'
+
+    @property
+    def has_steps(self):
+        steps = RecipeStep.objects.filter(recipe=self).order_by('order_number')
+        
+        if steps.count() == 1 and steps[0].description == '':
+            # If there is only one step and it is blank, then there aren't actually any steps. Not totally sure why this happens.
+            return False
+        elif steps.count() == 0:
+            # This is what I'd expect to happen if there are no steps.
+            return False
+        else:
+            return True
 
     @property
     def has_children(self):
