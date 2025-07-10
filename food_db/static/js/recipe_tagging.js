@@ -107,7 +107,10 @@ testTagFillColorChooser.addEventListener('change', updateTestTag);
 testTagBorderCheckbox.addEventListener('change', updateTestTag);
 testTagBorderColorChooser.addEventListener('change', updateTestTag);
 testTagTextColorChooser.addEventListener('change', updateTestTag);
-tagDivs.forEach(div => div.addEventListener("click", function () {
-    let tag = div.querySelector('input[type=checkbox]')
-    tag.checked = !tag.checked
+tagDivs.forEach(div => div.addEventListener("click", function (event) {
+    if (event.target.nodeName == 'DIV') {  // Don't trigger if clicking the input directly
+        console.log(event.target)
+        let tag = div.querySelector('input[type=checkbox]')
+        tag.checked = !tag.checked
+    }
 }));

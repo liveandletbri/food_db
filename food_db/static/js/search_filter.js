@@ -105,8 +105,11 @@ durationMinutesSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagDivs.forEach(div => div.addEventListener("click", function () {
-    let tag = div.querySelector('input[type=checkbox]')
-    tag.checked = !tag.checked
+    if (event.target.nodeName == 'DIV') {  // Don't trigger if clicking the input directly
+        console.log(event.target)
+        let tag = div.querySelector('input[type=checkbox]')
+        tag.checked = !tag.checked
+    }
 }));
 
 function incrementHoursFromMinutes() {
