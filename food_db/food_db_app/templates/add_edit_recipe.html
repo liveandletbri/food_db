@@ -13,7 +13,15 @@
         <tr id="tags_row">
             <td id="id_tags-label">{{create_recipe_form.tags.label}}</td>
             <td class="tags_row" id="tags_cell">
-                <label class="tags_row"><ul>
+                <label class="tags_row"><ul 
+                    {% if tag_list|length >= 16 %}
+                        class="four_cols"
+                    {% elif tag_list|length >= 12 %}
+                        class="three_cols"
+                    {% elif tag_list|length >= 6 %}
+                        class="two_cols"
+                    {% endif %}
+                    >
                     {% for tag in tag_list %}
                     
                         <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">

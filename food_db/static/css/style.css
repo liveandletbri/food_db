@@ -177,7 +177,17 @@ div.recipe_image_div:hover img.delete_recipe_image_button {
 }
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
-    ul {
+    ul.four_cols {
+        columns: 4;
+        -webkit-columns: 4;
+        -moz-columns: 4;
+    }
+    ul.three_cols {
+        columns: 3;
+        -webkit-columns: 3;
+        -moz-columns: 3;
+    }
+    ul.two_cols {
         columns: 2;
         -webkit-columns: 2;
         -moz-columns: 2;
