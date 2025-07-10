@@ -216,8 +216,7 @@ class IngredientCategory(models.Model):
 class Tag(models.Model):
     def __str__(self):
         return self.name
-    # clean_key = models.CharField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=25)
     fill_color = ColorField(default='#3cc382')
     border_color = ColorField(default='#000000')
     text_color = ColorField(default='#ffffff')
