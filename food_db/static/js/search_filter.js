@@ -7,6 +7,7 @@ let durationMinutesSearch = document.querySelector("#id_duration_lt_minutes")
 let durationClearButton = document.querySelector(".clear_duration_search_button")
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
+let tagDivs = document.querySelectorAll('.tag_check')
 // These swap functions are defined in swap_cooking_baking.js
 function swapCookingOrBakingSearch() {
     stealthSubmit(); 
@@ -103,6 +104,10 @@ durationHoursSearch.addEventListener("input", stealthSubmit);
 durationMinutesSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));
+tagDivs.forEach(div => div.addEventListener("click", function () {
+    let tag = div.querySelector('input[type=checkbox]')
+    tag.checked = !tag.checked
+}));
 
 function incrementHoursFromMinutes() {
     let hours = parseInt(durationHoursSearch.value)

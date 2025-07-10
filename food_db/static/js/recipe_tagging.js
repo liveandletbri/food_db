@@ -2,6 +2,7 @@ let newTagName = document.getElementById('id_new_tag');
 let isCookingTagInput = document.getElementById('id_is_cooking_tag');
 let isBakingTagInput = document.getElementById('id_is_baking_tag');
 let cookingOrBakingTooltip = document.getElementById('cooking_or_baking_tag_tooltip');
+let tagDivs = document.querySelectorAll('.tag_check')
 
 let testTagFillColorChooser = document.getElementById('tag_fill_color_chooser');
 let testTagBorderCheckbox = document.getElementById('tag_border_checkbox');
@@ -106,3 +107,7 @@ testTagFillColorChooser.addEventListener('change', updateTestTag);
 testTagBorderCheckbox.addEventListener('change', updateTestTag);
 testTagBorderColorChooser.addEventListener('change', updateTestTag);
 testTagTextColorChooser.addEventListener('change', updateTestTag);
+tagDivs.forEach(div => div.addEventListener("click", function () {
+    let tag = div.querySelector('input[type=checkbox]')
+    tag.checked = !tag.checked
+}));
