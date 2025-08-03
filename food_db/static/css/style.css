@@ -875,3 +875,37 @@ details[open] summary {
     margin-top: 8px;
     margin-left: 7px;
 }
+
+/* Cooking mode checkboxes */
+.cooking-checkbox {
+    display: none;
+    margin-right: 10px;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.cooking-mode-active .cooking-checkbox {
+    display: inline-block;
+}
+
+.cooking-mode-active .recipe_detail_ingredient_food,
+.cooking-mode-active .step_description_text {
+    cursor: pointer;
+}
+
+.cooking-mode-active .recipe_detail_ingredient_food:hover,
+.cooking-mode-active .step_description_text:hover {
+    background-color: rgba(60, 195, 130, 0.1);
+}
+
+.checked-ingredient,
+.checked-step {
+    opacity: 0.5;
+    color: #888;
+    text-decoration: line-through;
+}
+
+.checked-ingredient .cooking-checkbox,
+.checked-step .cooking-checkbox {
+    accent-color: #3cc382;
+}
