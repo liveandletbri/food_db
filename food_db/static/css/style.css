@@ -368,9 +368,6 @@ input[type="url"] {
     cursor: pointer;
     color: blue;
 }
-.step_description_text {
-    white-space: pre-wrap;
-}
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
     #ingred-form {
@@ -878,24 +875,24 @@ details[open] summary {
 
 /* Cooking mode checkboxes */
 .cooking-checkbox {
-    display: none;
+    display: none !important;
     margin-right: 10px;
     cursor: pointer;
     transform: scale(1.2);
 }
 
 .cooking-mode-active .cooking-checkbox {
-    display: inline-block;
+    display: inline-block !important;
 }
 
-.cooking-mode-active .recipe_detail_ingredient_food,
-.cooking-mode-active .step_description_text {
+.cooking-mode-active tr:has(td.recipe_detail_ingredient_food),
+.cooking-mode-active tr:has(td.step_description_text) {
     cursor: pointer;
 }
 
-.cooking-mode-active .recipe_detail_ingredient_food:hover,
-.cooking-mode-active .step_description_text:hover {
-    background-color: rgba(60, 195, 130, 0.1);
+.cooking-mode-active tr:has(td.recipe_detail_ingredient_food):hover,
+.cooking-mode-active tr:has(td.step_description_text):hover {
+    background-color: rgb(173, 255, 215);
 }
 
 .checked-ingredient,
