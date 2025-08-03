@@ -70,11 +70,11 @@ function setupCheckboxEventListeners() {
     const stepCheckboxes = document.querySelectorAll('.step-checkbox')
     stepCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const stepCell = this.closest('td')
+            const stepRow = this.closest('tr')
             if (this.checked) {
-                stepCell.classList.add('checked-step')
+                stepRow.classList.add('checked-step')
             } else {
-                stepCell.classList.remove('checked-step')
+                stepRow.classList.remove('checked-step')
             }
         })
     })
@@ -97,7 +97,8 @@ function setupCheckboxEventListeners() {
     // Add click handlers for step cells
     const stepCells = document.querySelectorAll('.step_description_text')
     stepCells.forEach(cell => {
-        cell.addEventListener('click', function(e) {
+        const stepRow = cell.closest('tr')
+        stepRow.addEventListener('click', function(e) {
             // Don't trigger if clicking on the checkbox itself
             if (e.target.type === 'checkbox') return
             

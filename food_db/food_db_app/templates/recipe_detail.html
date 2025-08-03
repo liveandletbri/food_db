@@ -179,9 +179,11 @@
             <table class="steps_table">
             {% for step in recipe_step_data.steps %}
                 <tr>
-                    <td class="step_number">{{ step.order_number }}.</td>
-                    <td class="step_description_text">
+                    <td class="step_number">
+                        <p class="step_number_text">{{ step.order_number }}.</p>
                         <input type="checkbox" class="cooking-checkbox step-checkbox" data-step-id="{{ step.order_number }}">
+                    </td>
+                    <td class="step_description_text">
                         {{ step.description | markdown | safe }}
                     </td>
                 </tr>
