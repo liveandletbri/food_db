@@ -104,11 +104,16 @@ durationHoursSearch.addEventListener("input", stealthSubmit);
 durationMinutesSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));
-tagDivs.forEach(div => div.addEventListener("click", function () {
+tagDivs.forEach(div => div.addEventListener("click", function (event) {
     if (event.target.nodeName == 'DIV') {  // Don't trigger if clicking the input directly
+        // Block the event from triggering multiple tags
+        event.preventDefault();
+        event.stopPropagation();
         console.log(event.target)
         let tag = div.querySelector('input[type=checkbox]')
         tag.checked = !tag.checked
+        // Trigger the change event to update the search
+        tag.dispatchEvent(new Event('change', { bubbles: true }))
     }
 }));
 
