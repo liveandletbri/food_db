@@ -49,14 +49,13 @@ To open your site to only those connected to your wifi network, configure port f
 
 Now on a different device, use your browser to visit your IP address at port 8000. Since you're only sharing internally, use your private IP address (a default router setup would give you an IP like `http://192.168.1.x:8000`).
 
-Add your IP address to [settings.py](food_db/settings.py) under `ALLOWED_HOSTS`. You can see I've put my private IP address there already. Re-build the Docker images and restart the containers and then, from another device, you can now visit `http://<your IP address>:8000` to access your Food DB. Neat!
-
 #### Notes on security
 
 If you want to your Food DB on the public internet, it'll take some work. I have knowingly taken shortcuts that compromise security because I am not opening my own Food DB to the public internet. Here are the vulnerabilities I put in _that I know of_:
 
 - I've left `DEBUG` set to `True`
 - My secret key is committed right here in this repo
+- ALLOWED_HOSTS is set to `'*'`, yikes
 - My use of `csrf_exempt` to expose my APIs
 - Using `| safe` on a user input on the recipe detail page 😅
 - User-uploaded images are stored locally, then served. This is enabled by adding `MEDIA_URL` and `MEDIA_ROOT` to `urlpatterns`.
