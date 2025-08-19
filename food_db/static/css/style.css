@@ -1,6 +1,8 @@
 :root {
-    --baking-color: rgba(228, 40, 156, 1);
-    --cooking-color: rgba(40, 100, 228, 1);
+    --baking-row-color: rgb(252, 233, 245);
+    --baking-color: rgb(228, 40, 156);
+    --cooking-row-color: rgb(233, 239, 252);
+    --cooking-color: rgb(40, 100, 228);
 }
 
 #logo_header {
@@ -367,9 +369,6 @@ input[type="url"] {
 .parse_step_button {
     cursor: pointer;
     color: blue;
-}
-.step_description_text {
-    white-space: pre-wrap;
 }
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
@@ -874,4 +873,46 @@ details[open] summary {
     margin-right: 10px;
     margin-top: 8px;
     margin-left: 7px;
+}
+
+/* Cooking mode checkboxes */
+.cooking-checkbox {
+    display: none !important;
+    margin-right: 10px;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.cooking-mode-active .cooking-checkbox {
+    display: inline-block !important;
+}
+
+.cooking-mode-active tr:has(td.recipe_detail_ingredient_food),
+.cooking-mode-active tr:has(td.step_description_text) {
+    cursor: pointer;
+}
+
+/* Highlight the whole row when overing over one td, except never highlight the ingredient category td */
+.cooking-mode-active tr:has(td.recipe_detail_ingredient_food):not(.ingredient_category_row):hover,
+.cooking-mode-active tr.ingredient_category_row:hover td:not(:first-child),
+.cooking-mode-active tr:has(td.step_description_text):hover {
+    background-color: rgb(143, 244, 195);
+}
+
+.cooking-mode-active .step_number_text {
+    display: none;
+}
+
+tr:has(td.checked-ingredient):not(.ingredient_category_row),
+tr.ingredient_category_row:has(td.checked-ingredient) td:not(:first-child),
+.checked-ingredient,
+.checked-step {
+    filter: brightness(103.5%);
+    color: #888888;
+    text-decoration: line-through;
+}
+
+.checked-ingredient .cooking-checkbox,
+.checked-step .cooking-checkbox {
+    accent-color: #3cc382;
 }

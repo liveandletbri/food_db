@@ -261,3 +261,17 @@ class ViewTests(TestCase):
 
         self.assertEqual(ingred.food.name, 'garlic')
         self.assertEqual(ingred.unit_of_measurement.name, 'kilogram')
+
+    def test_recipe_detail_cooking_mode_checkboxes(self):
+        """Test that cooking mode checkboxes are present in the recipe detail template"""
+        response = self.client.get(self.recipe_detail('my-recipe'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Check that cooking mode checkboxes are present
+        self.assertContains(response, 'cooking-checkbox')
+        self.assertContains(response, 'ingredient-checkbox')
+        self.assertContains(response, 'step-checkbox')
+        
+        # Check that cooking mode container is present
+        self.assertContains(response, 'cooking_mode_container')
+        self.assertContains(response, 'Enable Cooking Mode')

@@ -3011,12 +3011,12 @@ input::-moz-focus-inner {
 		border-color: rgba(0, 0, 0, 0.2);
 	}
 
-		/* every other row in table is gray */
+		/* every other row in table is gray/blue/pink */
 		table tbody tr:nth-child(2n + 1) {
 			background-color: var(--table-row-color);
 		}
 		
-		/* force row to be gray with <tr class="alt"> */
+		/* force row to be gray/blue/pink with <tr class="alt"> */
 		table tbody tr.alt {
 			background-color: var(--table-row-color) !important;
 		}
@@ -3026,7 +3026,15 @@ input::-moz-focus-inner {
 			background-color: transparent !important;
 		}
 		
-		/* force first td in the tr to be white <tr class="ingredient_category_row"> */
+		/* force row to be the opposite color compared to standard alternating pattern with <tr class="offset"> */
+		table tbody tr.offset {
+			background-color: var(--table-row-color);
+		}
+		table tbody tr.offset:nth-child(2n + 1) {
+			background-color: rgba(0, 0, 0, 0);
+		}
+		
+		/* override the alternating row color pattern so each ingredient category alternates colors <tr class="ingredient_category_row"> */
 		table tbody tr.ingredient_category_row {
 			background-color: transparent;
 		}
@@ -3036,15 +3044,6 @@ input::-moz-focus-inner {
 		table tbody tr.ingredient_category_row td:nth-child(n+1) {
 			background-color: var(--table-row-color);
 		}
-		
-		/* force row to be the opposite color compared to standard alternating pattern with <tr class="offset"> */
-		table tbody tr.offset {
-			background-color: var(--table-row-color);
-		}
-		table tbody tr.offset:nth-child(2n + 1) {
-			background-color: rgba(0, 0, 0, 0);
-		}
-
 
 	table th {
 		color: #000000;
