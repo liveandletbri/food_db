@@ -57,11 +57,14 @@ function setupCheckboxEventListeners() {
     const ingredientCheckboxes = document.querySelectorAll('.ingredient-checkbox')
     ingredientCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const ingredientCell = this.closest('td')
+            const parentIngredientCell = this.closest('td')
+            const notesIngredientCell = parentIngredientCell.nextElementSibling
             if (this.checked) {
-                ingredientCell.classList.add('checked-ingredient')
+                parentIngredientCell.classList.add('checked-ingredient')
+                notesIngredientCell.classList.add('checked-ingredient')
             } else {
-                ingredientCell.classList.remove('checked-ingredient')
+                parentIngredientCell.classList.remove('checked-ingredient')
+                notesIngredientCell.classList.remove('checked-ingredient')
             }
         })
     })

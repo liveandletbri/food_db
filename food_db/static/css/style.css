@@ -890,7 +890,9 @@ details[open] summary {
     cursor: pointer;
 }
 
-.cooking-mode-active tr:has(td.recipe_detail_ingredient_food):hover,
+/* Highlight the whole row when overing over one td, except never highlight the ingredient category td */
+.cooking-mode-active tr:has(td.recipe_detail_ingredient_food):not(.ingredient_category_row):hover,
+.cooking-mode-active tr.ingredient_category_row:has(td.recipe_detail_ingredient_food):hover td:not(:first-child),
 .cooking-mode-active tr:has(td.step_description_text):hover {
     background-color: rgb(173, 255, 215);
 }
@@ -902,7 +904,7 @@ details[open] summary {
 .checked-ingredient,
 .checked-step {
     opacity: 0.5;
-    color: #888;
+    color: #888888;
     text-decoration: line-through;
 }
 
