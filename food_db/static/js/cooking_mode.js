@@ -82,9 +82,13 @@ function setupCheckboxEventListeners() {
     // Add click handlers for ingredient cells
     const ingredientCells = document.querySelectorAll('.recipe_detail_ingredient_food')
     ingredientCells.forEach(cell => {
-        cell.addEventListener('click', function(e) {
+        const ingredientRow = cell.closest('tr')
+        ingredientRow.addEventListener('click', function(e) {
             // Don't trigger if clicking on the checkbox itself
             if (e.target.type === 'checkbox') return
+
+            // Don't trigger if clicking on the ingredient category cell
+            if (e.target.classList.contains('recipe_detail_ingredient_category_td')) return
             
             const checkbox = this.querySelector('.ingredient-checkbox')
             if (checkbox) {
