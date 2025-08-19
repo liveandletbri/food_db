@@ -1,6 +1,8 @@
 :root {
-    --baking-color: rgba(228, 40, 156, 1);
-    --cooking-color: rgba(40, 100, 228, 1);
+    --baking-row-color: rgb(252, 233, 245);
+    --baking-color: rgb(228, 40, 156);
+    --cooking-row-color: rgb(233, 239, 252);
+    --cooking-color: rgb(40, 100, 228);
 }
 
 #logo_header {
@@ -892,18 +894,20 @@ details[open] summary {
 
 /* Highlight the whole row when overing over one td, except never highlight the ingredient category td */
 .cooking-mode-active tr:has(td.recipe_detail_ingredient_food):not(.ingredient_category_row):hover,
-.cooking-mode-active tr.ingredient_category_row:has(td.recipe_detail_ingredient_food):hover td:not(:first-child),
+.cooking-mode-active tr.ingredient_category_row:hover td:not(:first-child),
 .cooking-mode-active tr:has(td.step_description_text):hover {
-    background-color: rgb(173, 255, 215);
+    background-color: rgb(143, 244, 195);
 }
 
 .cooking-mode-active .step_number_text {
     display: none;
 }
 
+tr:has(td.checked-ingredient):not(.ingredient_category_row),
+tr.ingredient_category_row:has(td.checked-ingredient) td:not(:first-child),
 .checked-ingredient,
 .checked-step {
-    opacity: 0.5;
+    filter: brightness(103.5%);
     color: #888888;
     text-decoration: line-through;
 }

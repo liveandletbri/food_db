@@ -27,12 +27,11 @@ function swapCookingOrBakingTags(element) {
 
 function swapCookingOrBakingColors(isBaking) {
     let root = document.documentElement
-    let cookingColor =  window.getComputedStyle(root).getPropertyValue("--cooking-color")
-    let bakingColor =  window.getComputedStyle(root).getPropertyValue("--baking-color")
+    let cookingColor =  window.getComputedStyle(root).getPropertyValue("--cooking-row-color")
+    let bakingColor =  window.getComputedStyle(root).getPropertyValue("--baking-row-color")
 
     // Set the color to be mostly transparent, as is done for table row colors
     let rowColor = isBaking ? bakingColor : cookingColor
-    rowColor = rowColor.replace('1)', '0.1)') // Set alpha to 0.1 for transparency
     root.style.setProperty("--table-row-color", rowColor);
 }
 
