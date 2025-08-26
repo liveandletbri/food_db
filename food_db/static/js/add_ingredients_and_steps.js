@@ -30,9 +30,22 @@ function onLoadSetup() {
     markdownHelpIcon.addEventListener('mouseover', () => setTimeout(showToolTip, 300, markdownHelpTooltip))
     markdownHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, markdownHelpTooltip))
 
+
     let recipeStepsHeader = document.querySelector("#recipe_steps_header")
     markdownHelpTooltip.style.left = `${recipeStepsHeader.offsetLeft + 180}px`;
     markdownHelpTooltip.style.top = `${recipeStepsHeader.offsetTop + 8}px`;
+
+    let ingredCategoryHelpIcon = document.querySelector("#ingred_category_help_icon")
+    let ingredCategoryHelpTooltip = document.querySelector("#ingred_category_help_tooltip")
+    ingredCategoryHelpIcon.addEventListener('mouseover', () => setTimeout(showToolTip, 300, ingredCategoryHelpTooltip))
+    ingredCategoryHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, ingredCategoryHelpTooltip))
+
+    let ingredCategoryHeader = document.querySelector("#ingred_category_header")
+    let headerRect = ingredCategoryHeader.getBoundingClientRect()
+    let scrollLeft = document.documentElement.scrollLeft
+    let scrollTop = document.documentElement.scrollTop
+    ingredCategoryHelpTooltip.style.left = `${headerRect.left + scrollLeft + 180}px`
+    ingredCategoryHelpTooltip.style.top = `${headerRect.top + scrollTop + 8}px`
 }
 
 window.addEventListener('load', onLoadSetup)
@@ -209,3 +222,54 @@ function parseThisStepRow(e) {
 
 addStepButton.addEventListener('click', addStepRow)
 deleteLastStepButton.addEventListener('click', removeBottomStepRow)
+
+// Function to copy Category from current row to next row
+function copyCategoryToNextRow() {
+    // Get the currently focused element
+    const activeElement = document.activeElement;
+    
+    // Check if the focused element is in an ingredient row
+    const currentRow = activeElement.closest('tr[name^="ingred_"]');
+    
+    if (!currentRow) {
+        // Not in an ingredient row, do nothing
+        return;
+    }
+    
+    // Check if this is the bottom row (last ingredient row)
+    const ingredientRows = document.querySelectorAll('tr[name^="ingred_"]');
+    const isLastRow = currentRow === ingredientRows[ingredientRows.length - 1];
+    
+    if (isLastRow) {
+        // This is the bottom row, do nothing
+        return;
+    }
+    
+    // Get the current row's category value
+    const currentCategoryInput = currentRow.querySelector('input[name$="_ingredient_category"]');
+    const currentCategoryValue = currentCategoryInput.value;
+    
+    // Find the next row
+    const nextRow = currentRow.nextElementSibling;
+    
+    // Check if the next row is also an ingredient row
+    if (nextRow && nextRow.getAttribute('name') && nextRow.getAttribute('name').startsWith('ingred_')) {
+        // Get the next row's category input
+        const nextCategoryInput = nextRow.querySelector('input[name$="_ingredient_category"]');
+        
+        // Copy the category value
+        nextCategoryInput.value = currentCategoryValue;
+        
+        // Move cursor to the next row's category field
+        nextCategoryInput.focus();
+        nextCategoryInput.select();
+    }
+}
+
+// Add keyboard event listener for Ctrl+Alt+C
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.altKey && e.key === 'c') {
+        e.preventDefault(); // Prevent default browser behavior
+        copyCategoryToNextRow();
+    }
+});

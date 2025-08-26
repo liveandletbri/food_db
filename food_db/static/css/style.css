@@ -654,18 +654,18 @@ button.merge_selected {
     margin-top: 20px;
     gap: 10px;
 }
-#markdown_help_icon {
+.help_icon {
     font-size: 1rem;
     padding-left: 10px;
     color: #afafaf;
     transition: color 0.4s ease-in-out;
     position: relative;
 }
-#markdown_help_icon:hover {
+.help_icon:hover {
     opacity: 1;
     color: #3cc382;
 }
-#markdown_help_tooltip {
+.help_tooltip {
     background: white;
     border: 2px solid #3cc382;
     color: #000000;
@@ -676,7 +676,7 @@ button.merge_selected {
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out, z-index 0.8s ease-in-out, opacity 0.8s;
     z-index: -1;
 }
-#markdown_help_tooltip.visible {
+.help_tooltip.visible {
     opacity: 100%;
     z-index: 1000;
 }

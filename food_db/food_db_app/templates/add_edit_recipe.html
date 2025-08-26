@@ -209,10 +209,14 @@
                 <th class="ingred_header_quantity" width="10%">Quantity</th>
                 <th class="ingred_header_unit" width="20%">Unit</th>
                 <th class="ingred_header_food" width="30%">Food</th>
-                <th class="ingred_header_category" width="20%">Category</th>
+                <th class="ingred_header_category" width="20%" id="ingred_category_header">Category  <i id="ingred_category_help_icon" class="fa-regular fa-circle-question fa-2xs help_icon"></i></th>
                 <th class="ingred_header_notes" width="20%">Notes</th>
                 <th> </th>
             </tr>
+            <span id="ingred_category_help_tooltip" class="tooltip help_tooltip">
+                The Category column is optional. You can use this to separate your ingredients into categories, like "Sauce", "Marinade", "Toppings", etc.<br><br>
+                Pro tip: when your cursor is in a Category box, you can press Ctrl+Alt+C to copy the current value to the row below!
+            </span>
             {% for ingred in ingredient_list %}
             <tr name="ingred_{{ forloop.counter0 }}_row">
                 <td class="ingred_body_quantity" width="5%"><input type="number" name="ingred_{{ forloop.counter0 }}_quantity" step="any" id="id_ingred_{{ forloop.counter0 }}_quantity" value="{% if ingred.quantity %}{{ ingred.quantity }}{% endif %}"></td>
@@ -255,9 +259,9 @@
 
     <h2 id = "recipe_steps_header">
         Recipe
-        <i id="markdown_help_icon" class="fa-regular fa-circle-question fa-2xs"></i>
+        <i id="markdown_help_icon" class="fa-regular fa-circle-question fa-2xs help_icon"></i>
     </h2>
-    <span id="markdown_help_tooltip" class="tooltip">
+    <span id="markdown_help_tooltip" class="tooltip help_tooltip">
         You can format the text of your recipe steps using Markdown syntax. You can google the full set of rules, but here are some of the most common tricks:<br><br>
         <p id="markdown_help_indented_text">• **Double asterisks** make text <b>bold</b><br>
         • *Single asterisks* or _underscores_ make it <i>italic</i>.<br>
