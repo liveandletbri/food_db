@@ -762,9 +762,9 @@ def edit_recipe(request, key):
 
             child_recipe_keys = request.POST.getlist('child_recipe')
             child_recipe_keys.remove('recipe_key')  # this is the example value and can be ignored
+            # First remove existing child recipes
+            recipe_instance.remove_all_children()
             if len(child_recipe_keys) > 0:
-                # First remove existing child recipes
-                recipe_instance.remove_all_children()
                 # Add the ones declared here
                 for child_recipe_key in child_recipe_keys:
                     child_recipe = Recipe.objects.get(clean_key=child_recipe_key)
