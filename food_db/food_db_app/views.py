@@ -934,8 +934,10 @@ def cook_meal(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         recipe_instance = Recipe.objects.get(title=data['title'])
-        cooked_meal_instance = CookedMeal(recipe=recipe_instance)
-        cooked_meal_instance.save()
+        child_recipes = recipe_instance.children
+        for rec in child_recipes + [recipe_instance]:
+            cooked_meal_instance = CookedMeal(recipe=rec)
+            cooked_meal_instance.save()
 
         total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
 
