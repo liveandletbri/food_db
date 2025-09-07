@@ -109,6 +109,55 @@ class GroceryList:
             if i < len(self.grocery_list_dict) - 1:
                 self.grocery_list_str += '\n\n'
 
+class DerivedTagRule:
+    def __init__(
+        self,
+        tag_name,
+        ingredient_regex_patterns=[],
+        step_regex_patterns=[],
+    ):
+        self.tag_name = tag_name
+        self.ingredient_regex_patterns = ingredient_regex_patterns
+        self.step_regex_patterns = step_regex_patterns
+        assert ingredient_regex_patterns or step_regex_patterns, "You must define at least one of: ingredient_regex_patterns, step_regex_patterns"
+
+        # Confirm tag already exists
+        try:
+            tag = Tag.objects.get(name=tag_name)
+        except Tag.DoesNotExist as err:
+            err.args = (f"You tried to create a DerivedTagRule for a tag named '{tag_name}' in {__file__}, but it does not yet exist. Create and save it in the database first.",)
+            raise err
+
+
+    def _check_ingredients(self, recipe):
+        for ingred in Ingredient.objects.filter(recipe=recipe):
+            for pattern in self.ingredient_regex_patterns:
+                if re.search(pattern, ingred.food.name, re.IGNORECASE):
+                    print("pattern ", pattern)
+                    print("food ", ingred.food.name)
+                    
+                    return True
+        return False
+
+    def _check_steps(self, recipe):
+        for step in RecipeStep.objects.filter(recipe=recipe):
+            for pattern in self.ingredient_regex_patterns:
+                if re.search(pattern, step.description, re.IGNORECASE):
+                    return True
+        return False
+    
+    def check(self, recipe):
+        print(f"Checking recipe to see if it should be tagged with {self.tag_name}")
+        ingred_match = self._check_ingredients(recipe)
+        step_match = self._check_steps(recipe)
+
+        if self.ingredient_regex_patterns and self.step_regex_patterns:
+            return ingred_match and step_match
+        elif self.ingredient_regex_patterns:
+            return ingred_match
+        elif self.step_regex_patterns:
+            return step_match
+
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
     hours = floor(float(minutes)/60.0)
@@ -182,6 +231,24 @@ def get_only_relevant_tags(recipe, tag_name_list):
             return_tags.append(tag)
     
     return return_tags
+
+def get_derived_tags(recipe_instance):
+    """Return tags that are automatically associated with a recipe based on its ingredients, steps, or other attributes"""
+    tag_rules = [
+        DerivedTagRule(
+            "Grain",
+            ingredient_regex_patterns=[
+                r"rice",
+                r"farro",
+                r"barley",
+                r"quinoa",
+                r"bulgur",
+            ]
+        )
+    ]
+    return [Tag.objects.get(name=rule.tag_name) for rule in tag_rules if rule.check(recipe_instance)]
+
+
 
 def get_is_baking_cookie(request):
     """Get the value of the is_baking_mode cookie, which is used to determine whether the user is in baking mode or cooking mode.
@@ -609,26 +676,6 @@ def edit_recipe(request, key):
 
             log_debug_message('saved book')
 
-            # Remove any existing tags from the recipe
-            # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-            existing_tags = Tag.objects.filter(recipes=recipe_instance)
-            for tag in existing_tags:
-                tag.recipes.remove(recipe_instance)
-                tag.save()
-            
-            log_debug_message('removed tags')
-            
-            # Extract tags from form data and create new relationships from tag -> recipe
-            tags = get_only_relevant_tags(recipe_instance, request.POST.getlist('tag'))
-            
-            if tags:
-                # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-                for tag_instance in tags:
-                    tag_instance.recipes.add(recipe_instance)
-                    tag_instance.save()
-            
-            log_debug_message('saved tags')
-
             # Only adding images here, not deleting any
             # Using a for loop instead of bulk_create to ensure RecipeImage.save() is triggered
             recipe_images = request.FILES.getlist('images')
@@ -759,6 +806,36 @@ def edit_recipe(request, key):
                 RecipeStep.objects.bulk_create(step_instances)
 
             log_debug_message(f'finished steps')
+
+            # Remove any existing tags from the recipe
+            # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
+            existing_tags = Tag.objects.filter(recipes=recipe_instance)
+            for tag in existing_tags:
+                tag.recipes.remove(recipe_instance)
+                tag.save()
+            
+            log_debug_message('removed tags')
+            
+            # Narrow selected tags down to cooking/baking as appropriate
+            form_tags = get_only_relevant_tags(recipe_instance, request.POST.getlist('tag'))
+            
+            log_debug_message('narrowed down cooking/baking tags')
+
+            # Add any derived tags 
+            derived_tags = get_derived_tags(recipe_instance)
+            
+            log_debug_message('got derived tags')
+
+            all_tags = form_tags + derived_tags
+            
+            if all_tags:
+                # Create tag relationship. Using a for loop instead of bulk_update because it can't update
+                # many-to-many relationship fields
+                for tag_instance in all_tags:
+                    tag_instance.recipes.add(recipe_instance)
+                    tag_instance.save()
+            
+            log_debug_message('saved tags')
 
             child_recipe_keys = request.POST.getlist('child_recipe')
             child_recipe_keys.remove('recipe_key')  # this is the example value and can be ignored
