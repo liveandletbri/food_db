@@ -41,8 +41,10 @@ function resetAllCheckboxes() {
     
     ingredientCheckboxes.forEach(checkbox => {
         checkbox.checked = false
-        const ingredientCell = checkbox.closest('td')
-        ingredientCell.classList.remove('checked-ingredient')
+        const parentIngredientCell = checkbox.closest('td')
+        const notesIngredientCell = parentIngredientCell.nextElementSibling
+        parentIngredientCell.classList.remove('checked-ingredient')
+        notesIngredientCell.classList.remove('checked-ingredient')
     })
     
     stepCheckboxes.forEach(checkbox => {

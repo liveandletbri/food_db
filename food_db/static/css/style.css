@@ -903,16 +903,16 @@ details[open] summary {
     display: none;
 }
 
-tr:has(td.checked-ingredient):not(.ingredient_category_row),
-tr.ingredient_category_row:has(td.checked-ingredient) td:not(:first-child),
-.checked-ingredient,
-.checked-step {
+.cooking-mode-active tr:has(td.checked-ingredient):not(.ingredient_category_row),
+.cooking-mode-active tr.ingredient_category_row:has(td.checked-ingredient) td:not(:first-child),
+.cooking-mode-active .checked-ingredient,
+.cooking-mode-active .checked-step {
     filter: brightness(103.5%);
     color: #888888;
     text-decoration: line-through;
 }
 
-.checked-ingredient .cooking-checkbox,
-.checked-step .cooking-checkbox {
+.cooking-mode-active .checked-ingredient .cooking-checkbox,
+.cooking-mode-active .checked-step .cooking-checkbox {
     accent-color: #3cc382;
 }
