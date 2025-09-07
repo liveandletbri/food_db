@@ -25,6 +25,13 @@
         <td class="recipe_detail_header_buttons">
             <a href="{% url 'edit_recipe' recipe.clean_key %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
         </td>
+        <td class="recipe_detail_header_buttons" style="padding-left: 3rem;width: 0%;">
+            <a href="{{ cloud_url }}/recipe/{{ recipe.title }}" target="_blank">
+                <svg id="share_recipe_icon" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                    <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+                </svg>
+            </a>
+        </td>
         <td id="upvote_button_td" class="recipe_detail_header_buttons">    
             <div id="upvote_button_div">
                 <!-- These two different <i> elements are the before and after click icons. They get swapped in cookMeal(). -->
@@ -36,6 +43,15 @@
         </td>
     </tr>
 </table>
+<div id="share_modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-buttons">
+            <button id="internal_link_button">Share this page</button>
+            <button id="cloud_link_button">Share the public link</button>
+            <button id="close_share_modal_button">Close</button>
+        </div>
+    </div>
+</div>
 {% if has_steps or has_children %}
 <h4>Multiplier: <input type="number" id="ingredient_multiplier" value="{{ multiplier }}" min="0" step="0.5"></h4>
 {% endif %}
@@ -193,10 +209,10 @@
     <div id="grocery_list_modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <p id="modal_text">{{ grocery_list | linebreaksbr }}</p>
+            <p id="grocery_list_modal_text">{{ grocery_list | linebreaksbr }}</p>
             <div class="modal-buttons">
-                <button id="select_text_button">Select Text</button>
-                <button id="close_modal_button">Close</button>
+                <button id="select_grocery_list_text_button">Select Text</button>
+                <button id="close_grocery_list_modal_button">Close</button>
             </div>
         </div>
     </div>

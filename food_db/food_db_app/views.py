@@ -336,6 +336,8 @@ def recipe_detail(request, key):
         'has_steps': recipe.has_steps,
         'is_baking_recipe': str(recipe.is_baking_recipe),
         'has_children': recipe.has_children,
+        'cloud_sync_enabled': S3_SYNC_ENABLED,
+        'cloud_url': S3Sync().bucket_url,
     }
     return render(request, 'recipe_detail.html', context)
 

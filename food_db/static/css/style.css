@@ -916,3 +916,11 @@ details[open] summary {
 .cooking-mode-active .checked-step .cooking-checkbox {
     accent-color: #3cc382;
 }
+
+#share_recipe_icon {
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+#share_recipe_icon:hover {
+    color: #47d3e5;
+}

@@ -11,7 +11,7 @@ class S3Sync():
         self.aws_region = os.getenv('AWS_REGION')
         self.s3 = boto3.resource('s3').Bucket(self.bucket_name)
         self.cloud_sync_dir = os.path.dirname(os.path.realpath(__file__))
-        self.bucket_url = f'{self.bucket_name}.s3-website-{self.aws_region}.amazonaws.com'
+        self.bucket_url = f'http://{self.bucket_name}.s3-website-{self.aws_region}.amazonaws.com'
 
     def upload_recipe(self, recipe, old_recipe_title=None):
         # Import happens here, not at top of page, so it's after Django is set up

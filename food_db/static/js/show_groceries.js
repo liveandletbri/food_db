@@ -1,8 +1,8 @@
 let showButton = document.getElementById('show_groceries_button')
-let selectTextButton = document.getElementById('select_text_button');
-let closeButton = document.getElementById('close_modal_button');
+let selectTextButton = document.getElementById('select_grocery_list_text_button');
+let closeButton = document.getElementById('close_grocery_list_modal_button');
 let modal = document.getElementById('grocery_list_modal');
-let modalText = document.getElementById('modal_text');
+let modalText = document.getElementById('grocery_list_modal_text');
 
 function openModal() {
     modal.style.display = 'block';

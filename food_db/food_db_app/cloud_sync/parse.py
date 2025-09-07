@@ -4,7 +4,7 @@ def convert_recipe_to_html(recipe_instance, bucket_url):
     
     # Create a new HTML file for the recipe
     recipe_html = f'''
-    <html><a href="http://{bucket_url}">Back to Home</a>
+    <html><a href="{bucket_url}">Back to Home</a>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
