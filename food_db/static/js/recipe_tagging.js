@@ -2,6 +2,7 @@ let newTagName = document.getElementById('id_new_tag');
 let isCookingTagInput = document.getElementById('id_is_cooking_tag');
 let isBakingTagInput = document.getElementById('id_is_baking_tag');
 let cookingOrBakingTooltip = document.getElementById('cooking_or_baking_tag_tooltip');
+let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagDivs = document.querySelectorAll('.tag_check')
 
 let testTagFillColorChooser = document.getElementById('tag_fill_color_chooser');
@@ -107,10 +108,20 @@ testTagFillColorChooser.addEventListener('change', updateTestTag);
 testTagBorderCheckbox.addEventListener('change', updateTestTag);
 testTagBorderColorChooser.addEventListener('change', updateTestTag);
 testTagTextColorChooser.addEventListener('change', updateTestTag);
+
+// Event listeners for checking the individual tags
+tags.forEach(tag => tag.addEventListener("change", function (event){
+    tag.checked = !tag.checked
+}));
 tagDivs.forEach(div => div.addEventListener("click", function (event) {
     if (event.target.nodeName == 'DIV') {  // Don't trigger if clicking the input directly
+        // Block the event from triggering multiple tags
+        event.preventDefault();
+        event.stopPropagation();
         console.log(event.target)
         let tag = div.querySelector('input[type=checkbox]')
         tag.checked = !tag.checked
+        // Trigger the change event to update the search
+        tag.dispatchEvent(new Event('change', { bubbles: true }))
     }
 }));
