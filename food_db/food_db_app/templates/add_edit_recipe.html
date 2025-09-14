@@ -91,6 +91,15 @@
             </td>
         </tr>
         <tr>
+            <td class="recipe_summary_label">Component?</td>
+            <td style="vertical-align: middle;">
+                <input type="checkbox" name="is_component_recipe" id="id_is_component_recipe" style="margin-top: 5px;" {% if create_recipe_form.is_component_recipe.value %} checked="checked"{% endif %}>
+                <p style="padding-left: 30px; padding-bottom: 3px;">
+                    Check here if this is a reusable component, as opposed to a standalone recipe.
+                </p>
+            </td>
+        </tr>
+        <tr>
             <td class="recipe_summary_label">{{create_recipe_form.url.label}}</td>
             <td>
                 {{create_recipe_form.url}}
