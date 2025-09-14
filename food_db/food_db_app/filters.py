@@ -1,4 +1,5 @@
 import django_filters as filters
+from distutils.util import strtobool
 from django import forms
 from django.db.models import Count
 from .models import Recipe, Tag, Food, FoodCategory
@@ -40,6 +41,15 @@ class RecipeTextFilter(filters.FilterSet):
     )
     is_baking_recipe = filters.BooleanFilter(
         field_name='is_baking_recipe'
+    )
+    is_component_recipe = filters.TypedMultipleChoiceFilter(
+        label='Recipe type',
+        widget=forms.CheckboxSelectMultiple(),
+        coerce=strtobool,
+        choices=(
+            ('false', 'Standalone recipe'),
+            ('true', 'Reusable component'),
+        ),
     )
 
     class Meta:
