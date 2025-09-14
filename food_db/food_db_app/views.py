@@ -886,7 +886,7 @@ def edit_recipe(request, key):
         )
         create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context via related_tags
         create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
-        create_recipe_form.fields['is_component_recipe'].initial = recipe_instance.is_c omponent_recipe
+        create_recipe_form.fields['is_component_recipe'].initial = recipe_instance.is_component_recipe
         if recipe_instance.servings_min:
             create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min)
             if recipe_instance.servings_max:
