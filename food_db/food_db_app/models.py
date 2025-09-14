@@ -68,6 +68,7 @@ class Recipe(models.Model):
     notes = models.TextField(blank=True)
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
     is_baking_recipe = models.BooleanField(default=False)  # Either Cooking or Baking recipe
+    is_component_recipe = models.BooleanField(default=False)  # Is this a reusable component or standalone recipe?
 
     # foo = models.TextField(max_length=200)
 
