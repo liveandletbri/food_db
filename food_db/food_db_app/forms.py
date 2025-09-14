@@ -84,6 +84,7 @@ class CreateRecipeForm(forms.Form):
     notes = forms.CharField(required=False)
     images = forms.ImageField(required=False)
     is_baking_recipe = forms.BooleanField(required=False, initial=False)
+    is_component_recipe = forms.BooleanField(required=False, initial=False)
     tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple())
     
     # Tag fields

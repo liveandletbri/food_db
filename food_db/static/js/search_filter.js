@@ -8,6 +8,8 @@ let durationClearButton = document.querySelector(".clear_duration_search_button"
 let tags = document.querySelectorAll('[id^=id_tag_]')
 let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 let tagDivs = document.querySelectorAll('.tag_check')
+let standaloneRecipeInput = document.getElementById('id_is_component_recipe_0')
+let componentRecipeInput = document.getElementById('id_is_component_recipe_1')
 // These swap functions are defined in swap_cooking_baking.js
 function swapCookingOrBakingSearch() {
     stealthSubmit(); 
@@ -37,6 +39,8 @@ async function stealthSubmit(e) {
     let excludedTags = Array.from(tagExclusions)
         .filter(tag => tag.checked)
         .map(tag => tag.value)
+    let includeStandaloneRecipes = standaloneRecipeInput.checked
+    let includeComponentRecipes = componentRecipeInput.checked
 
     // Calculate total duration in minutes
     let durationSearchValue
@@ -74,6 +78,12 @@ async function stealthSubmit(e) {
         param_string += Array.from(excludedTags)
             .map(tag => `tag_exclusion=${tag.replace(' ', '+')}`)
             .join('&')
+    }
+    if (includeStandaloneRecipes) {
+        param_string += '&is_component_recipe=false'
+    }
+    if (includeComponentRecipes) {
+        param_string += '&is_component_recipe=true'
     }
 
     console.log(`Performing GET with params: ${param_string}`)
@@ -116,6 +126,9 @@ tagDivs.forEach(div => div.addEventListener("click", function (event) {
         tag.dispatchEvent(new Event('change', { bubbles: true }))
     }
 }));
+standaloneRecipeInput.addEventListener("change", stealthSubmit);
+componentRecipeInput.addEventListener("change", stealthSubmit);
+
 
 function incrementHoursFromMinutes() {
     let hours = parseInt(durationHoursSearch.value)
