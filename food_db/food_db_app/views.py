@@ -586,13 +586,20 @@ def search(request):
             recipe_data[recipe.title]['times_cooked'] = ''
             recipe_data[recipe.title]['last_cooked'] = ''
     
+    # Get count of recipes by tag, used to display metadata on search page
+    tag_counts = defaultdict(int)
+    for rec in recipe_data.values():
+        for tag in rec['tags']:
+            tag_counts[tag['name']] += 1
+    
     # Separate out the list of tags from the form so we have more control over them in the HTML
-    tags = [
+    tag_data = [
         {
             'name': tag.name,
             'checked': tag.name in request.GET.getlist('tag'),
             'is_cooking_tag': tag.is_cooking_tag,
             'is_baking_tag': tag.is_baking_tag,
+            'result_count': tag_counts[tag.name]
         }
         for tag 
         in text_search_form.filters['tag'].extra['queryset']
@@ -601,7 +608,8 @@ def search(request):
     context = {
         'text_search': text_search_form,
         'recipe_data': recipe_data,
-        'tags': tags,
+        'tags': tag_data,
+        'tag_counts': tag_counts,
         'is_baking_recipe': search_params['is_baking_recipe'],
         'current_is_baking_mode': get_is_baking_cookie(request),
     }

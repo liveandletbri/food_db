@@ -39,6 +39,18 @@ span.tag_display_label.small {
     font-size: 0.7rem;
     padding: 6px;
 }
+span.result_count_label {
+    background-color: var(--table-row-color);
+    border-radius: 15px;
+    border-radius: 10px;
+    font-size: 0.6rem;
+    margin-left: 5px;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-weight: 100;
+}
 span.tag_display_label.Asian {
     background-color: #ff0000;
 }

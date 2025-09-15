@@ -10,16 +10,36 @@ let tagExclusions = document.querySelectorAll('[id^=id_excluded_tag_]')
 let tagDivs = document.querySelectorAll('.tag_check')
 let standaloneRecipeInput = document.getElementById('id_is_component_recipe_0')
 let componentRecipeInput = document.getElementById('id_is_component_recipe_1')
+
 // These swap functions are defined in swap_cooking_baking.js
 function swapCookingOrBakingSearch() {
-    stealthSubmit(); 
     swapCookingOrBakingTags();
+    stealthSubmit(); 
     swapCookingOrBakingColors(isBakingInput.checked);
 }
 
 swapCookingOrBakingTags()  // Run on page setup to set tags to cooking
 swapCookingOrBakingColors(isBakingInput.checked) // Also set colors on page setup
 isBakingInput.addEventListener('change', swapCookingOrBakingSearch)
+
+function refreshTagResultCounts(tagResultsScript) {
+    let tagResults = JSON.parse(tagResultsScript.textContent)
+    let tagResultCounts = Object.fromEntries(
+        tagResults.map(tag => [tag.name, tag.result_count])
+    )
+    let tagResultSpans = document.getElementsByClassName('result_count_label')
+    Array.from(tagResultSpans).forEach(numSpan => {
+        let resultTag = numSpan.getAttribute('data-tag_name')
+        let count = tagResultCounts[resultTag]
+        numSpan.innerHTML = count
+        if (count == 0) {
+            numSpan.style.display = 'none'
+        } else {
+            numSpan.style.display = ''
+        }
+    })
+}
+refreshTagResultCounts(tagResultsRaw)
 
 async function stealthSubmit(e) {
     // An async 'form submission' rather than an actual form submission that loads
@@ -103,6 +123,9 @@ async function stealthSubmit(e) {
 
     // Frankenstein it right into our existing page
     searchResults.innerHTML = responseSearchResults.innerHTML
+
+    // Update tag result counts
+    refreshTagResultCounts(responseHtml.querySelector('#tagResultsRaw'))
 
     // This function is defined in search_sort.js
     addListenersToTableHeaders()
