@@ -238,9 +238,9 @@ def get_derived_tags(recipe_instance):
         DerivedTagRule(
             "Grain",
             ingredient_regex_patterns=[
-                r"rice",
+                r"rice$",  # dollar sign means end of phrase, so it doesn't trigger on "rice vinegar", for example
                 r"farro",
-                r"barley",
+                r"barley$",
                 r"quinoa",
                 r"bulgur",
             ]
