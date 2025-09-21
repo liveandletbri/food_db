@@ -292,7 +292,7 @@ class UnitOfMeasurement(models.Model):
 
 class CookedMeal(models.Model):
     def __str__(self):
-        return self.recipe.title + ' - ' + self.date_cooked.astimezone(pytz.timezone('US/Pacific')).strftime('%Y/%m/%d')
+        return self.recipe.title + ' - ' + self.date_cooked.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%Y/%m/%d')
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -314,7 +314,7 @@ class RecipeImage(models.Model):
         return self._file_name
     
     def save(self, **kwargs):
-        self._file_name = self.recipe.clean_key + '__' + self._date_created.astimezone(pytz.timezone('US/Pacific')).strftime('%Y-%m-%d-%H%M%S.%f')
+        self._file_name = self.recipe.clean_key + '__' + self._date_created.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%Y-%m-%d-%H%M%S.%f')
 
         if (
             update_fields := kwargs.get("update_fields")

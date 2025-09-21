@@ -320,7 +320,7 @@ def recipe_detail(request, key):
 
     last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
     if last_cooked_meal:
-        last_cooked_date = last_cooked_meal.date_cooked.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
+        last_cooked_date = last_cooked_meal.date_cooked.astimezone(timezone('America/Los_Angeles')).strftime('%b %d, %Y')
     else:
         last_cooked_date = ''
 
@@ -573,7 +573,7 @@ def search(request):
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
         recipe_data[recipe.title]['tags'] = [t['fields'] for t in json.loads(serialize('json',Tag.objects.filter(recipes=recipe)))]  # convert Tag to JSON, then dict, because Tag object cannot be implicitly serialized into JSON (which is done on the search template so the data is accessible in Javascript layer)
-        recipe_data[recipe.title]['date_created'] = recipe._date_created.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
+        recipe_data[recipe.title]['date_created'] = recipe._date_created.astimezone(timezone('America/Los_Angeles')).strftime('%b %d, %Y')
         recipe_data[recipe.title]['clean_key'] = recipe.clean_key
         recipe_data[recipe.title]['duration_minutes'] = recipe.duration_minutes or 0
         recipe_data[recipe.title]['duration_string'] = convert_minutes_to_string(recipe.duration_minutes) if recipe.duration_minutes else ''
@@ -581,7 +581,7 @@ def search(request):
         last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
         if cooked_count > 0:
             recipe_data[recipe.title]['times_cooked'] = str(cooked_count)
-            recipe_data[recipe.title]['last_cooked'] = last_cooked_meal.date_cooked.astimezone(timezone('US/Pacific')).strftime('%b %d, %Y')
+            recipe_data[recipe.title]['last_cooked'] = last_cooked_meal.date_cooked.astimezone(timezone('America/Los_Angeles')).strftime('%b %d, %Y')
         else:
             recipe_data[recipe.title]['times_cooked'] = ''
             recipe_data[recipe.title]['last_cooked'] = ''

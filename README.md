@@ -30,9 +30,8 @@ You should be up and running at this point. You'll want to create a super user i
 Set up a super user by running `docker compose exec backend sh -c 'python manage.py createsuperuser'`. This allows you to log into the admin panel at http://127.0.0.1:8000/admin/.
 
 A few code changes to get things personalized to you:
-- To get the app running in your timezone, search this repo for `US/Pacific` and update each instance accordingly.
-- Check out [style.css](food_db/static/css/style.css) and look for `span.tag_display_label.<name>`. I've customized the styles for each of my tags. When you create tags, you can replace mine with your own tag names and color scheme, or delete it all and let tags be the default color.
-- Check out the [port forwarding section below](#port-forwarding), which must be concluded with a trip to [settings.py](food_db/settings.py)
+- To get the app running in your timezone, search this repo for `America/Los_Angeles` and update each instance accordingly.
+- Check out the [port forwarding section below](#port-forwarding), which must be concluded swith a trip to [settings.py](food_db/settings.py)
 
 ## Accessing your site
 First and foremost, as long as the Docker images are running, you can access your website from your local computer by visiting http://127.0.0.1:8000 in your browser. But that's not the most convenient thing. You have a few options for accessing the Food DB remotely:
