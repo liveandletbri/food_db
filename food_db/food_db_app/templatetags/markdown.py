@@ -8,54 +8,54 @@ register = template.Library()
 
 @register.filter()
 @stringfilter
-def markdown(value):
+def markdown(value, recipe_title):
     # Process custom ingredient links before passing to markdown
-    processed_value = _process_ingredient_links(value)
+    processed_value = _process_ingredient_links(value, recipe_title)
     return md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
 
-def _process_ingredient_links(text):
+def _process_ingredient_links(text, recipe_title):
     """
-    Process custom ingredient links in the format [text](!ingredient_id)
+    Process custom ingredient links in the format [text](!ingredient_name;ingredient_category)
     and replace them with HTML spans that include tooltip data.
     """
-    # Pattern to match [text](!ingredient_id)
-    pattern = r'\[([^\]]+)\]\(!(\d+)\)'
+    # Pattern to match [text](!ingredient_name) or [text](!ingredient_name;ingredient_category)
+    pattern = r'\[([^\]]+)\]\(!([\w ]+)(;[\w ]+)?\)'
     
     def replace_ingredient_link(match):
         link_text = match.group(1)
-        ingredient_id = match.group(2)
+        ingredient_name = match.group(2)
+        ingredient_category = match.group(3)  # None if not specified
         
         try:
             # Import here to avoid circular imports
-            from .models import Ingredient
+            from food_db_app.models import Ingredient
+            from food_db_app.views import RecipeIngredientData
             
-            ingredient = Ingredient.objects.select_related('food', 'unit_of_measurement').get(id=ingredient_id)
+            # We don't want to require the specification of ingredient_category, even if the ingredient does have a category. So try to find it first without filtering on category.
+            try:
+                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name=ingredient_name)
+            except Ingredient.MultipleObjectsReturned:
+                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name=ingredient_name, ingredient_category__name=ingredient_category or '')
+                
+            quantity = RecipeIngredientData.stringify_ingredient_quantity(ingredient.quantity, ingredient.unit_of_measurement.name or '', 1)  # FIXME: gotta work dynamically with the multiplier, right now it's set to 1
             
-            # Build tooltip content
-            tooltip_parts = []
-            if ingredient.food:
-                tooltip_parts.append(ingredient.food.name)
+            tooltip_content = f'{quantity} {ingredient.food.name}'
             
-            if ingredient.quantity and ingredient.unit_of_measurement:
-                tooltip_parts.append(f"{ingredient.quantity} {ingredient.unit_of_measurement.name}")
-            elif ingredient.quantity:
-                tooltip_parts.append(str(ingredient.quantity))
-            elif ingredient.unit_of_measurement:
-                tooltip_parts.append(ingredient.unit_of_measurement.name)
+            if ingredient.quantity != 1 and not ingredient.unit_of_measurement and not ingredient.food.name.endswith('s'):
+                tooltip_content += 's'
             
             if ingredient.notes:
-                tooltip_parts.append(ingredient.notes)
-            
-            tooltip_content = " - ".join(tooltip_parts)
+                tooltip_content += f' - {ingredient.notes}'
             
             # Return HTML span with tooltip attributes
-            return f'<span class="ingredient-link" data-tooltip="{tooltip_content}">{link_text}</span>'
+            return f'<span class="ingredient_link" data-tooltip="{tooltip_content}">{link_text}</span>'
             
         except Ingredient.DoesNotExist:
-            # If ingredient doesn't exist, return the original text
-            return match.group(0)
+            # If ingredient doesn't exist, return the hyperlink text (without the link formatting around it) plus an error
+            return match.group(1) + ' <linked ingredient not found>'
+        except Ingredient.MultipleObjectsReturned:
+            return match.group(1) + ' <multiple linked ingredients found; try specifying category>'
         except Exception:
-            # If any other error occurs, return the original text
-            return match.group(0)
+            return match.group(1) + ' <link error>'
     
     return re.sub(pattern, replace_ingredient_link, text)
