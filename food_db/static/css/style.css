@@ -701,10 +701,10 @@ button.merge_selected {
     opacity: 100%;
     z-index: 1000;
 }
-#markdown_help_indented_text {
+.markdown_help_indented_text {
     margin-left: 1rem;
 }
-#markdown_help_centered_text {
+.markdown_help_centered_text {
     text-align: center;
 }
 #confetti-canvas {

@@ -272,14 +272,26 @@
     </h2>
     <span id="markdown_help_tooltip" class="tooltip help_tooltip">
         You can format the text of your recipe steps using Markdown syntax. You can google the full set of rules, but here are some of the most common tricks:<br><br>
-        <p id="markdown_help_indented_text">• **Double asterisks** make text <b>bold</b><br>
-        • *Single asterisks* or _underscores_ make it <i>italic</i>.<br>
-        • Use hyphens or asterisks to create bullet points<br>
-        • Make headings by starting a line with 1-4 hash symbols (#), like this:<br><br>
-        </p><p id="markdown_help_centered_text">
-        # This is a large header<br>
-        #### This is a small one<br>
-        This is the normal text</p>
+        <p class="markdown_help_indented_text">
+            • **Double asterisks** make text <b>bold</b><br>
+            • *Single asterisks* or _underscores_ make it <i>italic</i>.<br>
+            • Use hyphens or asterisks to create bullet points<br>
+            • Make headings by starting a line with 1-4 hash symbols (#), like this:<br><br>
+        </p>
+        <p class="markdown_help_centered_text">
+            # This is a large header<br>
+            #### This is a small one<br>
+            This is the normal text<br><br>
+        </p>
+        There is also a custom syntax that you can use to create tooltips over your text that link back to ingredients. There are long and short forms of the syntax:<br><br>
+        <p class="markdown_help_centered_text">
+            This short form is the easiest and can be used when you're fine with the visible hyperlink text being the same as the food name:<br>
+            [ingredient food name]<br><br>
+            This medium form is the same as above, but lets you set a different visible text than the food's name:<br>
+            [visible hyperlink text](!ingredient food name)<br><br>
+            This longest form is only necessary when the same food is used in multiple different ingredient categories and you need to specify one:<br>
+            [visible hyperlink text](!ingredient food name;ingredient category name)<br><br>
+        </p>
     </span>
     {{create_recipe_form.extra_step_count}}
     <table id="step_table" class="form-table">
