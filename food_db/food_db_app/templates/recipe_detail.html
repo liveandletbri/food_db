@@ -200,7 +200,7 @@
                         <input type="checkbox" class="cooking-checkbox step-checkbox" data-step-id="{{ step.order_number }}">
                     </td>
                     <td class="step_description_text">
-                        {{ step.description | markdown | safe }}
+                        {{ step.description | markdown:recipe.title | safe }}
                     </td>
                 </tr>
             {% endfor %}
