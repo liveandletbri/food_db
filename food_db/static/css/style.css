@@ -291,6 +291,15 @@ textarea.default_text {
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
     transition: opacity 0.8s;
 }
+.ingredient_link_tooltip {
+    background: #3cc382;
+    color: white;
+    position: absolute;
+    padding: 5px;
+    font-size: smaller;
+    transition: opacity 0.8s;
+}
+
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
     .cooking_mode_tooltip {
@@ -916,54 +925,14 @@ details[open] summary {
 }
 
 /* Ingredient links styling */
-.ingredient-link {
-    color: #0066cc;
+.ingredient_link {
     text-decoration: underline;
     cursor: pointer;
     position: relative;
 }
 
-.ingredient-link:hover {
-    color: #004499;
-    text-decoration: underline;
-}
-
-/* Ingredient tooltip styling */
-.ingredient-tooltip {
-    position: absolute;
-    background: #333;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    max-width: 300px;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.ingredient-tooltip.visible {
-    opacity: 1;
-}
-
-.ingredient-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #333 transparent transparent transparent;
-}
-
-/* Arrow pointing up when tooltip appears below */
-.ingredient-tooltip[style*="--arrow-direction: up"]::after {
-    top: -10px;
-    border-color: transparent transparent #333 transparent;
+.ingredient_link:hover {
+    color: #47D3E5;
 }
 
 .cooking-mode-active tr:has(td.checked-ingredient):not(.ingredient_category_row),
