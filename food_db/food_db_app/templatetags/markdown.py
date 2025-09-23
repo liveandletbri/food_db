@@ -10,13 +10,19 @@ register = template.Library()
 @stringfilter
 def markdown(value, recipe_title):
     # Process custom ingredient links before passing to markdown
-    processed_value = _process_ingredient_links(value, recipe_title)
+    processed_value = process_ingredient_links(value, recipe_title)
     return md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
 
-def _process_ingredient_links(text, recipe_title):
+def process_ingredient_links(text, recipe_title, auto_parse=False):
     """
     Process custom ingredient links in the format [text](!ingredient name;ingredient category)
     and replace them with HTML spans that include tooltip data.
+
+    When submitting a recipe, this function is triggered automatically, and in that case auto_parse
+    is True. In this scenario, any text in the step description that matches an ingredient name is
+    automatically wrapped in [square brackets]. The text then goes through this function, attempting to
+    establish links back to ingredients. Errors will be ignored, and the original text (before the
+    square brackets were added) will be returned.  
     """
     # Pattern to match [ingredient name] or [text](!ingredient name) or [text](!ingredient name;ingredient category)
     pattern = r'\[([^\]]+)\](\(!([\w ]+)(;[\w ]+)?\))?'
@@ -61,12 +67,15 @@ def _process_ingredient_links(text, recipe_title):
             # Return HTML span with tooltip attributes
             return f'<span class="ingredient_link" data-tooltip="{tooltip_content}">{link_text}</span>'
             
-        except Ingredient.DoesNotExist:
-            # If ingredient doesn't exist, return the hyperlink text (without the link formatting around it) plus an error
-            return match.group(1) + ' <linked ingredient not found>'
-        except Ingredient.MultipleObjectsReturned:
-            return match.group(1) + ' <multiple linked ingredients found; try specifying category>'
-        except Exception:
-            return match.group(1) + ' <link error>'
+        except Exception as e:
+            if auto_parse == True:
+                return match.group(1)
+            if isinstance(e, Ingredient.DoesNotExist):
+                error_message = ' <linked ingredient not found>'
+            elif isinstance(e, Ingredient.MultipleObjectsReturned):
+                error_message = ' <multiple linked ingredients found; try specifying category>'
+            else:
+                error_message = ' <link error>'
+            return match.group(1) + error_message
     
     return re.sub(pattern, replace_ingredient_link, text)
