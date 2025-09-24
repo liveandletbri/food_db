@@ -2,7 +2,7 @@ import json
 import re
 import requests
 
-from collections import defaultdict, OrderedDict
+from collections import Counter, defaultdict, OrderedDict
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
@@ -502,16 +502,30 @@ def add_recipe(request):
                     ingredient_instances.append(ingredient_instance)
                 
                 Ingredient.objects.bulk_create(ingredient_instances)
+            
+            # Gather food names and sort them by number of words (descending), then by total string length (descending). The sort order helps ensure that something like "rice vinegar" will match correctly before it matches to "rice".
+            food_set = [ingred.food.name for ingred in ingredient_instances if Counter(ingredient_instances)[ingred] == 1]  # only returns foods that are not duplicated - any food mentioned more than once in the ingredient list will not be included at all
+            sorted_food_list = sorted(
+                food_set,
+                key=lambda name: (len(name.split()), len(name)),
+                reverse=True
+            )
+            food_name_regex = '(' + '|'.join(sorted_food_list) + ')'
 
             if create_recipe_form.cleaned_data['step_0_description'] != '':  # steps were entered for this recipe
                 # Now, for each step
                 step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
                 for i, step_id_prefix in enumerate(sorted(step_ids)):
                     step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
+                    # Attempt to automatically find ingredient links. This involves searching the step description for ingredient names, then wrapping the names with [square brackets].
+                    # This is only done when adding a recipe - not on edit - to prevent driving the user crazy with repeated attempts at the wrong ingredient links
+                    def wrap_food_with_brackets(match):
+                        return '[' + match + ']'
+                    step_description_with_links = re.sub(food_name_regex, wrap_food_with_brackets, step_description, flags=re.IGNORECASE)
                     step_instance = RecipeStep(
                         recipe=recipe_instance,
                         order_number=i + 1,
-                        description=step_description,
+                        description=step_description_with_links,
                     )
                     step_instances.append(step_instance)
                 
