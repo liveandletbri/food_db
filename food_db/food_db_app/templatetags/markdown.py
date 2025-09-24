@@ -13,16 +13,10 @@ def markdown(value, recipe_title):
     processed_value = process_ingredient_links(value, recipe_title)
     return md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
 
-def process_ingredient_links(text, recipe_title, auto_parse=False):
+def process_ingredient_links(text, recipe_title):
     """
     Process custom ingredient links in the format [text](!ingredient name;ingredient category)
     and replace them with HTML spans that include tooltip data.
-
-    When submitting a recipe, this function is triggered automatically, and in that case auto_parse
-    is True. In this scenario, any text in the step description that matches an ingredient name is
-    automatically wrapped in [square brackets]. The text then goes through this function, attempting to
-    establish links back to ingredients. Errors will be ignored, and the original text (before the
-    square brackets were added) will be returned.  
     """
     # Pattern to match [ingredient name] or [text](!ingredient name) or [text](!ingredient name;ingredient category)
     pattern = r'\[([^\]]+)\](\(!([\w ]+)(;[\w ]+)?\))?'
@@ -47,12 +41,12 @@ def process_ingredient_links(text, recipe_title, auto_parse=False):
                 # Checking the second case: [visible text](!ingredient name)
                 # We don't want to require the specification of ingredient_category, even if the ingredient does have a category. So try to find it first without filtering on category.
                 try:
-                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name=ingredient_name)
+                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=ingredient_name)
                 except Ingredient.MultipleObjectsReturned:
                     # The same food was used for multiple ingredients in this recipe, so an ingredient category is required. The full syntax for specifying this is [visible text](!ingredient name;category name)
                     cat = ingredient_category or ''  # if no category was specified, try searching with a blank string (which is what happens when no category is attached to the ingredient)
                     cat = cat.replace(';','').strip()  # if a category was specified, remove leading whitespace and the semicolon from the regular expression match
-                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name=ingredient_name, ingredient_category__name=cat)
+                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=ingredient_name, ingredient_category__name__iexact=cat)
                 
             quantity = RecipeIngredientData.stringify_ingredient_quantity(ingredient.quantity, ingredient.unit_of_measurement.name or '', 1)  # FIXME: gotta work dynamically with the multiplier, right now it's set to 1
             
@@ -68,8 +62,6 @@ def process_ingredient_links(text, recipe_title, auto_parse=False):
             return f'<span class="ingredient_link" data-tooltip="{tooltip_content}">{link_text}</span>'
             
         except Exception as e:
-            if auto_parse == True:
-                return match.group(1)
             if isinstance(e, Ingredient.DoesNotExist):
                 error_message = ' <linked ingredient not found>'
             elif isinstance(e, Ingredient.MultipleObjectsReturned):
@@ -78,4 +70,4 @@ def process_ingredient_links(text, recipe_title, auto_parse=False):
                 error_message = ' <link error>'
             return match.group(1) + error_message
     
-    return re.sub(pattern, replace_ingredient_link, text)
+    return re.sub(pattern, replace_ingredient_link, text, flags=re.IGNORECASE)
