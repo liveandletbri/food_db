@@ -669,12 +669,10 @@ def edit_recipe(request, key):
             create_recipe_form.cleaned_data['servings_min'] = servings_min
             create_recipe_form.cleaned_data['servings_max'] = servings_max
 
-            # Update the recipe instance with the new data
             clean_key=sanitize_string(create_recipe_form.cleaned_data['title'])
-            capital_title = capitalize_title(create_recipe_form.cleaned_data['title'])
 
             recipe_instance.clean_key=clean_key
-            recipe_instance.title=capital_title
+            recipe_instance.title=create_recipe_form.cleaned_data['title']  # not capitalizing title on editing a recipe - only on adding. This allows users to have full control if they don't like the capitals
             recipe_instance.url=create_recipe_form.cleaned_data.get('url')
             recipe_instance.recipe_book_page=create_recipe_form.cleaned_data.get('recipe_book_page')
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
