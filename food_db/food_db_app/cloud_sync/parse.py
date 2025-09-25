@@ -1,6 +1,7 @@
 def convert_recipe_to_html(recipe_instance, bucket_url):
     # Import happens here, not at top of page, so it's after Django is set up
     from food_db_app.models import Ingredient, RecipeStep
+    from food_db_app.templatetags.markdown import process_ingredient_links
     
     # Create a new HTML file for the recipe
     recipe_html = f'''
@@ -35,7 +36,7 @@ def convert_recipe_to_html(recipe_instance, bucket_url):
             recipe_html += f'''
             <table style="font-size:inherit;text-align:left;word-wrap:break-word;border-collapse:collapse;width:800;table-layout:fixed;">
             <thead>
-                <tr><th>Ingredient</th><th>Notes</th></tr>
+                <tr><th>Ingredient</th><th>Notes</th><th>Category</th></tr>
             </thead>'''
 
             for ingredient in related_ingredients:
@@ -58,7 +59,8 @@ def convert_recipe_to_html(recipe_instance, bucket_url):
                 else:
                     number_units = f'{quantity_str} {unit}s '
                 recipe_html += f'<td>{number_units}{food}</td>'
-                recipe_html += f'<td>{ingredient.notes}</td></tr>'
+                recipe_html += f'<td>{ingredient.notes}</td>'
+                recipe_html += f'<td>{ingredient.ingredient_category.name}</td></tr>'
             recipe_html += '</table>'
     
     recipe_html += '<h2>Steps</h2>'
@@ -74,7 +76,8 @@ def convert_recipe_to_html(recipe_instance, bucket_url):
             <ol style="width:750;">'''
             
             for step in related_steps:
-                recipe_html += f'<li style="padding:7;">{step.description}</li>'
+                step_description = process_ingredient_links(step.description, rec.title)
+                recipe_html += f'<li style="padding:7;">{step_description}</li>'
 
             recipe_html += '</ol>'
 
