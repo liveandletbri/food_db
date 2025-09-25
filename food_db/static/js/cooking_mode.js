@@ -81,6 +81,13 @@ function setupCheckboxEventListeners() {
             } else {
                 stepRow.classList.remove('checked-step')
             }
+            let linkedIngredientSpans = stepRow.querySelectorAll('.ingredient_link')
+            Array.from(linkedIngredientSpans).forEach(span => {
+                let relatedIngredientId = span.getAttribute('data-ingredient_id')
+                let relatedIngredientCheckbox = document.getElementById(relatedIngredientId)
+                relatedIngredientCheckbox.checked = this.checked
+                relatedIngredientCheckbox.dispatchEvent(new Event('change'))
+            })
         })
     })
     

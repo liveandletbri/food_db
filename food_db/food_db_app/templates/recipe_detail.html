@@ -171,7 +171,7 @@
                                 <tr data-ingredient_category="{{ category }}">
                             {% endif %}
                                 <td class="recipe_detail_ingredient_food">
-                                    <input type="checkbox" class="cooking-checkbox ingredient-checkbox" data-ingredient="{{ ingredient.quantity }} {{ ingredient.food }}">
+                                    <input type="checkbox" class="cooking-checkbox ingredient-checkbox" id="{{ ingredient.id }}" data-ingredient="{{ ingredient.quantity }} {{ ingredient.food }}">
                                     {{ ingredient.quantity }} {{ ingredient.food }}
                                 </td>
                                 <td class="recipe_detail_ingredient_notes"

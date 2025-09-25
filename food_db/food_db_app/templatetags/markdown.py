@@ -59,7 +59,7 @@ def process_ingredient_links(text, recipe_title):
                 tooltip_content += f' - {ingredient.notes}'
             
             # Return HTML span with tooltip attributes
-            return f'<span class="ingredient_link" data-tooltip="{tooltip_content}">{link_text}</span>'
+            return f'<span class="ingredient_link" data-ingredient_id="{ingredient.id}" data-tooltip="{tooltip_content}">{link_text}</span>'
             
         except Exception as e:
             if isinstance(e, Ingredient.DoesNotExist):

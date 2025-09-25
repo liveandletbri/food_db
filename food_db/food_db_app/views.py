@@ -48,6 +48,7 @@ class RecipeIngredientData:
                     'food': ingred.food.name,
                     'notes': ingred.notes,
                     'food_category': ingred.food.food_category.name if ingred.food.food_category else '',
+                    'id': ingred.id,
                 }
                 for ingred in ingred_instances
             ]
