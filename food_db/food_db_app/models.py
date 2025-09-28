@@ -107,6 +107,10 @@ class Recipe(models.Model):
             return False
         else:
             return True
+    
+    @property
+    def times_cooked(self):
+        return CookedMeal.objects.filter(recipe=self).count()
 
     @property
     def has_children(self):

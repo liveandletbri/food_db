@@ -317,7 +317,7 @@ def recipe_detail(request, key):
     # convert grocery list dictionary into string
     groceries = GroceryList([rec['ingred_data'] for rec in recipes.values()], multiplier)
 
-    total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe).count()
+    total_cooked_meal_counts = recipe.times_cooked
 
     last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
     if last_cooked_meal:
@@ -592,7 +592,7 @@ def search(request):
         recipe_data[recipe.title]['clean_key'] = recipe.clean_key
         recipe_data[recipe.title]['duration_minutes'] = recipe.duration_minutes or 0
         recipe_data[recipe.title]['duration_string'] = convert_minutes_to_string(recipe.duration_minutes) if recipe.duration_minutes else ''
-        cooked_count = CookedMeal.objects.filter(recipe=recipe).count()
+        cooked_count = recipe.times_cooked
         last_cooked_meal = CookedMeal.objects.filter(recipe=recipe).order_by('date_cooked').last()
         if cooked_count > 0:
             recipe_data[recipe.title]['times_cooked'] = str(cooked_count)
@@ -1042,7 +1042,7 @@ def cook_meal(request):
             cooked_meal_instance = CookedMeal(recipe=rec)
             cooked_meal_instance.save()
 
-        total_cooked_meal_counts = CookedMeal.objects.filter(recipe=recipe_instance).count()
+        total_cooked_meal_counts = recipe_instance.times_cooked
 
         return HttpResponse(str(total_cooked_meal_counts))
     else:
