@@ -521,7 +521,7 @@ def add_recipe(request):
                     # Attempt to automatically find ingredient links. This involves searching the step description for ingredient names, then wrapping the names with [square brackets].
                     # This is only done when adding a recipe - not on edit - to prevent driving the user crazy with repeated attempts at the wrong ingredient links
                     def wrap_food_with_brackets(match):
-                        return '[' + match + ']'
+                        return '[' + match.group(0) + ']'
                     step_description_with_links = re.sub(food_name_regex, wrap_food_with_brackets, step_description, flags=re.IGNORECASE)
                     step_instance = RecipeStep(
                         recipe=recipe_instance,
