@@ -815,13 +815,15 @@ def edit_recipe(request, key):
             existing_steps.delete()
 
             # Now, for each step in the form
-            step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
+            step_id_prefixes = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
+            step_ids = [int(id.replace('step_','')) for id in step_id_prefixes]  # pulls just the numbers from teh step ID prefix
             step_instances = []
-            for i, step_id_prefix in enumerate(sorted(step_ids)):
-                step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
+            # in JavaScript, all step rows are updated on form submission to be sequential integers (start at 0, increment by 1), so we can assume a predictable set of step_ids
+            for step_id in sorted(step_ids):
+                step_description = create_recipe_form.cleaned_data[f'step_{step_id}_description']
                 step_instance = RecipeStep(
                     recipe=recipe_instance,
-                    order_number=i + 1,
+                    order_number=step_id + 1,
                     description=step_description,
                 )
                 step_instances.append(step_instance)
