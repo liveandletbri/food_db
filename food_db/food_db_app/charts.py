@@ -5,8 +5,9 @@ from collections import defaultdict, OrderedDict
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import CookedMeal, Recipe
+from .models import CookedMeal, Recipe, Tag
 
+# Any class name that starts with 'Base' is not treated as a chart. 'Base' classes are created for chart classes to inherit.
 class BaseChart():
     def __init__(cls):
         assert cls.title
@@ -37,37 +38,66 @@ class BaseChart():
         
         return data
 
-class Top5CookedRecipes(BaseChart):
-    title = 'Top 5 Most Cooked Recipes'
+class BaseTopRecipes(BaseChart):
     type = 'bar'
     y_axis_min = 0
 
     cooked_counts = defaultdict(int)
-    for meal in CookedMeal.objects.all():
-        if meal.recipe.is_baking_recipe == False and meal.recipe.is_component_recipe == False:
+    baked_counts = defaultdict(int)
+    for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
+        if meal.recipe.is_baking_recipe:
+            baked_counts[meal.recipe.title] += 1
+        else:
             cooked_counts[meal.recipe.title] += 1
     
     # sort by times cooked, descending
     cooked_counts = OrderedDict(sorted(cooked_counts.items(), key=lambda item: item[1], reverse=True))
+    baked_counts = OrderedDict(sorted(baked_counts.items(), key=lambda item: item[1], reverse=True))
+
+class Top5CookedRecipes(BaseTopRecipes):
+    title = 'Top 5 Most Cooked Recipes'
     
+    cooked_counts = BaseTopRecipes.cooked_counts
     x_labels = list(cooked_counts.keys())[:5]
     y_data = {title: list(cooked_counts.values())[:5]}
 
-class Top5BakedRecipes(BaseChart):
+class Top5BakedRecipes(BaseTopRecipes):
     title = 'Top 5 Most Baked Recipes'
+    
+    baked_counts = BaseTopRecipes.baked_counts
+    x_labels = list(baked_counts.keys())[:5]
+    y_data = {title: list(baked_counts.values())[:5]}
+
+class BaseTopTags(BaseChart):
     type = 'bar'
     y_axis_min = 0
 
-    baked_counts = defaultdict(int)
-    for meal in CookedMeal.objects.all():
-        if meal.recipe.is_baking_recipe == True and meal.recipe.is_component_recipe == False:
-            baked_counts[meal.recipe.title] += 1
+    cooked_cooking_tag_counts = defaultdict(int)
+    cooked_baking_tag_counts = defaultdict(int)
+    for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
+        for tag in meal.recipe.associated_tags:
+            if meal.recipe.is_baking_recipe:
+                cooked_baking_tag_counts[tag.name] += 1
+            else:
+                cooked_cooking_tag_counts[tag.name] += 1
     
-    # sort by times baked, descending
-    baked_counts = OrderedDict(sorted(baked_counts.items(), key=lambda item: item[1], reverse=True))
+    # sort by times cooked, descending
+    cooked_cooking_tag_counts = OrderedDict(sorted(cooked_cooking_tag_counts.items(), key=lambda item: item[1], reverse=True))
+    cooked_baking_tag_counts = OrderedDict(sorted(cooked_baking_tag_counts.items(), key=lambda item: item[1], reverse=True))
+
+class Top10CookedTags(BaseTopTags):
+    title = 'Top 10 Most Cooked Tags'
     
-    x_labels = list(baked_counts.keys())[:5]
-    y_data = {title: list(baked_counts.values())[:5]}
+    cooked_counts = BaseTopTags.cooked_cooking_tag_counts
+    x_labels = list(cooked_counts.keys())[:10]
+    y_data = {title: list(cooked_counts.values())[:10]}
+
+class Top10BakedTags(BaseTopTags):
+    title = 'Top 10 Most Baked Tags'
+    
+    baked_counts = BaseTopTags.cooked_baking_tag_counts
+    x_labels = list(baked_counts.keys())[:10]
+    y_data = {title: list(baked_counts.values())[:10]}
 
 class AllCharts(APIView):
     def __init__(self):
@@ -77,7 +107,7 @@ class AllCharts(APIView):
         self.chart_count = 0
         for name, obj in current_module.__dict__.items():
             # Only instantiate classes that are not AllCharts or BaseChart and are defined in this file
-            if isinstance(obj, type) and name not in ('AllCharts', 'BaseChart') and obj.__module__ == __name__:
+            if isinstance(obj, type) and name not in ('AllCharts') and not name.startswith('Base') and obj.__module__ == __name__:
                 chart_class = obj()
                 chart_data = chart_class.get_data()
                 self.charts[chart_data['element_id']] = chart_data
