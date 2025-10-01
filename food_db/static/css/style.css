@@ -956,3 +956,7 @@ details[open] summary {
 #share_recipe_icon:hover {
     color: #47d3e5;
 }
+
+.chart {
+    height: 300px;
+}

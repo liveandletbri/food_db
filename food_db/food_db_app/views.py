@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from math import floor
 from pytz import timezone
 
+from .charts import AllCharts
 from .filters import RecipeTextFilter, FoodTextFilter, FoodCategoryTextFilter
 from .forms import CreateRecipeForm
 from .models import CookedMeal, Food, Ingredient, Recipe, RecipeBook, RecipeStep, Tag, UnitOfMeasurement, RecipeImage, IngredientCategory, FoodCategory
@@ -259,7 +260,11 @@ def get_is_baking_cookie(request):
 
 # Create your views here.
 def index(request):
-    return render(request, 'index.html')
+    all_charts = AllCharts()
+    context = {
+        'charts': list(all_charts.charts.keys()),
+    }
+    return render(request, 'index.html', context)
 
 def recipe_detail(request, key):
     # assert isinstance(multiplier, float) and multiplier > 0, "Multiplier must be a positive number"

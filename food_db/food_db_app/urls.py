@@ -21,6 +21,7 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from . import views
+from . import charts
 
 urlpatterns = [
     # pages
@@ -45,6 +46,9 @@ urlpatterns = [
     path('merge_food_categories/', views.merge_food_categories, name='merge_food_categories'),
     path('merge_foods/', views.merge_foods, name='merge_foods'),
     path('swap_ingredient_category_order_numbers/', views.swap_ingredient_category_order_numbers, name='swap_ingredient_category_order_numbers'),
+
+    # charts - this returns one JSON blob containing the data for every chart
+    path('charts/', charts.AllCharts.as_view(), name='charts'),
 
     # and this stupid thing to stop the console from complaining when every page loads
     path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.png')),
