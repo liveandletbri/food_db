@@ -7,9 +7,7 @@ from rest_framework.response import Response
 
 from .models import CookedMeal, Recipe
 
-
-
-class BaseChart(APIView):
+class BaseChart():
     def __init__(cls):
         assert cls.title
         assert cls.x_labels
@@ -24,7 +22,7 @@ class BaseChart(APIView):
             'x_labels': cls.x_labels, 
             'y_data': cls.y_data,
             'type': cls.type,
-            'step_size': 1
+            'step_size': 1  # default value
         }
         optional_attributes = [
             'step_size',
@@ -36,9 +34,6 @@ class BaseChart(APIView):
                 data[attr] = cls.__getattribute__(attr)
         
         return data
-    
-    def get(cls, request, format = None):
-        return Response(cls._get_data())
 
 class Top5Recipes(BaseChart):
     title = 'Top 5 Most Cooked Recipes'
