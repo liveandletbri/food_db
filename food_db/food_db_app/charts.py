@@ -74,14 +74,17 @@ class AllCharts(APIView):
         # Get all chart classes from this module
         current_module = sys.modules[__name__]
         self.charts = {}
+        self.chart_count = 0
         for name, obj in current_module.__dict__.items():
             # Only instantiate classes that are not AllCharts or BaseChart and are defined in this file
             if isinstance(obj, type) and name not in ('AllCharts', 'BaseChart') and obj.__module__ == __name__:
                 chart_class = obj()
                 chart_data = chart_class.get_data()
                 self.charts[chart_data['element_id']] = chart_data
+                self.chart_count += 1
 
         assert len(self.charts) > 0, "Failed to correctly gather chart classes. Check configs of each chart."
+        assert self.chart_count == len(self.charts.keys()), "Chart titles must be unique. Double-check chart titles."
 
     def get(self, request, format = None):
         print('Retrieving charts: ' + ', '.join(list(self.charts.keys())))
