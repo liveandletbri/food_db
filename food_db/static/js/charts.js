@@ -27,16 +27,21 @@ async function onLoadSetup() {
 
 function drawLineGraph(data, id) {
     let ctx = document.getElementById(id).getContext('2d');
+    let datasets = []
+    Object.keys(data.y_data).forEach(dataLabel => {
+        let dataset = {
+            label: dataLabel,
+            backgroundColor: 'rgb(255, 100, 200)',
+            borderColor: 'rgb(55, 99, 132)',
+            data: data.y_data[datalabel],
+        }
+        datasets.push(dataset)
+    })
     let chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.x_labels,
-            datasets: [{
-                label: data.title,
-                backgroundColor: 'rgb(255, 100, 200)',
-                borderColor: 'rgb(55, 99, 132)',
-                data: data.y_data,
-            }]
+            datasets: datasets,
         },
         options: {
             scales: {
@@ -55,31 +60,37 @@ function drawLineGraph(data, id) {
 
 function drawBarGraph(data, id) {
     let ctx = document.getElementById(id).getContext('2d');
+    let datasets = []
+    Object.keys(data.y_data).forEach(dataLabel => {
+        let dataset = {
+            label: dataLabel,
+            data: data.y_data[dataLabel],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }
+        datasets.push(dataset)
+    })
     let myChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.x_labels,
-            datasets: [{
-                label: data.title,
-                data: data.y_data,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
+            datasets: datasets,
+            
         },
         options: {
             scales: {
