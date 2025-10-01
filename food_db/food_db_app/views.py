@@ -592,7 +592,7 @@ def search(request):
     found_recipes = text_search_form.qs.distinct()
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
-        recipe_data[recipe.title]['tags'] = [t['fields'] for t in json.loads(serialize('json',Tag.objects.filter(recipes=recipe)))]  # convert Tag to JSON, then dict, because Tag object cannot be implicitly serialized into JSON (which is done on the search template so the data is accessible in Javascript layer)
+        recipe_data[recipe.title]['tags'] = [t['fields'] for t in json.loads(serialize('json',recipe.associated_tags))]  # convert Tag to JSON, then dict, because Tag object cannot be implicitly serialized into JSON (which is done on the search template so the data is accessible in Javascript layer)
         recipe_data[recipe.title]['date_created'] = recipe._date_created.astimezone(timezone('America/Los_Angeles')).strftime('%b %d, %Y')
         recipe_data[recipe.title]['clean_key'] = recipe.clean_key
         recipe_data[recipe.title]['duration_minutes'] = recipe.duration_minutes or 0
@@ -841,7 +841,7 @@ def edit_recipe(request, key):
 
             # Remove any existing tags from the recipe
             # Using a for loop instead of bulk_update because it can't update many-to-many relationship fields
-            existing_tags = Tag.objects.filter(recipes=recipe_instance)
+            existing_tags = recipe_instance.associated_tags
             for tag in existing_tags:
                 tag.recipes.remove(recipe_instance)
                 tag.save()
@@ -896,7 +896,7 @@ def edit_recipe(request, key):
 
     # If this is a GET (or any other method), populate the form with the recipe's existing info.
     else:
-        related_tags = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]
+        related_tags = [tag.name for tag in recipe_instance.associated_tags]
         related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
@@ -912,7 +912,7 @@ def edit_recipe(request, key):
             extra_ingreds=len(related_ingredients) - 1,
             extra_steps=len(related_steps) - 1,
         )
-        create_recipe_form.fields['tags'].initial = [tag.name for tag in Tag.objects.filter(recipes=recipe_instance)]  # doesn't really do anything because the tags that get checked are set in context via related_tags
+        create_recipe_form.fields['tags'].initial = [tag.name for tag in recipe_instance.associated_tags]  # doesn't really do anything because the tags that get checked are set in context via related_tags
         create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
         create_recipe_form.fields['is_component_recipe'].initial = recipe_instance.is_component_recipe
         if recipe_instance.servings_min:

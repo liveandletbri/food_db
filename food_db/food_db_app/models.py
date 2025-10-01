@@ -120,6 +120,10 @@ class Recipe(models.Model):
     def children(self):
         return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self).order_by('order_number')]
 
+    @property
+    def associated_tags(self):
+        return [tag for tag in Tag.objects.filter(recipes=self).order_by('name')]
+
     def add_child(self, child_recipe):
         '''Adds a child recipe to this recipe.'''
         if not isinstance(child_recipe, Recipe):
