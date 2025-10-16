@@ -34,6 +34,7 @@ urlpatterns = [
     path('search/', views.search, name='search'),
 
     # apis
+    path('add_recipe_to_cart/', views.add_recipe_to_cart, name='add_recipe_to_cart'),
     path('add_tag/', views.add_tag, name='add_tag'),
     path('cook/', views.cook_meal, name='cook_meal'),
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
@@ -46,6 +47,7 @@ urlpatterns = [
     path('ingred_parse', views.ingredient_parse_api, name='ingred_parse'),
     path('merge_food_categories/', views.merge_food_categories, name='merge_food_categories'),
     path('merge_foods/', views.merge_foods, name='merge_foods'),
+    path('remove_recipe_from_cart/', views.remove_recipe_from_cart, name='remove_recipe_from_cart'),
     path('swap_ingredient_category_order_numbers/', views.swap_ingredient_category_order_numbers, name='swap_ingredient_category_order_numbers'),
 
     # charts - this returns one JSON blob containing the data for every chart

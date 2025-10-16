@@ -1206,3 +1206,32 @@ def edit_baking_switch_cookie(request):
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def add_recipe_to_cart(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe_key = data['recipe_key']
+        if 'cart' not in (sesh := request.session):
+            sesh['cart'] = [recipe_key]
+        elif recipe_key not in sesh['cart']:
+            sesh['cart'].append(recipe_key)
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def remove_recipe_from_cart(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe_key = data['recipe_key']
+        if 'cart' not in (sesh := request.session):
+            sesh['cart'] = []
+        else:
+            try:
+                sesh['cart'].remove(recipe_key)
+            except ValueError:
+                pass
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
