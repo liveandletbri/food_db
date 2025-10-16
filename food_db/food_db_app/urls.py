@@ -27,6 +27,7 @@ urlpatterns = [
     # pages
     path('', views.index, name='index'),
     path('add/', views.add_recipe, name='add_recipe'),
+    path('bulk/', views.bulk_prep, name='bulk_prep'),
     path('food/', views.manage_food, name='manage_food'),
     path('recipe/<str:key>', views.recipe_detail, name='recipe_detail'),
     path('recipe/<str:key>/edit', views.edit_recipe, name='edit_recipe'),

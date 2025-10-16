@@ -1,0 +1,75 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+{{ recipe_data|json_script:"searchResultsRaw" }}
+{{ tags|json_script:"tagResultsRaw" }}
+
+<div id="cart_contents">
+    {% with result_count=text_search.qs|length %}
+    <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} {% if is_baking_recipe == 'true' %}baking{% else %}cooking{% endif %} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
+    {% endwith %}
+    <table id="search_results_table">
+        <thead>
+            <th>
+                <a>Recipe</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="recipe_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Duration</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="duration_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="duration_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Times cooked</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="times_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="times_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Last cooked</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="last_cooked_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="last_cooked_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+            <th>
+                <a>Recipe created</a>
+                <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                <i id="date_created_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
+                <i id="date_created_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+            </th>
+        </thead>
+        <tbody>
+            {% for recipe, data in recipe_data.items %}
+            <tr>
+                <td>
+                    <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>
+                        {% for tag in data.tags %}
+                            <span 
+                                class="tag_display_label small"
+                                style="background-color: {{ tag.fill_color }}; color: {{ tag.text_color }}; {% if tag.has_border %}outline: 2px solid {{ tag.border_color }};{% endif %}"
+                            >{{ tag.name }}</span>
+                        {% endfor %}<br /></p>
+                </td>
+                <td value="{{ data.duration_minutes }}">
+                    {{ data.duration_string }}
+                </td>
+                <td>
+                    {{ data.times_cooked }}
+                </td>
+                <td>
+                    {{ data.last_cooked }}
+                </td>
+                <td>
+                    {{ data.date_created }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

@@ -1010,6 +1010,13 @@ def manage_food(request):
     return render(request, 'manage_food.html', context)
 
 
+def bulk_prep(request):
+    context = {
+        # 'foods': foods,
+    }
+    return render(request, 'bulk_prep.html', context)
+
+
 @csrf_exempt
 def add_tag(request):
     if request.method == 'POST':
