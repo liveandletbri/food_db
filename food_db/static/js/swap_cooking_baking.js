@@ -1,5 +1,5 @@
 let isBakingInput = document.getElementById('cooking_baking_switch');
-document.getElementById('baking_switch_label').style.display = 'inline-block'; // Make it visible on pages where this .js script is included
+document.getElementById('baking_switch_label').style.display = 'inline-block'; // The switch is hidden by default. Make it visible on pages where this .js script is included
 
 function swapCookingOrBakingTags(element) {
     if ( element == undefined ) {
