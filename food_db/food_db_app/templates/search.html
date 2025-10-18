@@ -131,7 +131,7 @@
                     <!-- <i class="fa-solid fa-cart-shopping add_to_cart_icon"></i> -->
                 </td>
                 <td style="background-color: white !important;">
-                    <i class="fa-solid fa-cart-shopping add_to_cart_icon not_added" data-recipe_key="{{ data.clean_key }}"></i>
+                    <i class="fa-solid fa-cart-shopping add_to_cart_icon {% if data.in_cart == "false" %}not_{% endif %}added" data-recipe_key="{{ data.clean_key }}"></i>
                 </td>
             </tr>
             {% endfor %}

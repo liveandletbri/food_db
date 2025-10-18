@@ -590,6 +590,7 @@ def search(request):
 
     text_search_form = RecipeTextFilter(search_params, queryset=Recipe.objects.all().order_by('-_date_created'))
     found_recipes = text_search_form.qs.distinct()
+    cart = request.session.get('cart', [])
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
         recipe_data[recipe.title]['tags'] = [t['fields'] for t in json.loads(serialize('json',recipe.associated_tags))]  # convert Tag to JSON, then dict, because Tag object cannot be implicitly serialized into JSON (which is done on the search template so the data is accessible in Javascript layer)
@@ -605,6 +606,7 @@ def search(request):
         else:
             recipe_data[recipe.title]['times_cooked'] = ''
             recipe_data[recipe.title]['last_cooked'] = ''
+        recipe_data[recipe.title]['in_cart'] = str(recipe.clean_key in cart).lower()
     
     # Get count of recipes by tag, used to display metadata on search page
     tag_counts = defaultdict(int)
