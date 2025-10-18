@@ -1211,11 +1211,27 @@ def edit_baking_switch_cookie(request):
 def add_recipe_to_cart(request):
     if request.method == 'POST':
         data = json.loads(request.body)
+        print(data)
         recipe_key = data['recipe_key']
-        if 'cart' not in (sesh := request.session):
-            sesh['cart'] = [recipe_key]
-        elif recipe_key not in sesh['cart']:
-            sesh['cart'].append(recipe_key)
+        
+        # Get cart or initialize as empty list
+        cart = request.session.get('cart', [])
+        print(f"Current cart: {cart}")
+        
+        # If cart is None or contains None, reset it
+        if cart is None or (isinstance(cart, list) and None in cart):
+            cart = []
+            print("Reset cart due to None values")
+        
+        # Add recipe if not already in cart
+        if recipe_key not in cart:
+            cart.append(recipe_key)
+            request.session['cart'] = cart
+            print(f"Added {recipe_key} to cart")
+        else:
+            print(f"{recipe_key} already in cart")
+            
+        print(f"Final cart: {request.session['cart']}")
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
@@ -1225,13 +1241,21 @@ def remove_recipe_from_cart(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         recipe_key = data['recipe_key']
-        if 'cart' not in (sesh := request.session):
-            sesh['cart'] = []
-        else:
-            try:
-                sesh['cart'].remove(recipe_key)
-            except ValueError:
-                pass
+        
+        # Get cart or initialize as empty list
+        cart = request.session.get('cart', [])
+        
+        # If cart is None or contains None, reset it
+        if cart is None or (isinstance(cart, list) and None in cart):
+            cart = []
+        
+        # Remove recipe from cart
+        try:
+            cart.remove(recipe_key)
+            request.session['cart'] = cart
+        except ValueError:
+            pass  # Recipe not in cart, which is fine
+            
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])

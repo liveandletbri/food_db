@@ -129,6 +129,15 @@ async function stealthSubmit(e) {
 
     // This function is defined in search_sort.js
     addListenersToTableHeaders()
+
+    // This function is defined in cart.js
+    // For Font Awesome 6.x, wait until all <i> elements are replaced by SVGs before adding cart icon listeners.
+    if (window.FontAwesome && window.FontAwesome.dom && typeof window.FontAwesome.dom.i2svg === 'function') {
+        window.FontAwesome.dom.i2svg({ callback: addCartIconListeners });
+    } else {
+        // Fallback: if FontAwesome is not ready, listen for the i2svg event
+        document.addEventListener('fa-i2svg-done', addCartIconListeners, { once: true });
+    }
 }
 
 titleSearch.addEventListener("input", stealthSubmit);

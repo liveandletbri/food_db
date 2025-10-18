@@ -960,3 +960,16 @@ details[open] summary {
 .chart {
     height: 300px;
 }
+
+.add_to_cart_icon {
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    opacity: 0.2;
+}
+.add_to_cart_icon:hover.not_added {
+    opacity: 0.5;
+}
+.add_to_cart_icon.added {
+    color:#3cc382;
+    opacity: 1;
+}
