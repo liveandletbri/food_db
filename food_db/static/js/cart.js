@@ -1,10 +1,24 @@
-async function addRecipeToCart(event) {
-    let icon = event.target;
-    let svgParent = icon.closest('svg')
-    let recipeKey = svgParent.getAttribute('data-recipe_key')
-    console.log(`Adding recipe ${recipeKey} to cart`)
+let cartCounter = document.getElementById('cart_size')
+
+async function updateCart(event) {
+    // Find the cart icon (which has the data-recipe_key attribute)
+    let cartIcon = event.target.closest('.add_to_cart_icon')
+    let recipeKey = cartIcon.getAttribute('data-recipe_key')
     
-    let apiSuccess = await fetch(`/add_recipe_to_cart/`, {
+    let adding = cartIcon.classList.contains('not_added')
+    let logVerb
+    let apiName
+    if ( adding ) {
+        logVerb = 'Add'
+        apiName = '/add_recipe_to_cart/'
+    } else {
+        logVerb = 'Remov'
+        apiName = '/remove_recipe_from_cart/'
+    }
+
+    console.log(`Cart update: ${logVerb}ing recipe ${recipeKey}`)
+    
+    let apiSuccess = await fetch(apiName, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -24,31 +38,30 @@ async function addRecipeToCart(event) {
     })
     
     if (apiSuccess) {
-        console.log(`Added successfully`)
-        svgParent.classList.remove('not_added')
-        svgParent.classList.add('added')
+        console.log(`${logVerb}ed successfully`)
+        if ( adding ) {
+            cartIcon.classList.remove('not_added')
+            cartIcon.classList.add('added')
+        } else {
+            cartIcon.classList.remove('added')
+            cartIcon.classList.add('not_added')
+        }
     }
 }
 
-function addCartIconListeners() {
-    // Add event listeners to all add to cart icons
-    let addToCartIcons = document.querySelectorAll('.add_to_cart_icon')
-    addToCartIcons.forEach(function(icon) {
-        let pathChild = icon.querySelector('path')
-        icon.addEventListener('click', function(event) {
-            // Prevent the icon click from doing anything itself,
-            // but trigger the click event on the pathChild instead
-            
-            // Only trigger if the event did not originate from the path itself
-            if (event.target !== pathChild) {
-                pathChild.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-            }
-        });
-        
-        // Add the listener to the path child
-        pathChild.addEventListener('click', addRecipeToCart)
+function addCartIconListener() {
+    // Attach listener to document body and delegate events.
+    // This way it works even if Font Awesome re-renders the SVGs,
+    // which would reset listeners
+    document.addEventListener('click', function(event) {
+        // Check if the clicked element is a cart icon or inside one
+        let cartIcon = event.target.closest('.add_to_cart_icon')
+        if (cartIcon) {
+            event.preventDefault()
+            updateCart(event)
+        }
     })
 }
 
-// Need to wait for "onload" to be after all the SVGs are rendered by Font Awesome magic
-window.addEventListener('load', addCartIconListeners)
+// Setup event delegation when page loads
+window.addEventListener('load', addCartIconListener)

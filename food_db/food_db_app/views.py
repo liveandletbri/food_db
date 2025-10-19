@@ -258,11 +258,24 @@ def get_is_baking_cookie(request):
     load."""
     return str(request.session.get('is_baking_mode', False))
 
+def get_cart(request):
+    """Get the cart from the session, or or initialize it as an empty list."""
+    cart = request.session.get('cart', [])
+    print(f"Current cart: {cart}")
+    
+    # If cart is None or contains None, reset it
+    if cart is None or (isinstance(cart, list) and None in cart):
+        cart = []
+        print("Reset cart due to None values")
+    
+    return cart
+
 # Create your views here.
 def index(request):
     all_charts = AllCharts()
     context = {
         'charts': list(all_charts.charts.keys()),
+        'cart': get_cart(request),
     }
     return render(request, 'index.html', context)
 
@@ -344,6 +357,7 @@ def recipe_detail(request, key):
         'has_children': recipe.has_children,
         'cloud_sync_enabled': S3_SYNC_ENABLED,
         'cloud_url': S3Sync().bucket_url,
+        'cart': get_cart(request),
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -578,6 +592,7 @@ def add_recipe(request):
         'tag_list': existing_tags,
         'recipe_list': existing_recipes,
         'current_is_baking_mode': get_is_baking_cookie(request),
+        'cart': get_cart(request),
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -590,7 +605,7 @@ def search(request):
 
     text_search_form = RecipeTextFilter(search_params, queryset=Recipe.objects.all().order_by('-_date_created'))
     found_recipes = text_search_form.qs.distinct()
-    cart = request.session.get('cart', [])
+    cart = get_cart(request)
     recipe_data = {recipe.title : {} for recipe in found_recipes}
     for recipe in found_recipes:
         recipe_data[recipe.title]['tags'] = [t['fields'] for t in json.loads(serialize('json',recipe.associated_tags))]  # convert Tag to JSON, then dict, because Tag object cannot be implicitly serialized into JSON (which is done on the search template so the data is accessible in Javascript layer)
@@ -634,6 +649,7 @@ def search(request):
         'tag_counts': tag_counts,
         'is_baking_recipe': search_params['is_baking_recipe'],
         'current_is_baking_mode': get_is_baking_cookie(request),
+        'cart': cart,
     }
     return render(request, 'search.html', context)
 
@@ -976,6 +992,7 @@ def edit_recipe(request, key):
         'recipe_list': existing_recipes,
         'child_recipes': child_recipes,
         'current_is_baking_mode': get_is_baking_cookie(request),
+        'cart': get_cart(request),
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -1008,13 +1025,14 @@ def manage_food(request):
         'all_categories': all_categories,
         'food_search': food_search_form,
         'category_search': food_category_search_form,
+        'cart': get_cart(request),
     }
     return render(request, 'manage_food.html', context)
 
 
 def bulk_prep(request):
     context = {
-        # 'foods': foods,
+        'cart': get_cart(request),
     }
     return render(request, 'bulk_prep.html', context)
 
@@ -1261,3 +1279,11 @@ def remove_recipe_from_cart(request):
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def get_cart_size(request):
+    if request.method == 'GET':
+        cart = get_cart(request)
+        return HttpResponse(str(len(cart)))
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['GET'])
