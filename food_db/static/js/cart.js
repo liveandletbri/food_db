@@ -1,5 +1,20 @@
 let cartCounter = document.getElementById('cart_size')
 
+function updateCartShape(cartSize) {
+    // Remove existing shape classes
+    cartCounter.classList.remove('single-digit', 'multi-digit')
+    
+    // Set CSS custom property for digit count
+    cartCounter.style.setProperty('--digit-count', cartSize.length)
+    
+    // Add appropriate class based on number of digits
+    if (cartSize.length === 1) {
+        cartCounter.classList.add('single-digit')
+    } else {
+        cartCounter.classList.add('multi-digit')
+    }
+}
+
 async function updateCart(event) {
     // Find the cart icon (which has the data-recipe_key attribute)
     let cartIcon = event.target.closest('.add_to_cart_icon')
@@ -46,6 +61,22 @@ async function updateCart(event) {
             cartIcon.classList.remove('added')
             cartIcon.classList.add('not_added')
         }
+
+        // Update counter in nav bar
+        let cartSize = await fetch('/get_cart_size/', {
+            method: "GET",
+        })
+        .then(function(response) {
+            return response.text()
+        })
+        cartCounter.innerText = cartSize
+        if ( cartSize > 0 ) {
+            cartCounter.style.display = ''
+            // Update shape based on number of digits
+            updateCartShape(cartSize)
+        } else {
+            cartCounter.style.display = 'none'
+        }
     }
 }
 
@@ -65,3 +96,10 @@ function addCartIconListener() {
 
 // Setup event delegation when page loads
 window.addEventListener('load', addCartIconListener)
+
+// Initialize cart shape when page loads
+window.addEventListener('load', function() {
+    if ( parseInt(cartCounter.innerText) > 0 ) {
+        updateCartShape(cartCounter.innerText)
+    }
+})

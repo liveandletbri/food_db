@@ -973,3 +973,36 @@ details[open] summary {
     color:#3cc382;
     opacity: 1;
 }
+#cart_size {
+    position: relative;
+    display: inline-block;
+    padding-left: 0.5em; /* Space for the circle */
+    font-weight: bold;
+    z-index: 0;
+    color: #fff;
+}
+
+/* Base styles for the background shape */
+#cart_size::before {
+    content: "";
+    position: absolute;
+    left: 0.1em;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.4em;
+    background: #3cc382;
+    z-index: -1;
+    display: block;
+}
+
+/* Single digit: circle shape */
+#cart_size.single-digit::before {
+    width: 1.4em;
+    border-radius: 50%;
+}
+
+/* Multiple digits: stadium shape (oval with parallel top and bottom lines) */
+#cart_size.multi-digit::before {
+    width: calc(0.8em + 0.5em * var(--digit-count, 1));
+    border-radius: 0.7em;
+}
