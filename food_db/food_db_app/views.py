@@ -357,7 +357,8 @@ def recipe_detail(request, key):
         'has_children': recipe.has_children,
         'cloud_sync_enabled': S3_SYNC_ENABLED,
         'cloud_url': S3Sync().bucket_url,
-        'cart': get_cart(request),
+        'cart': (cart := get_cart(request)),
+        'in_cart': str(recipe.clean_key in cart).lower()
     }
     return render(request, 'recipe_detail.html', context)
 

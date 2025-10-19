@@ -31,6 +31,7 @@
                     <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
                 </svg>
             </a>
+            <i class="fa-solid fa-xl fa-cart-shopping add_to_cart_icon {% if in_cart == "false" %}not_{% endif %}added" data-recipe_key="{{ recipe.clean_key }}"></i>
         </td>
         <td id="upvote_button_td" class="recipe_detail_header_buttons">    
             <div id="upvote_button_div">

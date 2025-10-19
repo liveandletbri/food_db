@@ -51,8 +51,11 @@
                             >{{ tag.name }}</span>
                         {% endfor %}<br /></p>
                 </td>
-                <td value="{{ data.duration_minutes }}">
+                <td value="{{ recipe.duration_minutes }}">
                     {{ recipe.duration_minutes }}
+                </td>
+                <td style="background-color: white !important;">
+                    <i class="fa-solid fa-cart-shopping add_to_cart_icon added" data-recipe_key="{{ recipe.clean_key }}"></i>
                 </td>
             </tr>
             {% endfor %}
