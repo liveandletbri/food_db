@@ -5,6 +5,18 @@
 {{ recipe_data|json_script:"searchResultsRaw" }}
 {{ tags|json_script:"tagResultsRaw" }}
 
+<button type="button" id="show_groceries_button">Show grocery list</button>
+<div id="grocery_list_modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <p id="grocery_list_modal_text">{{ grocery_list | linebreaksbr }}</p>
+        <div class="modal-buttons">
+            <button id="select_grocery_list_text_button">Select Text</button>
+            <button id="close_grocery_list_modal_button">Close</button>
+        </div>
+    </div>
+</div>
+
 <div id="cart_contents">
     <table id="search_results_table">
         <thead>
@@ -62,5 +74,7 @@
         </tbody>
     </table>
 </div>
+
+<script src="{% static 'js/show_groceries.js' %}"></script>
 
 {% endblock content %}

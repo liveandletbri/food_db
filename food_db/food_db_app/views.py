@@ -1035,9 +1035,12 @@ def bulk_prep(request):
     cart = get_cart(request)
     cart_recipes = [Recipe.objects.get(clean_key = key) for key in cart]
 
+    all_recipes_with_children = [child for rec in cart_recipes for child in rec.children if rec.has_children] + cart_recipes
+    groceries = GroceryList([RecipeIngredientData(rec, 1) for rec in all_recipes_with_children], 1)
     context = {
         'cart': cart,
         'recipes': cart_recipes,
+        'grocery_list': groceries.grocery_list_str
     }
     return render(request, 'bulk_prep.html', context)
 
