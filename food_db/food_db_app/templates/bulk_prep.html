@@ -6,9 +6,6 @@
 {{ tags|json_script:"tagResultsRaw" }}
 
 <div id="cart_contents">
-    {% with result_count=text_search.qs|length %}
-    <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} {% if is_baking_recipe == 'true' %}baking{% else %}cooking{% endif %} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
-    {% endwith %}
     <table id="search_results_table">
         <thead>
             <th>
@@ -43,11 +40,11 @@
             </th>
         </thead>
         <tbody>
-            {% for recipe, data in recipe_data.items %}
+            {% for recipe in recipes %}
             <tr>
                 <td>
-                    <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>
-                        {% for tag in data.tags %}
+                    <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
+                        {% for tag in recipe.associated_tags %}
                             <span 
                                 class="tag_display_label small"
                                 style="background-color: {{ tag.fill_color }}; color: {{ tag.text_color }}; {% if tag.has_border %}outline: 2px solid {{ tag.border_color }};{% endif %}"
@@ -55,16 +52,7 @@
                         {% endfor %}<br /></p>
                 </td>
                 <td value="{{ data.duration_minutes }}">
-                    {{ data.duration_string }}
-                </td>
-                <td>
-                    {{ data.times_cooked }}
-                </td>
-                <td>
-                    {{ data.last_cooked }}
-                </td>
-                <td>
-                    {{ data.date_created }}
+                    {{ recipe.duration_minutes }}
                 </td>
             </tr>
             {% endfor %}

@@ -1031,8 +1031,12 @@ def manage_food(request):
 
 
 def bulk_prep(request):
+    cart = get_cart(request)
+    cart_recipes = [Recipe.objects.get(clean_key = key) for key in cart]
+
     context = {
-        'cart': get_cart(request),
+        'cart': cart,
+        'recipes': cart_recipes,
     }
     return render(request, 'bulk_prep.html', context)
 
