@@ -1,4 +1,8 @@
 let cartCounter = document.getElementById('cart_size')
+let emptyCartButton = document.getElementById('empty_cart_button')
+let emptyCartDialog = document.getElementById('empty_cart_dialog')
+let emptyCartConfirmButton = document.getElementById('empty_cart_confirm_button')
+let emptyCartCancelButton = document.getElementById('empty_cart_cancel_button')
 
 function updateCartShape(cartSize) {
     // Remove existing shape classes
@@ -103,3 +107,49 @@ window.addEventListener('load', function() {
         updateCartShape(cartCounter.innerText)
     }
 })
+
+async function emptyCart() {
+    console.log('Emptying cart...')
+    
+    let apiSuccess = await fetch('/empty_cart/', {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        if (! response.status == 200) {
+            console.log("d'oh!")
+            return false
+        } else {
+            return true
+        }
+    })
+    
+    if (apiSuccess) {
+        console.log('Cart emptied successfully')
+        
+        // Update cart counter and visibility
+        cartCounter.innerText = '0'
+        cartCounter.style.display = 'none'
+        
+        // Reload the page to reflect the empty cart
+        window.location.reload()
+    } else {
+        console.log('Failed to empty cart')
+    }
+}
+
+if ( emptyCartButton ) {
+    emptyCartButton.addEventListener('click', function() {
+        emptyCartDialog.style.display = 'flex'
+    })
+    emptyCartConfirmButton.addEventListener('click', function() {
+        emptyCartDialog.style.display = 'none'
+        emptyCart()
+    })
+    emptyCartCancelButton.addEventListener('click', function() {
+        emptyCartDialog.style.display = 'none'
+    })
+}

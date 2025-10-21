@@ -254,6 +254,15 @@ def remove_recipe_from_cart(request):
         return HttpResponseNotAllowed(permitted_methods=['POST'])
 
 @csrf_exempt
+def empty_cart(request):
+    if request.method == 'POST':
+        # Clear the cart by setting it to an empty list
+        request.session['cart'] = []
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
 def get_cart_size(request):
     if request.method == 'GET':
         cart = get_cart(request)

@@ -43,6 +43,7 @@ urlpatterns = [
     path('edit_baking_switch_cookie/', views.edit_baking_switch_cookie, name='edit_baking_switch_cookie'),
     path('edit_food_category/', views.edit_food_category, name='edit_food_category'),
     path('edit_food/', views.edit_food, name='edit_food'),
+    path('empty_cart/', views.empty_cart, name='empty_cart'),
     path('get_cart_size/', views.get_cart_size, name='get_cart_size'),
     path('get_ingredient_category_order_number/', views.get_ingredient_category_order_number, name='get_ingredient_category_order_number'),
     path('ingred_parse', views.ingredient_parse_api, name='ingred_parse'),

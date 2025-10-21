@@ -5,7 +5,11 @@
 {{ recipe_data|json_script:"searchResultsRaw" }}
 {{ tags|json_script:"tagResultsRaw" }}
 
-<button type="button" id="show_groceries_button">Show grocery list</button>
+{% with cart_size=recipes|length %}
+
+<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="show_groceries_button">Show grocery list</button>
+<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="empty_cart_button">Empty cart</button>
+
 <div id="grocery_list_modal" class="modal">
     <div class="modal-content">
         <span class="close-button">&times;</span>
@@ -16,6 +20,26 @@
         </div>
     </div>
 </div>
+
+<div id="empty_cart_dialog" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000;">
+    <div style="background-color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px;">
+        <p style="margin-bottom: 20px; font-size: 16px;">
+            Are you sure you want to remove all recipes from your cart?
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="empty_cart_confirm_button" style="background-color: rgb(220, 53, 69); color: white;">
+                Let's do it
+            </button>
+            <button id="empty_cart_cancel_button" style="background-color: rgb(108, 117, 125); color: white;">
+                Oh wait nope
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if cart_size == 0 %}
+<h2>Your cart is empty!</h2>
+{% else %}
 
 <div id="cart_contents">
     <table id="search_results_table">
@@ -74,6 +98,9 @@
         </tbody>
     </table>
 </div>
+
+{% endif %}
+{% endwith %}
 
 <script src="{% static 'js/show_groceries.js' %}"></script>
 
