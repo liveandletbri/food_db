@@ -81,6 +81,10 @@ async function updateCart(event) {
         } else {
             cartCounter.style.display = 'none'
         }
+
+        if (window.location.pathname.endsWith('/bulk/')) {
+            window.location.reload()
+        }
     }
 }
 
