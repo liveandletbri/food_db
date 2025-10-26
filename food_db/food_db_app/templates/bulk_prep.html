@@ -2,9 +2,6 @@
 {% load static %}
 {% block content %}
 
-{{ recipe_data|json_script:"searchResultsRaw" }}
-{{ tags|json_script:"tagResultsRaw" }}
-
 {% with cart_size=recipes|length %}
 
 <button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="show_groceries_button">Show grocery list</button>
@@ -42,8 +39,8 @@
 {% else %}
 
 <div id="cart_contents">
-    <div style="overflow-x: auto; width: 100%;">
-        <table id="search_results_table" style="min-width: 100%; border-collapse: collapse;">
+    <div id="tag_matrix_div" style="overflow-x: auto; width: 100%;">
+        <table id="tag_matrix_table" style="min-width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
                     <th style="min-width: 300px;">
@@ -52,7 +49,7 @@
                         <i id="recipe_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
                         <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
                     </th>
-                    {% for tag in all_tags %}
+                    {% for tag in all_tags.keys %}
                         <th style="min-width: 75px; white-space: nowrap;">
                             <span 
                                 class="tag_display_label small"
@@ -83,6 +80,23 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <div id="tag_count_summary" class="left_side_of_page">
+        <h2>Tag summary:</h2>
+        <label class="tags_row"><ul 
+            {% if all_tags|length >= 18 %}
+                class="three_cols"
+            {% elif all_tags|length >= 12 %}
+                class="two_cols"
+            {% endif %}
+        >
+            {% for tag, count in all_tags.items %}
+                <div style="padding-left: 20px;">
+                    {{ tag.name }}
+                    <span class="result_count_label" data-tag_name="{{ tag.name }}">{{ count }}</span>
+                </div>
+            {% endfor %}
+        </ul></label>
     </div>
 </div>
 

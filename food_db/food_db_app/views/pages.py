@@ -798,15 +798,24 @@ def bulk_prep(request):
     groceries = GroceryList([RecipeIngredientData(rec, 1) for rec in all_recipes_with_children], 1)
 
     # Build a set of all tags that are associated with any cart recipe
-    all_tags = set()
+    all_tags = defaultdict(int)
     for recipe in cart_recipes:
-        all_tags.update(recipe.associated_tags)
+        for tag in recipe.associated_tags:
+            all_tags[tag] += 1
+    
+    # sort by count descending, then by name
+    all_tags_sorted = OrderedDict(
+        sorted(
+            dict(all_tags).items(),
+            key=lambda item: (-item[1], item[0].name)
+        )
+    )
 
     # recipe_tag_matrix is a dict where the keys are recipe clean_keys and the values are dicts. Each inner dict has a key for every tag in all_tags, and a 1 or 0 indicating if the parent recipe is associated with a given tag.
     recipe_tag_matrix = {}
     for recipe in cart_recipes:
         tag_presence = {}
-        for tag in all_tags:
+        for tag in all_tags.keys():
             tag_presence[tag.name] = 1 if tag in recipe.associated_tags else 0
         recipe_tag_matrix[recipe] = tag_presence
 
@@ -815,6 +824,6 @@ def bulk_prep(request):
         'recipes': cart_recipes,
         'grocery_list': groceries.grocery_list_str,
         'recipe_tag_matrix': recipe_tag_matrix,
-        'all_tags': all_tags,
+        'all_tags': all_tags_sorted,
     }
     return render(request, 'bulk_prep.html', context)
