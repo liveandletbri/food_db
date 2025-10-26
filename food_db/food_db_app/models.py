@@ -48,6 +48,28 @@ class ParentChildRecipe(models.Model):
     )
     _date_created = models.DateTimeField(default=timezone.now)
 
+class RecipeTimingAttribute(models.Model):
+    def __str__(self):
+        return f'{self.recipe.title}: {self.type} {self.minutes}'
+
+    recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+    )
+    TYPE_CHOICES = [
+        ('bake', 'Bake'),
+        ('chill', 'Chill'),
+        ('prove', 'Prove'),
+        ('simmer', 'Simmer'),
+        ('marinade', 'Marinade'),
+        ('rest', 'Rest'),
+    ]
+    type = models.CharField(
+        max_length=15,
+        choices=TYPE_CHOICES,
+    )
+    minutes = models.PositiveSmallIntegerField()
+
 class Recipe(models.Model):
     def __str__(self):
         return self.title
