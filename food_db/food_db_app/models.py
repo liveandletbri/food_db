@@ -8,6 +8,15 @@ from django.utils.deconstruct import deconstructible
 
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
+TIMING_TYPE_CHOICES = [
+    ('bake', 'Bake'),
+    ('chill', 'Chill'),
+    ('prove', 'Prove'),
+    ('simmer', 'Simmer'),
+    ('marinade', 'Marinade'),
+    ('rest', 'Rest'),
+]
+
 @deconstructible
 class PathAndRename(object):
     def __init__(self, sub_path='media/'):
@@ -56,17 +65,10 @@ class RecipeTimingAttribute(models.Model):
         'Recipe',
         on_delete=models.CASCADE,
     )
-    TYPE_CHOICES = [
-        ('bake', 'Bake'),
-        ('chill', 'Chill'),
-        ('prove', 'Prove'),
-        ('simmer', 'Simmer'),
-        ('marinade', 'Marinade'),
-        ('rest', 'Rest'),
-    ]
+    
     type = models.CharField(
         max_length=15,
-        choices=TYPE_CHOICES,
+        choices=TIMING_TYPE_CHOICES,
     )
     minutes = models.PositiveSmallIntegerField()
 
