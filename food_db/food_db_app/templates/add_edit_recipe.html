@@ -314,9 +314,10 @@
     <button class="form_mod_button" id="add-step-form" type="button">Add another step</button>
     <button class="form_mod_button" id="delete-step-form" type="button">Remove last step</button>
 
-    <h2>Timing Attributes</h2>
-    <h4>Use these fields to record some of the times mentioned in the recipe steps. This data can be used on the Bulk Prep tab to help you coordinate a big day!</h4>
+    <h2>Timing</h2>
+    <h4>Use these (optional) fields to record some of the times mentioned in the recipe steps. This data can be used on the Bulk Prep tab to help you coordinate a big day!</h4>
     {{create_recipe_form.extra_timing_count}}
+    <span id="timing_attribute_tooltip" class="form_validate_tooltip tooltip">You can only have one time set for each type.</span>
     <table id="timing-table" class="form-table">
         <tr>
             <th width="50%">Type</th>
@@ -326,7 +327,7 @@
         {% for timing in timing_list %}
         <tr name="timing_{{ forloop.counter0 }}_row">
             <td width="50%">
-                <select name="timing_{{ forloop.counter0 }}_type" id="id_timing_{{ forloop.counter0 }}_type">
+                <select class="timing_attribute_choice" name="timing_{{ forloop.counter0 }}_type" id="id_timing_{{ forloop.counter0 }}_type">
                     <option value="">Choose...</option>
                     {% for type in timing_types %}
                     <option value="{{ type.0 }}" {% if timing.type == type.0 %}selected{% endif %}>{{ type.1 }}</option>

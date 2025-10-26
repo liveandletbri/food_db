@@ -10,6 +10,7 @@ let servingsInput = document.querySelector("#id_servings")
 let caloriesInput = document.querySelector("#id_calories_per_recipe")
 let notesInput = document.querySelector("#id_notes")
 let childRecipeCollection = document.getElementById('child_recipes_div')
+let timingAttributeChoices = document.getElementsByClassName('timing_attribute_choice')
 
 // These are declared in other scripts loaded in the same page
 // let ingredTable = document.querySelector("#ingred-table")
@@ -25,6 +26,7 @@ let servingsTooltip = document.querySelector("#servings_tooltip")
 let caloriesTooltip = document.querySelector("#calories_per_recipe_tooltip")
 let ingredFoodTooltip = document.querySelector("#ingred_0_food_tooltip")
 let stepTooltip = document.querySelector("#step_0_description_tooltip")
+let timingTooltip = document.querySelector("#timing_attribute_tooltip")
 
 async function validateAddRecipe(e) {
     e.preventDefault()
@@ -125,6 +127,20 @@ async function validateAddRecipe(e) {
             showAndHideTooltip(caloriesTooltip)
             invalid = true
         }
+    }
+
+    // Timing Attributes
+    let timingTypes = []
+    Array.from(timingAttributeChoices).forEach(choice => {
+        let val = choice.value
+        if ( val != '') {
+            timingTypes.push(val)
+        }
+    })
+    let timingTypeSet = new Set(timingTypes)
+    if (timingTypeSet.size != timingTypes.length) {
+        showAndHideTooltip(timingTooltip)
+        invalid = true
     }
 
     // Rename rows so the ID numbers are ordered the same as what's visible on the page
