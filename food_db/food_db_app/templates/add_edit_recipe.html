@@ -328,12 +328,9 @@
             <td width="50%">
                 <select name="timing_{{ forloop.counter0 }}_type" id="id_timing_{{ forloop.counter0 }}_type">
                     <option value="">Choose...</option>
-                    <option value="bake" {% if timing.type == 'bake' %}selected{% endif %}>Bake</option>
-                    <option value="chill" {% if timing.type == 'chill' %}selected{% endif %}>Chill</option>
-                    <option value="prove" {% if timing.type == 'prove' %}selected{% endif %}>Prove</option>
-                    <option value="simmer" {% if timing.type == 'simmer' %}selected{% endif %}>Simmer</option>
-                    <option value="marinade" {% if timing.type == 'marinade' %}selected{% endif %}>Marinade</option>
-                    <option value="rest" {% if timing.type == 'rest' %}selected{% endif %}>Rest</option>
+                    {% for type in timing_types %}
+                    <option value="{{ type.0 }}" {% if timing.type == type.0 %}selected{% endif %}>{{ type.1 }}</option>
+                    {% endfor %}
                 </select>
             </td>
             <td width="40%">

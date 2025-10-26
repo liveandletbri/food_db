@@ -381,6 +381,7 @@ def add_recipe(request):
         'recipe_list': existing_recipes,
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': get_cart(request),
+        'timing_types': TIMING_TYPE_CHOICES,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -824,6 +825,7 @@ def edit_recipe(request, key):
         'child_recipes': child_recipes,
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': get_cart(request),
+        'timing_types': TIMING_TYPE_CHOICES,
     }
 
     return render(request, 'add_edit_recipe.html', context)
