@@ -138,7 +138,10 @@ def add_recipe(request):
 
         extra_step_count = int(request.POST.get('extra_step_count'))
         total_step_count = extra_step_count + 1
-        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
+
+        extra_timing_count = int(request.POST.get('extra_timing_count', 0))
+        total_timing_count = extra_timing_count + 1
+        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count, extra_timings=extra_timing_count)
 
         log_debug_message('is valid?')
 
@@ -321,6 +324,28 @@ def add_recipe(request):
 
             log_debug_message('created child recipes')
 
+            # Handle timing attributes
+            timing_id_prefixes = {re.search(r'timing_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('timing_')}
+            timing_ids = [int(id.replace('timing_','')) for id in timing_id_prefixes]  # pulls just the numbers from the timing ID prefix
+            timing_instances = []
+            
+            for timing_id in sorted(timing_ids):
+                timing_type = create_recipe_form.cleaned_data.get(f'timing_{timing_id}_type')
+                timing_minutes = create_recipe_form.cleaned_data.get(f'timing_{timing_id}_minutes')
+                
+                if timing_type and timing_minutes:
+                    timing_instance = RecipeTimingAttribute(
+                        recipe=recipe_instance,
+                        type=timing_type,
+                        minutes=timing_minutes,
+                    )
+                    timing_instances.append(timing_instance)
+            
+            if timing_instances:
+                RecipeTimingAttribute.objects.bulk_create(timing_instances)
+            
+            log_debug_message('saved timing attributes')
+
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
@@ -345,6 +370,9 @@ def add_recipe(request):
         ],
         'step_list': [
             {'description': ''},
+        ],
+        'timing_list': [
+            {'type': '', 'minutes': None},
         ],
         'food_list': existing_foods,
         'unit_list': existing_units,
@@ -429,7 +457,10 @@ def edit_recipe(request, key):
 
         extra_step_count = int(request.POST.get('extra_step_count'))
         total_step_count = extra_step_count + 1
-        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count)
+
+        extra_timing_count = int(request.POST.get('extra_timing_count', 0))
+        total_timing_count = extra_timing_count + 1
+        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count, extra_timings=extra_timing_count)
 
         log_debug_message('is valid?')
 
@@ -659,6 +690,30 @@ def edit_recipe(request, key):
 
             log_debug_message('created child recipes')
 
+            # Handle timing attributes - remove existing ones first
+            RecipeTimingAttribute.objects.filter(recipe=recipe_instance).delete()
+            
+            timing_id_prefixes = {re.search(r'timing_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('timing_')}
+            timing_ids = [int(id.replace('timing_','')) for id in timing_id_prefixes]  # pulls just the numbers from the timing ID prefix
+            timing_instances = []
+            
+            for timing_id in sorted(timing_ids):
+                timing_type = create_recipe_form.cleaned_data.get(f'timing_{timing_id}_type')
+                timing_minutes = create_recipe_form.cleaned_data.get(f'timing_{timing_id}_minutes')
+                
+                if timing_type and timing_minutes:
+                    timing_instance = RecipeTimingAttribute(
+                        recipe=recipe_instance,
+                        type=timing_type,
+                        minutes=timing_minutes,
+                    )
+                    timing_instances.append(timing_instance)
+            
+            if timing_instances:
+                RecipeTimingAttribute.objects.bulk_create(timing_instances)
+            
+            log_debug_message('saved timing attributes')
+
             # if cloud sync is enabled, sync now
             if S3_SYNC_ENABLED:
                 s3 = S3Sync()
@@ -678,6 +733,7 @@ def edit_recipe(request, key):
         related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
+        related_timing_attributes = RecipeTimingAttribute.objects.filter(recipe=recipe_instance)
         child_recipes = recipe_instance.children
 
         existing_foods = [food.name for food in Food.objects.all()]
@@ -689,6 +745,7 @@ def edit_recipe(request, key):
             initial=recipe_instance.__dict__,
             extra_ingreds=len(related_ingredients) - 1,
             extra_steps=len(related_steps) - 1,
+            extra_timings=len(related_timing_attributes) - 1 if len(related_timing_attributes) > 0 else 0,
         )
         create_recipe_form.fields['tags'].initial = [tag.name for tag in recipe_instance.associated_tags]  # doesn't really do anything because the tags that get checked are set in context via related_tags
         create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
@@ -735,6 +792,19 @@ def edit_recipe(request, key):
         if len(step_list) == 0:
             step_list = [{key: '' for key in step_fields}]
 
+        # Prepping timing attributes as dictionaries
+        timing_list = []
+        timing_fields = ['type', 'minutes']
+        for timing in related_timing_attributes:
+            timing_data = {}
+            for field in timing_fields:
+                timing_data[field] = getattr(timing, field)
+            timing_list.append(timing_data)
+        
+        # If there are no timing attributes, populate a blank one for the form
+        if len(timing_list) == 0:
+            timing_list = [{key: '' for key in timing_fields}]
+
         # Change the cookie for is_baking_mode to match the recipe's is_baking_recipe value
         request.session['is_baking_mode'] = recipe_instance.is_baking_recipe
 
@@ -745,6 +815,7 @@ def edit_recipe(request, key):
         'existing_images': related_images,
         'ingredient_list': ingredient_list,
         'step_list': step_list,
+        'timing_list': timing_list,
         'food_list': existing_foods,
         'unit_list': existing_units,
         'book_list': existing_books,
