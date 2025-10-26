@@ -148,6 +148,14 @@ class Recipe(models.Model):
     def associated_tags(self):
         return [tag for tag in Tag.objects.filter(recipes=self).order_by('name')]
 
+    @property
+    def associated_times(self):
+        return [time for time in RecipeTimingAttribute.objects.filter(recipe=self).order_by('type')]
+
+    @property
+    def has_times(self):
+        return RecipeTimingAttribute.objects.filter(recipe=self).count() > 0
+
     def add_child(self, child_recipe):
         '''Adds a child recipe to this recipe.'''
         if not isinstance(child_recipe, Recipe):

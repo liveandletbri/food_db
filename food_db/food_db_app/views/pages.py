@@ -117,7 +117,8 @@ def recipe_detail(request, key):
         'cloud_sync_enabled': S3_SYNC_ENABLED,
         'cloud_url': S3Sync().bucket_url,
         'cart': (cart := get_cart(request)),
-        'in_cart': str(recipe.clean_key in cart).lower()
+        'in_cart': str(recipe.clean_key in cart).lower(),
+        'timing_types': TIMING_TYPE_CHOICES,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -734,7 +735,7 @@ def edit_recipe(request, key):
         related_images = [{'url':recipe_image.image.url,'file_name':recipe_image._file_name} for recipe_image in RecipeImage.objects.filter(recipe=recipe_instance)]
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
-        related_timing_attributes = RecipeTimingAttribute.objects.filter(recipe=recipe_instance)
+        related_timing_attributes = recipe_instance.associated_times
         child_recipes = recipe_instance.children
 
         existing_foods = [food.name for food in Food.objects.all()]
