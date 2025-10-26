@@ -8,6 +8,15 @@ from django.utils.deconstruct import deconstructible
 
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
+TIMING_TYPE_CHOICES = [
+    ('bake', 'Bake'),
+    ('chill', 'Chill'),
+    ('prove', 'Prove'),
+    ('simmer', 'Simmer'),
+    ('marinade', 'Marinade'),
+    ('rest', 'Rest'),
+]
+
 @deconstructible
 class PathAndRename(object):
     def __init__(self, sub_path='media/'):
@@ -47,6 +56,21 @@ class ParentChildRecipe(models.Model):
         help_text="Order number for the child recipe when displayed on page for parent recipe. Lower numbers appear first.",
     )
     _date_created = models.DateTimeField(default=timezone.now)
+
+class RecipeTimingAttribute(models.Model):
+    def __str__(self):
+        return f'{self.recipe.title}: {self.type} {self.minutes}'
+
+    recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+    )
+    
+    type = models.CharField(
+        max_length=15,
+        choices=TIMING_TYPE_CHOICES,
+    )
+    minutes = models.PositiveSmallIntegerField()
 
 class Recipe(models.Model):
     def __str__(self):
@@ -123,6 +147,14 @@ class Recipe(models.Model):
     @property
     def associated_tags(self):
         return [tag for tag in Tag.objects.filter(recipes=self).order_by('name')]
+
+    @property
+    def associated_times(self):
+        return [time for time in RecipeTimingAttribute.objects.filter(recipe=self).order_by('type')]
+
+    @property
+    def has_times(self):
+        return RecipeTimingAttribute.objects.filter(recipe=self).count() > 0
 
     def add_child(self, child_recipe):
         '''Adds a child recipe to this recipe.'''

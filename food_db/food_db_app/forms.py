@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 from .admin import my_admin_site
-from .models import Food, Recipe, RecipeBook, Ingredient, Tag, UnitOfMeasurement
+from .models import Food, Recipe, RecipeBook, Ingredient, Tag, UnitOfMeasurement, TIMING_TYPE_CHOICES
 from .widgets import CustomRelatedFieldWidgetWrapper, ListTextWidget
 
 # Getting objects! You can run these queries directly by doing python manage.py shell
@@ -43,6 +43,7 @@ class CreateRecipeForm(forms.Form):
     def __init__(self, *args, **kwargs):
         extra_ingred_fields = kwargs.pop('extra_ingreds', 0)
         extra_step_fields = kwargs.pop('extra_steps', 0)
+        extra_timing_fields = kwargs.pop('extra_timings', 0)
         super(CreateRecipeForm,self).__init__(*args, **kwargs)
 
         # Ingredient fields
@@ -70,6 +71,13 @@ class CreateRecipeForm(forms.Form):
         self.fields['extra_step_count'].initial = extra_step_fields
         for index in range(1, int(extra_step_fields)+1):
             self.fields[f'step_{index}_description'] = forms.CharField(required=False)
+
+        # Recipe timing attribute fields
+        self.fields['extra_timing_count'].initial = extra_timing_fields
+        timing_choices = TIMING_TYPE_CHOICES
+        for index in range(1, int(extra_timing_fields)+1):
+            self.fields[f'timing_{index}_type'] = forms.ChoiceField(required=False, choices=timing_choices)
+            self.fields[f'timing_{index}_minutes'] = forms.IntegerField(required=False)
 
     class Meta:
         model = Recipe  
@@ -104,6 +112,11 @@ class CreateRecipeForm(forms.Form):
     # Recipe step fields
     step_0_description = forms.CharField(required=False)
     extra_step_count = forms.CharField(widget=forms.HiddenInput())
+
+    # Recipe timing attribute fields
+    timing_0_type = forms.ChoiceField(required=False, choices=TIMING_TYPE_CHOICES)
+    timing_0_minutes = forms.IntegerField(required=False)
+    extra_timing_count = forms.CharField(widget=forms.HiddenInput())
 
     def clean_servings(self):
         raw_servings_str = self.data['servings']

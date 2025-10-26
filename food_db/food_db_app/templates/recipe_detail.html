@@ -109,6 +109,21 @@
         <td>{{ recipe.notes }}</td>
     </tr>
     {% endif %}
+    {% if recipe.has_times %}
+        {% for time in recipe.associated_times %}
+            <tr>
+                <td class="recipe_summary_label">
+                    <!-- Show the type label, the user-facing value, nicely capitalized -->
+                    {% for type_value, type_label in timing_types %}
+                        {% if time.type == type_value %}
+                            {{ type_label }} time:
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ time.minutes }} minutes</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
     {% if images %}
     <tr>
         <td class="recipe_summary_label">Pix:</td>
