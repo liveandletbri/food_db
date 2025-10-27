@@ -2,6 +2,7 @@ import re
 import sys
 
 from collections import defaultdict, OrderedDict
+from django.db.utils import OperationalError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -44,15 +45,19 @@ class BaseTopRecipes(BaseChart):
 
     cooked_counts = defaultdict(int)
     baked_counts = defaultdict(int)
-    for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
-        if meal.recipe.is_baking_recipe:
-            baked_counts[meal.recipe.title] += 1
-        else:
-            cooked_counts[meal.recipe.title] += 1
-    
-    # sort by times cooked, descending
-    cooked_counts = OrderedDict(sorted(cooked_counts.items(), key=lambda item: item[1], reverse=True))
-    baked_counts = OrderedDict(sorted(baked_counts.items(), key=lambda item: item[1], reverse=True))
+    try:
+        for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
+            if meal.recipe.is_baking_recipe:
+                baked_counts[meal.recipe.title] += 1
+            else:
+                cooked_counts[meal.recipe.title] += 1
+        
+        # sort by times cooked, descending
+        cooked_counts = OrderedDict(sorted(cooked_counts.items(), key=lambda item: item[1], reverse=True))
+        baked_counts = OrderedDict(sorted(baked_counts.items(), key=lambda item: item[1], reverse=True))
+    except OperationalError:
+        # During migrations, database schema may not match models yet
+        pass
 
 class Top5CookedRecipes(BaseTopRecipes):
     title = 'Top 5 Most Cooked Recipes'
@@ -74,16 +79,20 @@ class BaseTopTags(BaseChart):
 
     cooked_cooking_tag_counts = defaultdict(int)
     cooked_baking_tag_counts = defaultdict(int)
-    for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
-        for tag in meal.recipe.associated_tags:
-            if meal.recipe.is_baking_recipe:
-                cooked_baking_tag_counts[tag.name] += 1
-            else:
-                cooked_cooking_tag_counts[tag.name] += 1
-    
-    # sort by times cooked, descending
-    cooked_cooking_tag_counts = OrderedDict(sorted(cooked_cooking_tag_counts.items(), key=lambda item: item[1], reverse=True))
-    cooked_baking_tag_counts = OrderedDict(sorted(cooked_baking_tag_counts.items(), key=lambda item: item[1], reverse=True))
+    try:
+        for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
+            for tag in meal.recipe.associated_tags:
+                if meal.recipe.is_baking_recipe:
+                    cooked_baking_tag_counts[tag.name] += 1
+                else:
+                    cooked_cooking_tag_counts[tag.name] += 1
+        
+        # sort by times cooked, descending
+        cooked_cooking_tag_counts = OrderedDict(sorted(cooked_cooking_tag_counts.items(), key=lambda item: item[1], reverse=True))
+        cooked_baking_tag_counts = OrderedDict(sorted(cooked_baking_tag_counts.items(), key=lambda item: item[1], reverse=True))
+    except OperationalError:
+        # During migrations, database schema may not match models yet
+        pass
 
 class Top10CookedTags(BaseTopTags):
     title = 'Top 10 Most Cooked Tags'
