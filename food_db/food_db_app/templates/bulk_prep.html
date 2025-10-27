@@ -47,8 +47,8 @@
                     <th style="min-width: 300px;">
                         <a>Recipe</a>
                         <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
-                        <i id="recipe_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
-                        <i id="recipe_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+                        <i id="recipe_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
+                        <i id="recipe_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
                     </th>
                     {% for tag in all_tags.keys %}
                         <th style="min-width: 75px; white-space: nowrap;">
@@ -57,8 +57,8 @@
                                 style="background-color: {{ tag.fill_color }}; color: {{ tag.text_color }}; {% if tag.has_border %}outline: 2px solid {{ tag.border_color }};{% endif %} white-space: nowrap;"
                             >{{ tag.name }}</span>
                             <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
-                            <i id="duration_asc_icon" class="fa fa-caret-down search_sort_icon"></i>
-                            <i id="duration_desc_icon" class="fa fa-caret-up search_sort_icon"></i>
+                            <i id="duration_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
+                            <i id="duration_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
                         </th>
                     {% endfor %}
                 </tr>
@@ -95,13 +95,25 @@
     </div>
     <div id="timing_coordination" class="left_side_of_page">
         <br><h2>Timing:</h2>
-    <table class="table table-striped">
+    <table id="timing_table" class="table table-striped">
         <thead>
             <tr>
-                <th>Recipe</th>
-                <th>Oven Temp</th>
+                <th>
+                    <a>Recipe</a>
+                </th>
+                <th>
+                    <a>Oven Temp</a>
+                    <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                    <i id="oven_temp_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
+                    <i id="oven_temp_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
+                </th>
                 {% for timing_type in timing_types %}
-                    <th>{{ timing_type.1 }} time</th>
+                    <th>
+                        <a>{{ timing_type.1 }} time</a>
+                        <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
+                        <i id="{{ timing_type.0 }}_time_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
+                        <i id="{{ timing_type.0 }}_time_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
+                    </th>
                 {% endfor %}
             </tr>
         </thead>
@@ -135,5 +147,6 @@
 {% endwith %}
 
 <script src="{% static 'js/show_groceries.js' %}"></script>
+<script src="{% static 'js/table_sort.js' %}"></script>
 
 {% endblock content %}

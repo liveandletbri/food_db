@@ -127,7 +127,7 @@ async function stealthSubmit(e) {
     // Update tag result counts
     refreshTagResultCounts(responseHtml.querySelector('#tagResultsRaw'))
 
-    // This function is defined in search_sort.js
+    // This function is defined in table_sort.js
     addListenersToTableHeaders()
 }
 
