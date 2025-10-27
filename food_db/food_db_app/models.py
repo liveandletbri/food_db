@@ -90,6 +90,7 @@ class Recipe(models.Model):
     servings_max = models.PositiveSmallIntegerField(null=True, blank=True)
     calories_per_recipe = models.PositiveSmallIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
+    oven_temp = models.PositiveSmallIntegerField(null=True, blank=True)
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
     is_baking_recipe = models.BooleanField(default=False)  # Either Cooking or Baking recipe
     is_component_recipe = models.BooleanField(default=False)  # Is this a reusable component or standalone recipe?

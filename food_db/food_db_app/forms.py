@@ -90,6 +90,7 @@ class CreateRecipeForm(forms.Form):
     servings = forms.CharField(required=False)
     calories_per_recipe = forms.IntegerField(required=False)
     notes = forms.CharField(required=False)
+    oven_temp = forms.IntegerField(required=False)
     images = forms.ImageField(required=False)
     is_baking_recipe = forms.BooleanField(required=False, initial=False)
     is_component_recipe = forms.BooleanField(required=False, initial=False)

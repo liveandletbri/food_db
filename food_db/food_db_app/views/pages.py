@@ -168,6 +168,7 @@ def add_recipe(request):
                 servings_max=servings_max,
                 calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
+                oven_temp=create_recipe_form.cleaned_data.get('oven_temp'),
                 is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False),
                 is_component_recipe=create_recipe_form.cleaned_data.get('is_component_recipe', False),
             )
@@ -494,6 +495,7 @@ def edit_recipe(request, key):
             recipe_instance.duration_minutes=create_recipe_form.cleaned_data['duration_minutes']
             recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
+            recipe_instance.oven_temp=create_recipe_form.cleaned_data.get('oven_temp')
             recipe_instance.is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False)
             recipe_instance.is_component_recipe=create_recipe_form.cleaned_data.get('is_component_recipe', False)
 
