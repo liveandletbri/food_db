@@ -1,5 +1,6 @@
 function toggleSortIcon(thElement, asc) {
-    let allSortIcons = document.querySelectorAll('.search_sort_icon')
+    let table = thElement.closest('table')
+    let allSortIcons = table.querySelectorAll('.table_sort_icon')
     allSortIcons.forEach(icon => icon.style.display = 'none')
     let sortStyle = asc ? 'asc' : 'desc'
     console.log(thElement)
