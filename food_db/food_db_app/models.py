@@ -5,6 +5,7 @@ from django.db import models
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
+from math import floor
 
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
@@ -71,6 +72,20 @@ class RecipeTimingAttribute(models.Model):
         choices=TIMING_TYPE_CHOICES,
     )
     minutes = models.PositiveSmallIntegerField()
+
+    @property
+    def duration_str(self):
+        '''Convert minutes into string with hours and minutes'''
+        hours = floor(float(self.minutes)/60.0)
+        minutes = self.minutes % 60
+        duration_str = ''
+        if hours == 1:
+            duration_str += f'{hours} hr '
+        elif hours > 1:
+            duration_str += f'{hours} hrs '
+        if minutes > 0:
+            duration_str += f'{minutes} min'
+        return duration_str
 
 class Recipe(models.Model):
     def __str__(self):

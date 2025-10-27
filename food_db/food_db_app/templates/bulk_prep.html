@@ -40,6 +40,7 @@
 
 <div id="cart_contents">
     <div id="tag_matrix_div" style="overflow-x: auto; width: 100%;">
+        <br><h2>Tags:</h2>
         <table id="tag_matrix_table" style="min-width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
@@ -82,14 +83,8 @@
         </table>
     </div>
     <div id="tag_count_summary" class="left_side_of_page">
-        <h2>Tag summary:</h2>
-        <label class="tags_row"><ul 
-            {% if all_tags|length >= 18 %}
-                class="three_cols"
-            {% elif all_tags|length >= 12 %}
-                class="two_cols"
-            {% endif %}
-        >
+        <br><h2>Tag summary:</h2>
+        <label class="tags_row"><ul class="three_cols">
             {% for tag, count in all_tags.items %}
                 <div style="padding-left: 20px;">
                     {{ tag.name }}
@@ -97,6 +92,42 @@
                 </div>
             {% endfor %}
         </ul></label>
+    </div>
+    <div id="timing_coordination" class="left_side_of_page">
+        <br><h2>Timing:</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Recipe</th>
+                <th>Oven Temp</th>
+                {% for timing_type in timing_types %}
+                    <th>{{ timing_type.1 }} time</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for recipe in recipes %}
+                <tr>
+                    <td style="min-width: 75px;">
+                        <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
+                    </td>
+                    <td>
+                        {% if recipe.oven_temp %}{{ recipe.oven_temp }}{% endif %}
+                    </td>
+                    {% for timing_type in timing_types %}
+                        <td>
+                            {% for timing in recipe.associated_times %}
+                                {% if timing.type == timing_type.0 %}{{ timing.duration_str }}{% endif %}
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                    <td style="min-width: 75px; background-color: white !important;">
+                        <i class="fa-solid fa-cart-shopping add_to_cart_icon added" data-recipe_key="{{ recipe.clean_key }}"></i>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     </div>
 </div>
 

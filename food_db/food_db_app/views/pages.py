@@ -901,5 +901,6 @@ def bulk_prep(request):
         'grocery_list': groceries.grocery_list_str,
         'recipe_tag_matrix': recipe_tag_matrix,
         'all_tags': all_tags_sorted,
+        'timing_types': TIMING_TYPE_CHOICES,
     }
     return render(request, 'bulk_prep.html', context)
