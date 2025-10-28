@@ -119,9 +119,12 @@
         </thead>
         <tbody>
             {% for recipe in recipes %}
-                <tr>
+                <tr class="timing_table_row">
                     <td style="min-width: 75px;">
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
+                        <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
+                        <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
+                        <i class="fa-solid fa-cart-shopping add_to_cart_icon added" style="padding-left: 12px;" data-recipe_key="{{ recipe.clean_key }}"></i>
                     </td>
                     <td>
                         {% if recipe.oven_temp %}{{ recipe.oven_temp }}{% endif %}
@@ -133,9 +136,6 @@
                             {% endfor %}
                         </td>
                     {% endfor %}
-                    <td style="min-width: 75px; background-color: white !important;">
-                        <i class="fa-solid fa-cart-shopping add_to_cart_icon added" data-recipe_key="{{ recipe.clean_key }}"></i>
-                    </td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -148,5 +148,8 @@
 
 <script src="{% static 'js/show_groceries.js' %}"></script>
 <script src="{% static 'js/table_sort.js' %}"></script>
+<script src="{% static 'js/table_row_shift.js' %}"></script>
+<!-- Important to load bulk_prep.js after table_row_shift.js, as bulk_prep assigns a second event listener to th elements that needs to be executed second. It also must be loaded after table_sort.js, as the secone event listener uses a function defined there. -->
+<script src="{% static 'js/bulk_prep.js' %}"></script>
 
 {% endblock content %}
