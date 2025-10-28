@@ -70,7 +70,7 @@ function moveRow(e, rowSelector, containerSelector, direction) {
     if (element.classList && (element.classList.contains('move_row_up_button') || 
         element.classList.contains('move_row_down_button'))) {
         buttonElement = element;
-    } else if (element.nodeName == 'PATH' || element.nodeName == 'I' || element.nodeName == 'svg') {
+    } else if (element.nodeName == 'path' || element.nodeName == 'i' || element.nodeName == 'svg') {
         // If clicking on an icon child (path or the i tag itself), get the closest button
         buttonElement = element.closest('.move_row_up_button') || element.closest('.move_row_down_button');
     } else {
