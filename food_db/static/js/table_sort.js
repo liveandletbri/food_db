@@ -54,15 +54,20 @@ var comparer = function(idx, asc) {
     }
 };
 
+function sortColumn(event) {
+    let th = event.target.closest('th');
+    let table = th.closest('table')
+    let tableBody = table.querySelector('tbody')
+    toggleSortIcon(th, th.asc)
+    Array.from(tableBody.querySelectorAll('tr'))
+        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+        .forEach(tr => tableBody.appendChild(tr) )
+}
+
+const sortColumnHandler = (event) => sortColumn(event)
+
 function addListenersToTableHeaders() {
-    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
-        let table = th.closest('table')
-        let tableBody = table.querySelector('tbody')
-        toggleSortIcon(th, this.asc)
-        Array.from(tableBody.querySelectorAll('tr'))
-            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-            .forEach(tr => tableBody.appendChild(tr) )
-    })))
+    document.querySelectorAll('th').forEach(th => th.addEventListener('click', sortColumnHandler))
 }
 
 addListenersToTableHeaders()
