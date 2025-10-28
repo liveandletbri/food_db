@@ -9,8 +9,6 @@ window.addEventListener('load', function() {
     initializeRowShiftFunctionality('.attached_child_recipe_div', '#child_recipes_div')
 })
 
-// Event listeners are handled by initializeRowShiftFunctionality
-
 function attachChildRecipe(e) {
     e.preventDefault()  // This textbox is in a form and I don't want Enter to trigger form submission
     let childRecipe = exampleChildRecipe.cloneNode(true)
@@ -60,5 +58,3 @@ childRecipeSearchInput.addEventListener('keydown', function(event) {
         attachChildRecipe(event)
     }
 });
-
-// Row shifting and deletion logic is now handled by table_row_shift.js
