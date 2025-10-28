@@ -5,21 +5,18 @@ let existingRecipes = JSON.parse(existingRecipesRaw.textContent)
 let existingRecipeTitles = Object.keys(existingRecipes)
 let submitButton = document.getElementById('add_child_recipe_button')
 
-function addListenersToChildRecipeButtons() {
-    let moveButtons = document.querySelectorAll('.move_child_recipe_button')
-    let deleteButtons = document.querySelectorAll('.delete_child_recipe_button')
-    
-    moveButtons.forEach(btn => btn.addEventListener('click', moveChildRecipe, btn))
-    deleteButtons.forEach(btn => btn.addEventListener('click', deleteChildRecipe, btn))
-}
+window.addEventListener('load', function() {
+    initializeRowShiftFunctionality('.attached_child_recipe_div', '#child_recipes_div')
+})
 
-addListenersToChildRecipeButtons()
+// Event listeners are handled by initializeRowShiftFunctionality
 
 function attachChildRecipe(e) {
     e.preventDefault()  // This textbox is in a form and I don't want Enter to trigger form submission
     let childRecipe = exampleChildRecipe.cloneNode(true)
     childRecipe.style.display = ''
     childRecipe.removeAttribute('id')  // avoid duplicate IDs
+    childRecipe.classList.remove('ignore_row');
 
     // Did they type a valid recipe title?
     let recipeTitleInput = childRecipeSearchInput.value
@@ -53,8 +50,7 @@ function attachChildRecipe(e) {
 
     childRecipeContainer.appendChild(childRecipe)
     childRecipeSearchInput.value = ''
-    addListenersToChildRecipeButtons()
-    hideTopAndBottomMoveButtons()
+    initializeRowShiftFunctionality('.attached_child_recipe_div', '#child_recipes_div')
 }
 
 submitButton.addEventListener('click', function(event) {attachChildRecipe(event)})
@@ -65,74 +61,4 @@ childRecipeSearchInput.addEventListener('keydown', function(event) {
     }
 });
 
-function hideTopAndBottomMoveButtons() {
-    let allChildRecipes = childRecipeContainer.querySelectorAll('.attached_child_recipe_div')
-    let firstChild = allChildRecipes[0]
-    let lastChild = allChildRecipes[allChildRecipes.length - 1]
-
-    // First child should not have an up arrow and last one should not have down. All other arrows are visible.
-    allChildRecipes.forEach(child => {
-        let upArrow = child.querySelectorAll('.move_child_recipe_up_button')[0]
-        let downArrow = child.querySelectorAll('.move_child_recipe_down_button')[0]
-        if (child == firstChild) {
-            upArrow.style.display = 'none'
-        } else {
-            upArrow.style.display = ''
-        }
-        if (child == lastChild) {
-            downArrow.style.display = 'none'
-        } else {
-            downArrow.style.display = ''
-        }
-
-    })
-
-}
-
-function moveChildRecipe(e) {
-    let element = e.target
-    let svg
-
-    if (element.nodeName == 'svg') {
-        svg = element
-    } else if (element.nodeName == 'path') {
-        svg = element.parentNode
-    } else {
-        console.log(element)
-        console.error('wut')
-    }
-    
-    let childRecipe = svg.parentNode
-    let upOrDown
-
-    if (svg.classList.contains('move_child_recipe_up_button')) {
-        upOrDown = 'up'
-    } else if (svg.classList.contains('move_child_recipe_down_button')) {
-        upOrDown = 'down'
-    } else {
-        console.error('SVG did not have appropriate classes')
-    }
-
-    if (upOrDown == 'up') {
-        childRecipeContainer.insertBefore(childRecipe, childRecipe.previousElementSibling)
-    } else if (upOrDown == 'down') {
-        childRecipeContainer.insertBefore(childRecipe.nextElementSibling, childRecipe)
-    }
-    hideTopAndBottomMoveButtons()
-}
-
-function deleteChildRecipe(e) {
-    let element = e.target
-    let img
-
-    if (element.nodeName == 'IMG') {
-        img = element
-    } else {
-        console.log(element)
-        console.error('wut')
-    }
-    
-    let childRecipe = img.parentNode
-    childRecipe.remove()
-    hideTopAndBottomMoveButtons()
-}
+// Row shifting and deletion logic is now handled by table_row_shift.js

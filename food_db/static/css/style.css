@@ -857,11 +857,11 @@ details[open] summary {
 #add_child_recipe_button {
     cursor: pointer;
 }
-.delete_child_recipe_button {
+.delete_row_button {
     margin-left: 8px;
     cursor: pointer;
 }
-.move_child_recipe_button {
+.move_row_button {
     margin-left: 12px;
     cursor: pointer;
     color: #808080;
