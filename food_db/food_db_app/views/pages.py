@@ -890,7 +890,7 @@ def bulk_prep(request):
     # recipe_tag_matrix is a dict where the keys are recipe clean_keys and the values are dicts. Each inner dict has a key for every tag in all_tags, and a 1 or 0 indicating if the parent recipe is associated with a given tag.
     recipe_tag_matrix = {}
     for recipe in cart_recipes:
-        tag_presence = {}
+        tag_presence = OrderedDict((tag.name, 0) for tag in all_tags_sorted.keys())
         for tag in all_tags.keys():
             tag_presence[tag.name] = 1 if tag in recipe.associated_tags else 0
         recipe_tag_matrix[recipe] = tag_presence
