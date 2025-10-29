@@ -5,7 +5,6 @@ from decimal import Decimal
 from django.forms.models import model_to_dict
 from math import floor
 
-from food_db.food_db_app.cloud_sync.s3 import recipe
 from food_db_app.models import *
 
 LAST_DEBUG_LOG_START_TIME = None
