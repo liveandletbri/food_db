@@ -60,7 +60,7 @@ function sortColumn(event) {
     let tableBody = table.querySelector('tbody')
     toggleSortIcon(th, th.asc)
     Array.from(tableBody.querySelectorAll('tr'))
-        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), th.asc = !th.asc))
         .forEach(tr => tableBody.appendChild(tr) )
 }
 
