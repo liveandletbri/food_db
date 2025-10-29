@@ -248,7 +248,7 @@ def get_derived_tags(recipe_instance):
             ]
         ),
         DerivedTagRule(
-            "Cookie",
+            "Cookies",
             recipe_attributes={'is_cookie_recipe': True}
         )
     ]

@@ -169,8 +169,9 @@ def add_recipe(request):
                 calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe'),
                 notes=create_recipe_form.cleaned_data.get('notes'),
                 oven_temp=create_recipe_form.cleaned_data.get('oven_temp'),
-                is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False),
+                is_baking_recipe=(is_baking := create_recipe_form.cleaned_data.get('is_baking_recipe', False)),
                 is_component_recipe=create_recipe_form.cleaned_data.get('is_component_recipe', False),
+                is_cookie_recipe=create_recipe_form.cleaned_data.get('is_cookie_recipe', False) if is_baking else False,
             )
 
             log_debug_message('made recipe instance')
@@ -496,8 +497,9 @@ def edit_recipe(request, key):
             recipe_instance.calories_per_recipe=create_recipe_form.cleaned_data.get('calories_per_recipe')
             recipe_instance.notes=create_recipe_form.cleaned_data.get('notes')
             recipe_instance.oven_temp=create_recipe_form.cleaned_data.get('oven_temp')
-            recipe_instance.is_baking_recipe=create_recipe_form.cleaned_data.get('is_baking_recipe', False)
+            recipe_instance.is_baking_recipe=(is_baking := create_recipe_form.cleaned_data.get('is_baking_recipe', False))
             recipe_instance.is_component_recipe=create_recipe_form.cleaned_data.get('is_component_recipe', False)
+            recipe_instance.is_cookie_recipe=create_recipe_form.cleaned_data.get('is_cookie_recipe', False) if is_baking else False
 
             log_debug_message('made recipe instance')
 
@@ -754,6 +756,7 @@ def edit_recipe(request, key):
         create_recipe_form.fields['tags'].initial = [tag.name for tag in recipe_instance.associated_tags]  # doesn't really do anything because the tags that get checked are set in context via related_tags
         create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
         create_recipe_form.fields['is_component_recipe'].initial = recipe_instance.is_component_recipe
+        create_recipe_form.fields['is_cookie_recipe'].initial = recipe_instance.is_cookie_recipe
         if recipe_instance.servings_min:
             create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min)
             if recipe_instance.servings_max:
