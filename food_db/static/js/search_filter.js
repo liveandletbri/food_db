@@ -15,11 +15,9 @@ let componentRecipeInput = document.getElementById('id_is_component_recipe_1')
 function swapCookingOrBakingSearch() {
     swapCookingOrBakingTags();
     stealthSubmit(); 
-    swapCookingOrBakingColors(isBakingInput.checked);
 }
 
 swapCookingOrBakingTags()  // Run on page setup to set tags to cooking
-swapCookingOrBakingColors(isBakingInput.checked) // Also set colors on page setup
 isBakingInput.addEventListener('change', swapCookingOrBakingSearch)
 
 function refreshTagResultCounts(tagResultsScript) {

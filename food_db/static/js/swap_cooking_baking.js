@@ -56,6 +56,13 @@ async function updateBakingModeCookie() {
     console.log(`Baking mode cookie updated: ${cookieUpdateSuccess ? 'success' : 'failure'}`)
 }
 
-let updateBakingModeCookieHandler = () => updateBakingModeCookie()
+async function swapBakingMode() {
+    swapCookingOrBakingColors(isBakingInput.checked)
+    await updateBakingModeCookie()
+}
 
-isBakingInput.addEventListener('change', updateBakingModeCookieHandler);
+let swapBakingModeHandler = () => swapBakingMode()
+
+isBakingInput.addEventListener('change', swapBakingModeHandler);
+// Set the colors on page load
+swapCookingOrBakingColors(isBakingInput.checked)
