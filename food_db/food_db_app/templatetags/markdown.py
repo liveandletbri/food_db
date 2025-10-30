@@ -19,7 +19,7 @@ def process_ingredient_links(text, recipe_title):
     and replace them with HTML spans that include tooltip data.
     """
     # Pattern to match [ingredient name] or [text](!ingredient name) or [text](!ingredient name;ingredient category)
-    pattern = r'\[([^\]]+)\](\(!([\w ]+)(;[\w ]+)?\))?'
+    pattern = r"\[([^\]]+)\](\(!([\w '\-%]+)(;[\w ]+)?\))?"
     
     def replace_ingredient_link(match):
         link_text = match.group(1)
