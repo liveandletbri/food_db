@@ -119,6 +119,7 @@ def recipe_detail(request, key):
         'cart': (cart := get_cart(request)),
         'in_cart': str(recipe.clean_key in cart).lower(),
         'timing_types': TIMING_TYPE_CHOICES,
+        'cookie_style_choices': COOKIE_STYLE_CHOICES,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -171,7 +172,9 @@ def add_recipe(request):
                 oven_temp=create_recipe_form.cleaned_data.get('oven_temp'),
                 is_baking_recipe=(is_baking := create_recipe_form.cleaned_data.get('is_baking_recipe', False)),
                 is_component_recipe=create_recipe_form.cleaned_data.get('is_component_recipe', False),
-                is_cookie_recipe=create_recipe_form.cleaned_data.get('is_cookie_recipe', False) if is_baking else False,
+                is_cookie_recipe=(is_cookie := create_recipe_form.cleaned_data.get('is_cookie_recipe', False) if is_baking else False),
+                cookie_style=create_recipe_form.cleaned_data.get('cookie_style') if is_cookie else None,
+                cookie_color=create_recipe_form.cleaned_data.get('cookie_color') if is_cookie else None,
             )
 
             log_debug_message('made recipe instance')
@@ -385,6 +388,7 @@ def add_recipe(request):
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': get_cart(request),
         'timing_types': TIMING_TYPE_CHOICES,
+        'cookie_style_choices': COOKIE_STYLE_CHOICES,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -499,7 +503,9 @@ def edit_recipe(request, key):
             recipe_instance.oven_temp=create_recipe_form.cleaned_data.get('oven_temp')
             recipe_instance.is_baking_recipe=(is_baking := create_recipe_form.cleaned_data.get('is_baking_recipe', False))
             recipe_instance.is_component_recipe=create_recipe_form.cleaned_data.get('is_component_recipe', False)
-            recipe_instance.is_cookie_recipe=create_recipe_form.cleaned_data.get('is_cookie_recipe', False) if is_baking else False
+            recipe_instance.is_cookie_recipe=(is_cookie := create_recipe_form.cleaned_data.get('is_cookie_recipe', False) if is_baking else False)
+            recipe_instance.cookie_style=create_recipe_form.cleaned_data.get('cookie_style') if is_cookie else None
+            recipe_instance.cookie_color=create_recipe_form.cleaned_data.get('cookie_color') if is_cookie else None
 
             log_debug_message('made recipe instance')
 
@@ -757,6 +763,8 @@ def edit_recipe(request, key):
         create_recipe_form.fields['is_baking_recipe'].initial = recipe_instance.is_baking_recipe
         create_recipe_form.fields['is_component_recipe'].initial = recipe_instance.is_component_recipe
         create_recipe_form.fields['is_cookie_recipe'].initial = recipe_instance.is_cookie_recipe
+        create_recipe_form.fields['cookie_style'].initial = recipe_instance.cookie_style
+        create_recipe_form.fields['cookie_color'].initial = recipe_instance.cookie_color
         if recipe_instance.servings_min:
             create_recipe_form.fields['servings'].initial = str(recipe_instance.servings_min)
             if recipe_instance.servings_max:
@@ -832,6 +840,7 @@ def edit_recipe(request, key):
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': get_cart(request),
         'timing_types': TIMING_TYPE_CHOICES,
+        'cookie_style_choices': COOKIE_STYLE_CHOICES,
     }
 
     return render(request, 'add_edit_recipe.html', context)
