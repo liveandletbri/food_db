@@ -15,7 +15,7 @@ TIMING_TYPE_CHOICES = [
     ('prove', 'Prove'),
     ('simmer', 'Simmer'),
     ('marinade', 'Marinade'),
-    ('rest', 'Rest'),
+    ('cool', 'Cool'),
 ]
 
 COOKIE_STYLE_CHOICES = [
