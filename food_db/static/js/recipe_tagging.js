@@ -76,13 +76,10 @@ document.getElementById('add_tag_button').addEventListener('click', submitAndHid
 
 // Filter the table on page load
 swapCookingOrBakingTags(document.getElementById('tags_table'))
-// Also set the colors on page load
-swapCookingOrBakingColors(isBakingInput.checked)
 
 // Also filter it on change of the is_baking_recipe checkbox
 isBakingInput.addEventListener('change', function() {
     swapCookingOrBakingTags(document.getElementById('tags_table'))
-    swapCookingOrBakingColors(isBakingInput.checked)
     isCookingTagInput.checked = ! isBakingInput.checked
     isBakingTagInput.checked = isBakingInput.checked
 })

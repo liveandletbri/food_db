@@ -99,6 +99,30 @@
                 </p>
             </td>
         </tr>
+        <tr class="hide_if_cooking">
+            <td class="recipe_summary_label">Cookies?</td>
+            <td style="vertical-align: middle;">
+                <input type="checkbox" name="is_cookie_recipe" id="id_is_cookie_recipe" style="margin-top: 5px;" {% if create_recipe_form.is_cookie_recipe.value %} checked="checked"{% endif %}>
+                <p style="padding-left: 30px; padding-bottom: 3px;">
+                    Check here if this recipe is for cookies (this exposes extra cookie-related attributes).
+                </p>
+            </td>
+        </tr>
+        <tr class="hide_if_cooking cookie_attribute">
+            <td class="recipe_summary_label">Cookie style</td>
+            <td>
+                <select name="cookie_style" id="id_cookie_style">
+                    <option value="">Choose...</option>
+                    {% for style_value, style_label in cookie_style_choices %}
+                    <option value="{{ style_value }}" {% if create_recipe_form.cookie_style.value == style_value %}selected{% endif %}>{{ style_label }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr class="hide_if_cooking cookie_attribute">
+            <td class="recipe_summary_label">Cookie color</td>
+            <td>{{create_recipe_form.cookie_color}}</td>
+        </tr>
         <tr>
             <td class="recipe_summary_label">{{create_recipe_form.url.label}}</td>
             <td>
@@ -367,4 +391,5 @@
 <script src="{% static 'js/recipe_tagging.js' %}"></script>
 <script src="{% static 'js/delete_image.js' %}"></script>
 <script src="{% static 'js/recipe_timing_attributes.js' %}"></script>
+<script src="{% static 'js/cookie_attributes.js' %}"></script>
 {% endblock content %}

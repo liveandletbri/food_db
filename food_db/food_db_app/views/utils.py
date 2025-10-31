@@ -2,6 +2,7 @@ import re
 from collections import defaultdict, OrderedDict
 from datetime import datetime
 from decimal import Decimal
+from django.forms.models import model_to_dict
 from math import floor
 
 from food_db_app.models import *
@@ -101,11 +102,13 @@ class DerivedTagRule:
         tag_name,
         ingredient_regex_patterns=[],
         step_regex_patterns=[],
+        recipe_attributes={},
     ):
         self.tag_name = tag_name
         self.ingredient_regex_patterns = ingredient_regex_patterns
         self.step_regex_patterns = step_regex_patterns
-        assert ingredient_regex_patterns or step_regex_patterns, "You must define at least one of: ingredient_regex_patterns, step_regex_patterns"
+        self.recipe_attributes = recipe_attributes
+        assert ingredient_regex_patterns or step_regex_patterns or recipe_attributes, "You must define at least one of: ingredient_regex_patterns, step_regex_patterns, recipe_attributes"
 
         # Confirm tag already exists
         try:
@@ -131,18 +134,31 @@ class DerivedTagRule:
                 if re.search(pattern, step.description, re.IGNORECASE):
                     return True
         return False
+
+    def _check_attributes(self, recipe):
+        recipe_dict = model_to_dict(recipe)
+        for attr, value in self.recipe_attributes.items():
+            assert attr in recipe_dict.keys(), f'Invalid attribute specified in DerivedTagRule: {attr}'
+            if recipe_dict[attr] != value:
+                return False
+        return True
     
     def check(self, recipe):
         print(f"Checking recipe to see if it should be tagged with {self.tag_name}")
         ingred_match = self._check_ingredients(recipe)
         step_match = self._check_steps(recipe)
+        attr_match = self._check_attributes(recipe)
 
-        if self.ingredient_regex_patterns and self.step_regex_patterns:
-            return ingred_match and step_match
-        elif self.ingredient_regex_patterns:
-            return ingred_match
-        elif self.step_regex_patterns:
-            return step_match
+        match_dict = {key: True for key in ('ingred', 'step', 'attr')}
+
+        if self.ingredient_regex_patterns:
+            match_dict['ingred'] = ingred_match
+        if self.step_regex_patterns:
+            match_dict['step'] = step_match
+        if self.recipe_attributes:
+            match_dict['attr'] = attr_match
+
+        return all(match_dict.values())  # returns True only if all values are True
 
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
@@ -230,6 +246,10 @@ def get_derived_tags(recipe_instance):
                 r"quinoa",
                 r"bulgur",
             ]
+        ),
+        DerivedTagRule(
+            "Cookies",
+            recipe_attributes={'is_cookie_recipe': True}
         )
     ]
     return [Tag.objects.get(name=rule.tag_name) for rule in tag_rules if rule.check(recipe_instance)]

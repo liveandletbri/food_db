@@ -56,6 +56,92 @@ async function updateBakingModeCookie() {
     console.log(`Baking mode cookie updated: ${cookieUpdateSuccess ? 'success' : 'failure'}`)
 }
 
-let updateBakingModeCookieHandler = () => updateBakingModeCookie()
+// Global object to store original position data for tr elements
+let trRestoreInfo = new Map();
 
-isBakingInput.addEventListener('change', updateBakingModeCookieHandler);
+function hideSpecificElements() {
+    let hideIfBakingElements = document.querySelectorAll('.hide_if_baking');
+    let hideIfCookingElements = document.querySelectorAll('.hide_if_cooking');
+
+    // Helper for tr removal & tracking
+    function handleTrs(elements, shouldHide) {
+        elements.forEach(elem => {
+            if (elem.tagName === 'TR') {
+                if (shouldHide) {
+                    // Track where to put back if not already tracked & remove from DOM
+                    if (!trRestoreInfo.has(elem)) {
+                        let parent = elem.parentNode;
+                        if (parent) {
+                            // Find next sibling in DOM (could be null)
+                            let nextSibling = elem.nextSibling;
+                            trRestoreInfo.set(elem, {
+                                parent: parent,
+                                nextSibling: nextSibling
+                            });
+                            parent.removeChild(elem);
+                        }
+                    }
+                } else {
+                    // Restore to its original position if not present and was tracked
+                    if (trRestoreInfo.has(elem)) {
+                        let { parent, nextSibling } = trRestoreInfo.get(elem);
+                        // Only re-append if it's not currently in the tree
+                        if (!parent.contains(elem)) {
+                            if (nextSibling && parent.contains(nextSibling)) {
+                                parent.insertBefore(elem, nextSibling);
+                            } else {
+                                parent.appendChild(elem);
+                            }
+                        }
+                        trRestoreInfo.delete(elem);
+                    }
+                }
+            } else {
+                elem.style.display = shouldHide ? 'none' : '';
+            }
+        });
+    }
+
+    // Restore any removed TRs that match the given CSS class
+    function restoreTrsByClass(className) {
+        // Copy entries array to avoid mutation issues while deleting
+        let entries = Array.from(trRestoreInfo.entries());
+        for (let [elem, info] of entries) {
+            if (elem.tagName === 'TR' && elem.classList && elem.classList.contains(className)) {
+                let parent = info.parent;
+                let nextSibling = info.nextSibling;
+                if (!parent.contains(elem)) {
+                    if (nextSibling && parent.contains(nextSibling)) {
+                        parent.insertBefore(elem, nextSibling);
+                    } else {
+                        parent.appendChild(elem);
+                    }
+                }
+                trRestoreInfo.delete(elem);
+            }
+        }
+    }
+
+    if (isBakingInput.checked) {
+        handleTrs(hideIfBakingElements, true);
+        handleTrs(hideIfCookingElements, false);
+        restoreTrsByClass('hide_if_cooking');
+    } else {
+        handleTrs(hideIfBakingElements, false);
+        handleTrs(hideIfCookingElements, true);
+        restoreTrsByClass('hide_if_baking');
+    }
+}
+
+async function swapBakingMode() {
+    swapCookingOrBakingColors(isBakingInput.checked)
+    hideSpecificElements()
+    await updateBakingModeCookie()
+}
+
+let swapBakingModeHandler = () => swapBakingMode()
+
+isBakingInput.addEventListener('change', swapBakingModeHandler);
+// Set the colors on page load
+swapCookingOrBakingColors(isBakingInput.checked)
+hideSpecificElements()

@@ -15,7 +15,14 @@ TIMING_TYPE_CHOICES = [
     ('prove', 'Prove'),
     ('simmer', 'Simmer'),
     ('marinade', 'Marinade'),
-    ('rest', 'Rest'),
+    ('cool', 'Cool'),
+]
+
+COOKIE_STYLE_CHOICES = [
+    ('hand_rolled', 'Hand-rolled'),
+    ('slice_n_bake', "Slice 'n Bake"),
+    ('cut', 'Cut'),
+    ('stamped', 'Stamp'),
 ]
 
 @deconstructible
@@ -109,6 +116,20 @@ class Recipe(models.Model):
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
     is_baking_recipe = models.BooleanField(default=False)  # Either Cooking or Baking recipe
     is_component_recipe = models.BooleanField(default=False)  # Is this a reusable component or standalone recipe?
+    is_cookie_recipe = models.BooleanField(default=False)  # cookies have extra attributes
+
+    # cookie-specific attributes
+    cookie_style = models.CharField(
+        max_length=20,
+        choices=COOKIE_STYLE_CHOICES,
+        null=True,
+        blank=True,
+    )
+    cookie_color = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+    )
 
     # foo = models.TextField(max_length=200)
 

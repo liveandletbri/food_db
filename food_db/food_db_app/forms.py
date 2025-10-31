@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 from .admin import my_admin_site
-from .models import Food, Recipe, RecipeBook, Ingredient, Tag, UnitOfMeasurement, TIMING_TYPE_CHOICES
+from .models import Food, Recipe, RecipeBook, Ingredient, Tag, UnitOfMeasurement, TIMING_TYPE_CHOICES, COOKIE_STYLE_CHOICES
 from .widgets import CustomRelatedFieldWidgetWrapper, ListTextWidget
 
 # Getting objects! You can run these queries directly by doing python manage.py shell
@@ -94,6 +94,9 @@ class CreateRecipeForm(forms.Form):
     images = forms.ImageField(required=False)
     is_baking_recipe = forms.BooleanField(required=False, initial=False)
     is_component_recipe = forms.BooleanField(required=False, initial=False)
+    is_cookie_recipe = forms.BooleanField(required=False, initial=False)
+    cookie_style = forms.ChoiceField(required=False, choices=COOKIE_STYLE_CHOICES)
+    cookie_color = forms.CharField(required=False)
     tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all().order_by('name'), widget=forms.CheckboxSelectMultiple())
     
     # Tag fields
