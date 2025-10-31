@@ -22,7 +22,7 @@ function syncCookieInputs(event) {
         cookieTagInput.checked = false
         isCookieInput.checked = false
     }
-showHideCookieAttributeRows()()
+    showHideCookieAttributeRows()
 }
 
 let syncCookieInputsHandler = (event) => syncCookieInputs(event)
