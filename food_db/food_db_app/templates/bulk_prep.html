@@ -76,8 +76,8 @@
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
                     </td>
                     {% for tag, boolean in tag_dict.items %}
-                    <td style="min-width: 75px; text-align: center; font-size: xx-large; padding: 0px; color: #3cc382; vertical-align: middle;" value="{{ boolean }}">
-                        {% if boolean == 1 %}✔️{% endif %}
+                    <td style="min-width: 75px; text-align: center; font-size: x-large; padding: 0px; color: #3cc382; vertical-align: middle;" value="{{ boolean }}">
+                        {% if boolean == 1 %}✅{% endif %}
                     </td>
                     {% endfor %}
                     <td style="min-width: 75px; background-color: white !important;">
@@ -153,28 +153,24 @@
         
         <div style="margin-bottom: 20px;">
             <h3 style="margin-bottom: 10px;">Tags:</h3>
-            <ul class="three_cols" style="list-style: none; padding-left: 0;">
+            <ul class="four_cols">
                 {% for tag in all_tags %}
-                <li style="padding-left: 20px;">
-                    <label>
+                    <div style="display: flex; align-items: center;">
                         <input type="checkbox" name="tags" value="{{ tag }}" style="margin-right: 5px;">
                         {{ tag }}
-                    </label>
-                </li>
+                    </div>
                 {% endfor %}
             </ul>
         </div>
         
         <div style="margin-bottom: 20px;">
             <h3 style="margin-bottom: 10px;">Recipe Attributes:</h3>
-            <ul class="three_cols" style="list-style: none; padding-left: 0;">
+            <ul class="four_cols" style="list-style: none; padding-left: 0;">
                 {% for attr_value, attr_label in all_attribute_tuples %}
-                <li style="padding-left: 20px;">
-                    <label>
+                    <div style="display: flex; align-items: center;">
                         <input type="checkbox" name="recipe_attributes" value="{{ attr_value }}" style="margin-right: 5px;">
                         {{ attr_label }}
-                    </label>
-                </li>
+                    </div>
                 {% endfor %}
             </ul>
         </div>

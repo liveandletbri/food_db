@@ -484,14 +484,6 @@ a {cursor:pointer;}
     display: inline-block;
 }
 
-.tab_container h2 { margin-left: 15px;  margin-right: 15px;  margin-bottom: 10px; color: #5685bc; }
-
-.tab_container p { margin-left: 15px; margin-right: 15px;  margin-top: 10px; margin-bottom: 10px; line-height: 1.3; }
-
-.tab_container ul { margin-left: 25px; line-height: 1.1; list-style-type: disc; column-count: 1;}
-
-.tab_container li { margin-left: 5px;}
-
 input[type="text"].manage_food_search {
     width: 60% !important;
 }

@@ -972,8 +972,11 @@ def bulk_prep(request):
             'clean_key',
             'title',
             'url',
+            'servings_min',
+            'servings_max',
             'notes',
             'is_baking_recipe',
+            'is_cookie_recipe',
             '_date_created',
             '_date_modified',   
         )
