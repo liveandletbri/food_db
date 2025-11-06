@@ -994,8 +994,6 @@ def bulk_prep(request):
         all_attributes.extend(timing_attributes)
         all_attribute_tuples = [(attr_name, get_friendly_name(attr_name)) for attr_name in all_attributes]
         all_tags =  [tag.name for tag in Tag.objects.all().order_by('name')]
-
-        # Get all ViewConfigs for the radio buttons
         all_view_configs = ViewConfig.objects.all().order_by('name')
 
         # choose attributes for the attribute table

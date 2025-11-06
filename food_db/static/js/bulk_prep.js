@@ -64,7 +64,7 @@ function validateViewConfig(e) {
     let selectedAttributes = document.querySelectorAll('input[name="recipe_attributes"]:checked')
     
     // Name must be filled out
-    if (name === '') {
+    if (name === '' || name.toLowerCase() === 'default') {
         showAndHideTooltip(viewConfigNameTooltip)
         invalid = true
     }
