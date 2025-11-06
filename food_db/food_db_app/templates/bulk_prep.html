@@ -146,40 +146,44 @@
     <h2>Create View Config</h2>
     <form id="view_config_form" method="POST" action="{% url 'bulk_prep' %}">
         {% csrf_token %}
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px; position: relative;">
             <label for="view_config_name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
             <input type="text" id="view_config_name" name="name" required style="width: 300px; padding: 5px;">
+            <span id="view_config_name_tooltip" class="form_validate_tooltip tooltip">You must enter a name for the View Config</span>
         </div>
         
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px; position: relative;">
             <h3 style="margin-bottom: 10px;">Tags:</h3>
             <ul class="four_cols">
                 {% for tag in all_tags %}
-                    <div style="display: flex; align-items: center;">
+                    <div class="checkbox" style="display: flex; align-items: center;">
                         <input type="checkbox" name="tags" value="{{ tag }}" style="margin-right: 5px;">
                         {{ tag }}
                     </div>
                 {% endfor %}
             </ul>
+            <span id="view_config_tags_tooltip" class="form_validate_tooltip tooltip">You must select at least one tag</span>
         </div>
         
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px; position: relative;">
             <h3 style="margin-bottom: 10px;">Recipe Attributes:</h3>
             <ul class="four_cols" style="list-style: none; padding-left: 0;">
                 {% for attr_value, attr_label in all_attribute_tuples %}
-                    <div style="display: flex; align-items: center;">
+                    <div class="checkbox" style="display: flex; align-items: center;">
                         <input type="checkbox" name="recipe_attributes" value="{{ attr_value }}" style="margin-right: 5px;">
                         {{ attr_label }}
                     </div>
                 {% endfor %}
             </ul>
+            <span id="view_config_attributes_tooltip" class="form_validate_tooltip tooltip">You must select at least one recipe attribute</span>
         </div>
         
-        <button type="submit" style="padding: 10px 20px; font-size: 16px; background-color: #5685bc; color: white; border: none; border-radius: 4px; cursor: pointer;">Create View Config</button>
+        <button type="button" id="submit_view_config_button" style="padding: 10px 20px; font-size: 16px; background-color: #5685bc; color: white; border: none; border-radius: 4px; cursor: pointer;">Create View Config</button>
     </form>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/show_groceries.js' %}"></script>
 <script src="{% static 'js/table_sort.js' %}"></script>
 <script src="{% static 'js/table_row_shift.js' %}"></script>

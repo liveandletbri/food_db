@@ -43,3 +43,70 @@ document.querySelectorAll('th').forEach(th => th.addEventListener('click', timin
 
 // Initialize tabs when document is ready
 $(document).ready(showHideTabs)
+
+// View Config form validation
+let submitViewConfigButton = document.querySelector("#submit_view_config_button")
+let viewConfigForm = document.querySelector("#view_config_form")
+let viewConfigNameInput = document.querySelector("#view_config_name")
+
+let viewConfigNameTooltip = document.querySelector("#view_config_name_tooltip")
+let viewConfigTagsTooltip = document.querySelector("#view_config_tags_tooltip")
+let viewConfigAttributesTooltip = document.querySelector("#view_config_attributes_tooltip")
+
+function validateViewConfig(e) {
+    e.preventDefault()
+    
+    let invalid = false
+    
+    // Get current form values
+    let name = viewConfigNameInput.value.trim()
+    let selectedTags = document.querySelectorAll('input[name="tags"]:checked')
+    let selectedAttributes = document.querySelectorAll('input[name="recipe_attributes"]:checked')
+    
+    // Name must be filled out
+    if (name === '') {
+        showAndHideTooltip(viewConfigNameTooltip)
+        invalid = true
+    }
+    
+    // At least one tag must be checked
+    if (selectedTags.length === 0) {
+        showAndHideTooltip(viewConfigTagsTooltip)
+        invalid = true
+    }
+    
+    // At least one recipe attribute must be checked
+    if (selectedAttributes.length === 0) {
+        showAndHideTooltip(viewConfigAttributesTooltip)
+        invalid = true
+    }
+    
+    // Submit if all clear!
+    if (invalid == false) {
+        submitViewConfigButton.innerText = 'Creating...'
+        submitViewConfigButton.style.backgroundColor = 'lightgray'
+        submitViewConfigButton.style.opacity = 0.25
+        viewConfigForm.submit()
+    }
+}
+
+// Add event listener when document is ready
+$(document).ready(function() {
+    if (submitViewConfigButton) {
+        submitViewConfigButton.addEventListener('click', validateViewConfig)
+    }
+    
+    // Add click handlers to checkbox divs to toggle the checkbox when clicking anywhere on the div
+    document.querySelectorAll('.checkbox').forEach(function(checkboxDiv) {
+        checkboxDiv.addEventListener('click', function(event) {
+            // Only toggle if the click wasn't directly on the checkbox input itself
+            // (to avoid double-toggling when clicking directly on the checkbox)
+            if (event.target.type !== 'checkbox') {
+                let checkboxInput = checkboxDiv.querySelector('input[type="checkbox"]')
+                if (checkboxInput) {
+                    checkboxInput.checked = !checkboxInput.checked
+                }
+            }
+        })
+    })
+})
