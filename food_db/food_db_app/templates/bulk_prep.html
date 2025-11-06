@@ -4,9 +4,6 @@
 
 {% with cart_size=recipes|length %}
 
-<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="show_groceries_button">Show grocery list</button>
-<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="empty_cart_button">Empty cart</button>
-
 <div id="grocery_list_modal" class="modal">
     <div class="modal-content">
         <span class="close-button">&times;</span>
@@ -34,9 +31,18 @@
     </div>
 </div>
 
+<ul id="tabs" style="margin: 0;">
+    <li><a class="bulk_prep_tab" id="prep_tab">Prep Tools</a></li>
+    <li><a class="bulk_prep_tab" id="view_config_tab">View Config</a></li>
+</ul>
+
+<div class="tab_container" id="prep_tab_content">
 {% if cart_size == 0 %}
 <h2>Your cart is empty!</h2>
 {% else %}
+
+<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="show_groceries_button">Show grocery list</button>
+<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="empty_cart_button">Empty cart</button>
 
 <div id="cart_contents">
     <div id="tag_matrix_div" style="overflow-x: auto; width: 100%;">
@@ -50,7 +56,7 @@
                         <i id="recipe_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
                         <i id="recipe_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
                     </th>
-                    {% for tag in all_tags.keys %}
+                    {% for tag in matrix_tags.keys %}
                         <th style="min-width: 75px; white-space: nowrap;">
                             <span 
                                 class="tag_display_label small"
@@ -70,8 +76,8 @@
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
                     </td>
                     {% for tag, boolean in tag_dict.items %}
-                    <td style="min-width: 75px; text-align: center; font-size: xx-large; padding: 0px; color: #3cc382; vertical-align: middle;" value="{{ boolean }}">
-                        {% if boolean == 1 %}✔️{% endif %}
+                    <td style="min-width: 75px; text-align: center; font-size: x-large; padding: 0px; color: #3cc382; vertical-align: middle;" value="{{ boolean }}">
+                        {% if boolean == 1 %}✅{% endif %}
                     </td>
                     {% endfor %}
                     <td style="min-width: 75px; background-color: white !important;">
@@ -85,7 +91,7 @@
     <div id="tag_count_summary" class="left_side_of_page">
         <br><h2>Tag summary:</h2>
         <label class="tags_row"><ul class="three_cols">
-            {% for tag, count in all_tags.items %}
+            {% for tag, count in matrix_tags.items %}
                 <div style="padding-left: 20px;">
                     {{ tag.name }}
                     <span class="result_count_label" data-tag_name="{{ tag.name }}">{{ count }}</span>
@@ -101,24 +107,18 @@
                 <th>
                     <a>Recipe</a>
                 </th>
-                <th>
-                    <a>Oven Temp</a>
-                    <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
-                    <i id="oven_temp_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
-                    <i id="oven_temp_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
-                </th>
-                {% for timing_type in timing_types %}
+                {% for attribute in matrix_attributes %}
                     <th>
-                        <a>{{ timing_type.1 }} time</a>
+                        <a>{{ attribute }}</a>
                         <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
-                        <i id="{{ timing_type.0 }}_time_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
-                        <i id="{{ timing_type.0 }}_time_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
+                        <i id="{{ attribute }}_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
+                        <i id="{{ attribute }}_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
                     </th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for recipe in recipes %}
+            {% for recipe, attribute_dict in recipe_attribute_matrix.items %}
                 <tr class="timing_table_row">
                     <td style="min-width: 75px;">
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
@@ -126,14 +126,9 @@
                         <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
                         <i class="fa-solid fa-cart-shopping add_to_cart_icon added" style="padding-left: 12px;" data-recipe_key="{{ recipe.clean_key }}"></i>
                     </td>
-                    <td>
-                        {% if recipe.oven_temp %}{{ recipe.oven_temp }}{% endif %}
-                    </td>
-                    {% for timing_type in timing_types %}
+                    {% for value in attribute_dict.values %}
                         <td>
-                            {% for timing in recipe.associated_times %}
-                                {% if timing.type == timing_type.0 %}{{ timing.duration_str }}{% endif %}
-                            {% endfor %}
+                            {% if value %}{{ value }}{% endif %}
                         </td>
                     {% endfor %}
                 </tr>
@@ -145,7 +140,72 @@
 
 {% endif %}
 {% endwith %}
+</div>
 
+<div class="tab_container" id="view_config_tab_content" style="display: none;">
+    <h2>Select a View Config</h2>
+    <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <label style="display: flex; align-items: center; margin-right: 10px;">
+                <input type="radio" name="view_config_radio" value="" {% if not current_view_config_key %}checked{% endif %} style="margin-right: 5px;">
+                Default
+            </label>
+        </div>
+        {% for view_config in all_view_configs %}
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <label style="display: flex; align-items: center; margin-right: 10px;">
+                <input type="radio" name="view_config_radio" value="{{ view_config.key }}" data-view-config-name="{{ view_config.name }}" data-view-config-tags="{{ view_config.selected_fields.tags|join:',' }}" data-view-config-attributes="{{ view_config.selected_fields.recipe_attributes|join:',' }}" {% if current_view_config_key == view_config.key %}checked{% endif %} style="margin-right: 5px;">
+                {{ view_config.name }}
+            </label>
+            <a href="#" class="edit_view_config_link" style="display: none; margin-left: 10px; color: #5685bc; text-decoration: underline; cursor: pointer;">Edit</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <details style="margin-top: 20px;">
+        <summary><h2 id="view_config_form_summary" style="display: inline;">Add New View Config</h2></summary>
+        <form id="view_config_form" method="POST" action="{% url 'bulk_prep' %}">
+        {% csrf_token %}
+        <input type="hidden" id="edit_view_config_key" name="edit_view_config_key" value="">
+        <div style="margin-bottom: 20px; position: relative;">
+            <label for="view_config_name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+            <input type="text" id="view_config_name" name="name" required style="width: 300px; padding: 5px;">
+            <span id="view_config_name_tooltip" class="form_validate_tooltip tooltip">You must enter a name for the View Config (and it can't be "default")</span>
+        </div>
+        
+        <div style="margin-bottom: 20px; position: relative;">
+            <h3 style="margin-bottom: 10px;">Tags:</h3>
+            <ul class="four_cols">
+                {% for tag in all_tags %}
+                    <div class="checkbox" style="display: flex; align-items: center;">
+                        <input type="checkbox" name="tags" value="{{ tag }}" style="margin-right: 5px;">
+                        {{ tag }}
+                    </div>
+                {% endfor %}
+            </ul>
+            <span id="view_config_tags_tooltip" class="form_validate_tooltip tooltip">You must select at least one tag</span>
+        </div>
+        
+        <div style="margin-bottom: 20px; position: relative;">
+            <h3 style="margin-bottom: 10px;">Recipe Attributes:</h3>
+            <ul class="four_cols" style="list-style: none; padding-left: 0;">
+                {% for attr_value, attr_label in all_attribute_tuples %}
+                    <div class="checkbox" style="display: flex; align-items: center;">
+                        <input type="checkbox" name="recipe_attributes" value="{{ attr_value }}" style="margin-right: 5px;">
+                        {{ attr_label }}
+                    </div>
+                {% endfor %}
+            </ul>
+            <span id="view_config_attributes_tooltip" class="form_validate_tooltip tooltip">You must select at least one recipe attribute</span>
+        </div>
+        
+        <button type="button" id="submit_view_config_button" style="padding: 10px 20px; font-size: 16px; background-color: #5685bc; color: white; border: none; border-radius: 4px; cursor: pointer;">Create View Config</button>
+    </form>
+    </details>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="{% static 'js/tooltip.js' %}"></script>
 <script src="{% static 'js/show_groceries.js' %}"></script>
 <script src="{% static 'js/table_sort.js' %}"></script>
 <script src="{% static 'js/table_row_shift.js' %}"></script>

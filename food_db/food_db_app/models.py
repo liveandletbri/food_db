@@ -1,7 +1,9 @@
 import os
+import re
 import pytz
 from colorfield.fields import ColorField
 from django.db import models
+from django.db.models.fields.related import ManyToOneRel
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
@@ -105,18 +107,19 @@ class Recipe(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        verbose_name='Recipe Book',
     )
-    recipe_book_page = models.PositiveSmallIntegerField(null=True, blank=True)
-    duration_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
+    recipe_book_page = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Recipe Book Page')
+    duration_minutes = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Duration (minutes)')
     servings_min = models.PositiveSmallIntegerField(null=True, blank=True)
     servings_max = models.PositiveSmallIntegerField(null=True, blank=True)
-    calories_per_recipe = models.PositiveSmallIntegerField(null=True, blank=True)
+    calories_per_recipe = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Total Calories')
     notes = models.TextField(blank=True)
-    oven_temp = models.PositiveSmallIntegerField(null=True, blank=True)
+    oven_temp = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Oven Temperature')
     tags = models.ManyToManyField('Tag', related_name='recipes', blank=True)
     is_baking_recipe = models.BooleanField(default=False)  # Either Cooking or Baking recipe
-    is_component_recipe = models.BooleanField(default=False)  # Is this a reusable component or standalone recipe?
-    is_cookie_recipe = models.BooleanField(default=False)  # cookies have extra attributes
+    is_component_recipe = models.BooleanField(default=False, verbose_name='Component of a Larger Recipe')  # Is this a reusable component or standalone recipe?
+    is_cookie_recipe = models.BooleanField(default=False, verbose_name='Cookies')  # cookies have extra attributes
 
     # cookie-specific attributes
     cookie_style = models.CharField(
@@ -124,11 +127,13 @@ class Recipe(models.Model):
         choices=COOKIE_STYLE_CHOICES,
         null=True,
         blank=True,
+        verbose_name='Cookie Style',
     )
     cookie_color = models.CharField(
         max_length=50,
         null=True,
         blank=True,
+        verbose_name='Cookie Color',
     )
 
     # foo = models.TextField(max_length=200)
@@ -420,5 +425,17 @@ class FoodCategory(models.Model):
     def __str__(self):
         return self.name
     name = models.CharField(max_length=255, unique=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+    _date_modified = models.DateTimeField(default=timezone.now)
+
+class ViewConfig(models.Model):
+    def __str__(self):
+        return self.name
+    name = models.CharField(max_length=255, unique=True)
+    key = models.CharField(max_length=255, unique=True)
+    selected_fields = models.JSONField(default={
+        'recipe_attributes': [],
+        'tags': [],
+    })
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
