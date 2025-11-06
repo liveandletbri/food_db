@@ -983,7 +983,10 @@ def bulk_prep(request):
             if attribute_raw_name in timing_attributes:
                 return next((tup[1] for tup in TIMING_TYPE_CHOICES if f'time-{tup[0]}' == attribute_raw_name), attribute_raw_name) + ' time'
             else:
-                return Recipe._meta.get_field(attribute_raw_name).verbose_name
+                try:
+                    return Recipe._meta.get_field(attribute_raw_name).verbose_name
+                except AttributeError:
+                    return attribute_raw_name
 
         attributes_to_hide = (
             'id',
@@ -1021,23 +1024,34 @@ def bulk_prep(request):
             # default is oven temperature plus all possible timings
             selected_attributes = ['oven_temp'] + timing_attributes
         
+        # if there are multiple time attributes, add a grand total column to the matrix
+        sum_times = False
+        if len([attr for attr in selected_attributes if attr in timing_attributes]) > 1:
+            sum_times = True
+        
         # like the recipe_tag_matrix, this is a dict of dicts, where the outer keys are recipes and the inner dictionaries are mappings of attribute names to values
         recipe_attribute_matrix = {}
         for recipe in cart_recipes:
             recipe_attribute_dict = OrderedDict()
+            total_time = 0
             for attribute in selected_attributes:
                 if attribute in timing_attributes:
                     timing_attribute_instance = RecipeTimingAttribute.objects.filter(recipe=recipe, type=attribute.split('-')[1])
                     recipe_attribute_dict[attribute] = timing_attribute_instance.first().duration_str if timing_attribute_instance else ''
+                    total_time += timing_attribute_instance.first().minutes if timing_attribute_instance else 0
                 elif attribute == 'cookie_style':
                     style_raw_name = getattr(recipe, attribute)
                     recipe_attribute_dict[attribute] = next((tup[1] for tup in COOKIE_STYLE_CHOICES if tup[0] == style_raw_name), style_raw_name)
                 else:
                     recipe_attribute_dict[attribute] = getattr(recipe, attribute)
+            if sum_times:
+                recipe_attribute_dict['Total time'] = convert_minutes_to_string(total_time)
             recipe_attribute_matrix[recipe] = recipe_attribute_dict
         
 
         friendly_attribute_names = [get_friendly_name(attribute) for attribute in selected_attributes]
+        if sum_times:
+            friendly_attribute_names.append('Total time')
         
         context = {
             'cart': cart,
