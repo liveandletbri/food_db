@@ -143,7 +143,44 @@
 </div>
 
 <div class="tab_container" id="view_config_tab_content" style="display: none;">
-    <!-- View Config tab content will go here -->
+    <h2>Create View Config</h2>
+    <form id="view_config_form" method="POST" action="{% url 'bulk_prep' %}">
+        {% csrf_token %}
+        <div style="margin-bottom: 20px;">
+            <label for="view_config_name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+            <input type="text" id="view_config_name" name="name" required style="width: 300px; padding: 5px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin-bottom: 10px;">Tags:</h3>
+            <ul class="three_cols" style="list-style: none; padding-left: 0;">
+                {% for tag in all_tags %}
+                <li style="padding-left: 20px;">
+                    <label>
+                        <input type="checkbox" name="tags" value="{{ tag }}" style="margin-right: 5px;">
+                        {{ tag }}
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin-bottom: 10px;">Recipe Attributes:</h3>
+            <ul class="three_cols" style="list-style: none; padding-left: 0;">
+                {% for attr_value, attr_label in all_attribute_tuples %}
+                <li style="padding-left: 20px;">
+                    <label>
+                        <input type="checkbox" name="recipe_attributes" value="{{ attr_value }}" style="margin-right: 5px;">
+                        {{ attr_label }}
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <button type="submit" style="padding: 10px 20px; font-size: 16px; background-color: #5685bc; color: white; border: none; border-radius: 4px; cursor: pointer;">Create View Config</button>
+    </form>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

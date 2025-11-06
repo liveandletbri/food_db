@@ -7,6 +7,7 @@ from collections import Counter, defaultdict, OrderedDict
 from copy import deepcopy
 from decimal import Decimal
 from django.core.serializers import serialize
+from django.db import IntegrityError
 from django.forms.models import model_to_dict
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -880,117 +881,148 @@ def manage_food(request):
     return render(request, 'manage_food.html', context)
 
 
-def bulk_prep(request, view_config_key=None):
-    if view_config_key:
-        view_config = ViewConfig.objects.get(key=view_config_key)
+def bulk_prep(request):
+    # If this is a POST request, create a new ViewConfig instance
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        tags = request.POST.getlist('tags')
+        recipe_attributes = request.POST.getlist('recipe_attributes')
+        
+        # Create sanitized key from name
+        key = sanitize_string(name)
+        
+        # Create selected_fields dictionary
+        selected_fields = {
+            'recipe_attributes': recipe_attributes,
+            'tags': tags,
+        }
+        
+        # Create and save ViewConfig instance
+        try:
+            view_config = ViewConfig(
+                name=name,
+                key=key,
+                selected_fields=selected_fields
+            )
+            view_config.save()
+        except IntegrityError:
+            # Handle duplicate name or key
+            return HttpResponseBadRequest('A View Config with this name already exists.')
+        
+        # Redirect to bulk_prep with the new view_config_key as a GET parameter
+        return redirect(f'{reverse("bulk_prep")}?view_config_key={key}')
     else:
-        view_config = None
+        view_config_key = request.GET.get('view_config_key')
 
-    cart = get_cart(request)
-    cart_recipes = [Recipe.objects.get(clean_key = key) for key in cart]
-
-    all_recipes_with_children = [child for rec in cart_recipes for child in rec.children if rec.has_children] + cart_recipes
-    groceries = GroceryList([RecipeIngredientData(rec, 1) for rec in all_recipes_with_children], 1)
-
-    # Build a set of all tags that are associated with any cart recipe
-    cart_tags = defaultdict(int)
-    for recipe in cart_recipes:
-        for tag in recipe.associated_tags:
-            cart_tags[tag] += 1
-    
-    # sort by count descending, then by name
-    cart_tags_sorted = OrderedDict(
-        sorted(
-            dict(cart_tags).items(),
-            key=lambda item: (-item[1], item[0].name)
-        )
-    )
-    matrix_tags = cart_tags_sorted
-    
-    if view_config:
-        # The view config will specify which tags we want in the tag matrix. Update the matrix to remove/add tags as needed.
-        config_tags = view_config.selected_fields['tags']
-        for tag in matrix_tags.keys():
-            if tag.name not in config_tags:
-                matrix_tags.pop(tag)
-        for tag in config_tags:
-            if tag not in matrix_tags.keys():
-                matrix_tags[tag] = 0
-
-    # recipe_tag_matrix is a dict where the keys are recipe clean_keys and the values are dicts. Each inner dict has a key for every tag in cart_tags, and a 1 or 0 indicating if the recipe is associated with a given tag.
-    recipe_tag_matrix = {}
-    for recipe in cart_recipes:
-        tag_presence = OrderedDict((tag.name, 0) for tag in matrix_tags.keys())
-        for tag in matrix_tags.keys():
-            tag_presence[tag.name] = 1 if tag in recipe.associated_tags else 0
-        recipe_tag_matrix[recipe] = tag_presence
-
-    # prep full list of possible options for creating a new view config
-
-    def get_friendly_name(attribute_raw_name):
-        '''get user-friendly names of attributes to display in UI'''
-        if attribute_raw_name in timing_attributes:
-            return next((tup[1] for tup in TIMING_TYPE_CHOICES if f'time-{tup[0]}' == attribute_raw_name), attribute_raw_name) + ' time'
+        if view_config_key:
+            view_config = ViewConfig.objects.get(key=view_config_key)
         else:
-            return Recipe._meta.get_field(attribute_raw_name).verbose_name
+            view_config = None
 
-    attributes_to_hide = (
-        'id',
-        'clean_key',
-        'title',
-        'url',
-        'notes',
-        'is_baking_recipe',
-        '_date_created',
-        '_date_modified',   
-    )
-    all_attributes = [
-        field.name 
-        for field 
-        in Recipe._meta.get_fields(include_hidden=False) 
-        if not isinstance(field, models.ManyToManyField) 
-        and not isinstance(field, ManyToOneRel)
-        and field.name not in attributes_to_hide
-    ]
-    
-    timing_attributes = [f'time-{type[0]}' for type in TIMING_TYPE_CHOICES]
+        cart = get_cart(request)
+        cart_recipes = [Recipe.objects.get(clean_key = key) for key in cart]
 
-    all_attributes.extend(timing_attributes)
-    all_attribute_tuples = [(attr_name, get_friendly_name(attr_name)) for attr_name in all_attributes]
-    all_tags =  [tag.name for tag in Tag.objects.all().order_by('name')]
+        all_recipes_with_children = [child for rec in cart_recipes for child in rec.children if rec.has_children] + cart_recipes
+        groceries = GroceryList([RecipeIngredientData(rec, 1) for rec in all_recipes_with_children], 1)
 
-    # choose attributes for the attribute table
-    if view_config:
-        selected_attributes = view_config.selected_fields['recipe_attributes']
-    else:
-        # default is oven temperature plus all possible timings
-        selected_attributes = ['oven_temp'] + timing_attributes
-    
-    # like the recipe_tag_matrix, this is a dict of dicts, where the outer keys are recipes and the inner dictionaries are mappings of attribute names to values
-    recipe_attribute_matrix = {}
-    for recipe in cart_recipes:
-        recipe_attribute_dict = OrderedDict()
-        for attribute in selected_attributes:
-            if attribute in timing_attributes:
-                timing_attribute_instance = RecipeTimingAttribute.objects.filter(recipe=recipe, type=attribute.split('-')[1])
-                recipe_attribute_dict[attribute] = timing_attribute_instance.first().duration_str if timing_attribute_instance else ''
+        # Build a set of all tags that are associated with any cart recipe
+        cart_tags = defaultdict(int)
+        for recipe in cart_recipes:
+            for tag in recipe.associated_tags:
+                cart_tags[tag] += 1
+        
+        # sort by count descending, then by name
+        cart_tags_sorted = OrderedDict(
+            sorted(
+                dict(cart_tags).items(),
+                key=lambda item: (-item[1], item[0].name)
+            )
+        )
+        matrix_tags = deepcopy(cart_tags_sorted)
+        
+        if view_config:
+            # The view config will specify which tags we want in the tag matrix. Update the matrix to remove/add tags as needed.
+            config_tags = view_config.selected_fields['tags']
+            for tag in cart_tags_sorted.keys():
+                if tag.name not in config_tags:
+                    matrix_tags.pop(tag)
+            for tag in config_tags:
+                if tag not in cart_tags_sorted.keys():
+                    matrix_tags[Tag.objects.get(name=tag)] = 0
+
+        # recipe_tag_matrix is a dict where the keys are recipe clean_keys and the values are dicts. Each inner dict has a key for every tag in cart_tags, and a 1 or 0 indicating if the recipe is associated with a given tag.
+        recipe_tag_matrix = {}
+        for recipe in cart_recipes:
+            tag_presence = OrderedDict((tag.name, 0) for tag in matrix_tags.keys())
+            for tag in matrix_tags.keys():
+                tag_presence[tag.name] = 1 if tag in recipe.associated_tags else 0
+            recipe_tag_matrix[recipe] = tag_presence
+
+        # prep full list of possible options for creating a new view config
+
+        def get_friendly_name(attribute_raw_name):
+            '''get user-friendly names of attributes to display in UI'''
+            if attribute_raw_name in timing_attributes:
+                return next((tup[1] for tup in TIMING_TYPE_CHOICES if f'time-{tup[0]}' == attribute_raw_name), attribute_raw_name) + ' time'
             else:
-                recipe_attribute_dict[attribute] = getattr(recipe, attribute)
-        recipe_attribute_matrix[recipe] = recipe_attribute_dict
-    
+                return Recipe._meta.get_field(attribute_raw_name).verbose_name
 
-    friendly_attribute_names = [get_friendly_name(attribute) for attribute in selected_attributes]
-    
+        attributes_to_hide = (
+            'id',
+            'clean_key',
+            'title',
+            'url',
+            'notes',
+            'is_baking_recipe',
+            '_date_created',
+            '_date_modified',   
+        )
+        all_attributes = [
+            field.name 
+            for field 
+            in Recipe._meta.get_fields(include_hidden=False) 
+            if not isinstance(field, models.ManyToManyField) 
+            and not isinstance(field, ManyToOneRel)
+            and field.name not in attributes_to_hide
+        ]
+        
+        timing_attributes = [f'time-{type[0]}' for type in TIMING_TYPE_CHOICES]
 
-    context = {
-        'cart': cart,
-        'recipes': cart_recipes,
-        'grocery_list': groceries.grocery_list_str,
-        'recipe_tag_matrix': recipe_tag_matrix,
-        'matrix_tags': matrix_tags,
-        'recipe_attribute_matrix': recipe_attribute_matrix,
-        'matrix_attributes': friendly_attribute_names,
-        'all_attribute_tuples': all_attribute_tuples,
-        'all_tags': all_tags,
-    }
-    return render(request, 'bulk_prep.html', context)
+        all_attributes.extend(timing_attributes)
+        all_attribute_tuples = [(attr_name, get_friendly_name(attr_name)) for attr_name in all_attributes]
+        all_tags =  [tag.name for tag in Tag.objects.all().order_by('name')]
+
+        # choose attributes for the attribute table
+        if view_config:
+            selected_attributes = view_config.selected_fields['recipe_attributes']
+        else:
+            # default is oven temperature plus all possible timings
+            selected_attributes = ['oven_temp'] + timing_attributes
+        
+        # like the recipe_tag_matrix, this is a dict of dicts, where the outer keys are recipes and the inner dictionaries are mappings of attribute names to values
+        recipe_attribute_matrix = {}
+        for recipe in cart_recipes:
+            recipe_attribute_dict = OrderedDict()
+            for attribute in selected_attributes:
+                if attribute in timing_attributes:
+                    timing_attribute_instance = RecipeTimingAttribute.objects.filter(recipe=recipe, type=attribute.split('-')[1])
+                    recipe_attribute_dict[attribute] = timing_attribute_instance.first().duration_str if timing_attribute_instance else ''
+                else:
+                    recipe_attribute_dict[attribute] = getattr(recipe, attribute)
+            recipe_attribute_matrix[recipe] = recipe_attribute_dict
+        
+
+        friendly_attribute_names = [get_friendly_name(attribute) for attribute in selected_attributes]
+        
+        context = {
+            'cart': cart,
+            'recipes': cart_recipes,
+            'grocery_list': groceries.grocery_list_str,
+            'recipe_tag_matrix': recipe_tag_matrix,
+            'matrix_tags': matrix_tags,
+            'recipe_attribute_matrix': recipe_attribute_matrix,
+            'matrix_attributes': friendly_attribute_names,
+            'all_attribute_tuples': all_attribute_tuples,
+            'all_tags': all_tags,
+        }
+        return render(request, 'bulk_prep.html', context)
