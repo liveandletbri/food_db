@@ -920,6 +920,12 @@ def bulk_prep(request):
                 # Handle duplicate name or key
                 return HttpResponseBadRequest('A View Config with this name already exists.')
         
+
+        # if cloud sync is enabled, sync now
+        if S3_SYNC_ENABLED:
+            s3 = S3Sync()
+            s3.upload_db_backup()
+    
         # Redirect to bulk_prep with the view_config_key as a GET parameter
         return redirect(f'{reverse("bulk_prep")}?view_config_key={key}')
     else:
