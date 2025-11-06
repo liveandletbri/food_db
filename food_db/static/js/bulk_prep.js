@@ -90,6 +90,61 @@ function validateViewConfig(e) {
     }
 }
 
+async function changeViewConfig(event) {
+    // The event target could be a div or span; find the input[type="radio"] within or nearby.
+    let radioButton;
+    if (event.target.type === "radio") {
+        radioButton = event.target;
+    } else {
+        // Try to find a descendant radio button input
+        radioButton = event.target.querySelector('input[type="radio"]');
+        // If not found as a descendant, try to find a radio button among siblings
+        if (!radioButton && event.target.parentElement) {
+            radioButton = event.target.parentElement.querySelector('input[type="radio"]');
+        }
+    }
+    if (!radioButton) {
+        // If not found, abort gracefully
+        return;
+    }
+    let currentUrl = window.location.href;
+    let currentUrlDomain = currentUrl.split("/bulk")[0];
+    let viewConfigKey = radioButton.value;
+    
+    // Fetch bulk_prep with the selected view_config_key via AJAX, then replace the prep_tab_content div in the current page.
+    let url;
+    if (viewConfigKey === '') {
+        url = currentUrlDomain + '/bulk/';
+    } else {
+        url = currentUrlDomain + '/bulk/?view_config_key=' + viewConfigKey;
+    }
+
+    try {
+        let response = await fetch(url, { method: "GET" });
+        let responseText = await response.text();
+
+        // Create a temporary DOM to parse the HTML
+        let responseHtml = document.createElement('html');
+        responseHtml.innerHTML = responseText;
+
+        // Find the prep_tab_content div in the returned HTML
+        let newPrepTabContent = responseHtml.querySelector('#prep_tab_content');
+        let currentPrepTabContent = document.querySelector('#prep_tab_content');
+
+        if (newPrepTabContent && currentPrepTabContent) {
+            currentPrepTabContent.innerHTML = newPrepTabContent.innerHTML;
+        } else {
+            // Fallback to full reload if the element isn't found
+            window.location.href = url;
+        }
+    } catch (err) {
+        // If anything fails, fallback to reloading the page
+        window.location.href = url;
+    }
+}
+
+let changeViewConfigHandler = (event) => changeViewConfig(event)
+
 // Add event listener when document is ready
 $(document).ready(function() {
     if (submitViewConfigButton) {
@@ -112,18 +167,6 @@ $(document).ready(function() {
     
     // Handle view config radio button selection
     document.querySelectorAll('input[name="view_config_radio"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            let currentUrl = window.location.href
-            let currentUrlDomain = currentUrl.split("/bulk")[0]
-            let viewConfigKey = this.value
-            
-            if (viewConfigKey === '') {
-                // Redirect to bulk_prep without view_config_key (default)
-                window.location.href = currentUrlDomain + '/bulk/'
-            } else {
-                // Redirect to bulk_prep with the selected view_config_key
-                window.location.href = currentUrlDomain + '/bulk/?view_config_key=' + viewConfigKey
-            }
-        })
+        radio.addEventListener('change', changeViewConfigHandler)
     })
 })
