@@ -4,9 +4,6 @@
 
 {% with cart_size=recipes|length %}
 
-<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="show_groceries_button">Show grocery list</button>
-<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="empty_cart_button">Empty cart</button>
-
 <div id="grocery_list_modal" class="modal">
     <div class="modal-content">
         <span class="close-button">&times;</span>
@@ -34,9 +31,18 @@
     </div>
 </div>
 
+<ul id="tabs" style="margin: 0;">
+    <li><a class="bulk_prep_tab" id="prep_tab">Prep Tools</a></li>
+    <li><a class="bulk_prep_tab" id="view_config_tab">View Config</a></li>
+</ul>
+
+<div class="tab_container" id="prep_tab_content">
 {% if cart_size == 0 %}
 <h2>Your cart is empty!</h2>
 {% else %}
+
+<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="show_groceries_button">Show grocery list</button>
+<button type="button" {% if cart_size == 0 %}style="display: none;" {% endif %} id="empty_cart_button">Empty cart</button>
 
 <div id="cart_contents">
     <div id="tag_matrix_div" style="overflow-x: auto; width: 100%;">
@@ -134,7 +140,13 @@
 
 {% endif %}
 {% endwith %}
+</div>
 
+<div class="tab_container" id="view_config_tab_content" style="display: none;">
+    <!-- View Config tab content will go here -->
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="{% static 'js/show_groceries.js' %}"></script>
 <script src="{% static 'js/table_sort.js' %}"></script>
 <script src="{% static 'js/table_row_shift.js' %}"></script>
