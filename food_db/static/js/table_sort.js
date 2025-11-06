@@ -59,9 +59,31 @@ function sortColumn(event) {
     let table = th.closest('table')
     let tableBody = table.querySelector('tbody')
     toggleSortIcon(th, th.asc)
-    Array.from(tableBody.querySelectorAll('tr'))
-        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), th.asc = !th.asc))
-        .forEach(tr => tableBody.appendChild(tr) )
+    Array.from(tableBody.querySelectorAll('tr:not(.ignore_row)'))
+        // Collect all rows
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        // Find the ignore row and its index
+        const ignoreRow = rows.find(row => row.classList.contains('ignore_row'));
+        const ignoreIndex = ignoreRow ? rows.indexOf(ignoreRow) : -1;
+
+        // Get rows to sort, excluding ignore_row
+        const sortableRows = rows.filter(row => !row.classList.contains('ignore_row'));
+        const sortedRows = sortableRows.sort(comparer(Array.from(th.parentNode.children).indexOf(th), th.asc = !th.asc));
+
+        // Remove all rows from the table body
+        rows.forEach(row => tableBody.removeChild(row));
+
+        // Reinsert rows, preserving ignore_row in its original position
+        sortedRows.forEach((row, idx) => {
+            if (ignoreRow && idx === ignoreIndex) {
+                tableBody.appendChild(ignoreRow);
+            }
+            tableBody.appendChild(row);
+        });
+        // If ignoreRow is at the end
+        if (ignoreRow && sortedRows.length === ignoreIndex) {
+            tableBody.appendChild(ignoreRow);
+        }
 }
 
 const sortColumnHandler = (event) => sortColumn(event)

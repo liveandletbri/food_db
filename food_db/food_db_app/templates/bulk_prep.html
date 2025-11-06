@@ -85,23 +85,23 @@
                     </td>
                 </tr>
                 {% endfor %}
+                <tr class="ignore_row">
+                    <td>
+                        <p class="search_result left_side_of_page"><b>Totals</b>
+                    </td>
+                    {% for count in matrix_tags.values %}
+                    <td style="min-width: 75px; text-align: center; font-size: x-large; padding: 0px; color: #3cc382; vertical-align: middle;" value="{{ boolean }}">
+                        <b>{{ count }}</b>
+                    </td>
+                    {% endfor %}
+                </tr>
             </tbody>
         </table>
     </div>
-    <div id="tag_count_summary" class="left_side_of_page">
-        <br><h2>Tag summary:</h2>
-        <label class="tags_row"><ul class="three_cols">
-            {% for tag, count in matrix_tags.items %}
-                <div style="padding-left: 20px;">
-                    {{ tag.name }}
-                    <span class="result_count_label" data-tag_name="{{ tag.name }}">{{ count }}</span>
-                </div>
-            {% endfor %}
-        </ul></label>
-    </div>
-    <div id="timing_coordination" class="left_side_of_page">
-        <br><h2>Timing:</h2>
-    <table id="timing_table" class="table table-striped">
+
+    <div id="attribute_matrix_div" class="left_side_of_page">
+        <br><h2>Recipe attributes:</h2>
+    <table id="attribute_matrix_table" class="table table-striped">
         <thead>
             <tr>
                 <th>
@@ -119,7 +119,7 @@
         </thead>
         <tbody>
             {% for recipe, attribute_dict in recipe_attribute_matrix.items %}
-                <tr class="timing_table_row">
+                <tr class="attribute_matrix_table_row">
                     <td style="min-width: 75px;">
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
                         <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
