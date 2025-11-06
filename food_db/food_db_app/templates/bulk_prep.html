@@ -50,7 +50,7 @@
                         <i id="recipe_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
                         <i id="recipe_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
                     </th>
-                    {% for tag in all_tags.keys %}
+                    {% for tag in matrix_tags.keys %}
                         <th style="min-width: 75px; white-space: nowrap;">
                             <span 
                                 class="tag_display_label small"
@@ -85,7 +85,7 @@
     <div id="tag_count_summary" class="left_side_of_page">
         <br><h2>Tag summary:</h2>
         <label class="tags_row"><ul class="three_cols">
-            {% for tag, count in all_tags.items %}
+            {% for tag, count in matrix_tags.items %}
                 <div style="padding-left: 20px;">
                     {{ tag.name }}
                     <span class="result_count_label" data-tag_name="{{ tag.name }}">{{ count }}</span>
@@ -101,24 +101,18 @@
                 <th>
                     <a>Recipe</a>
                 </th>
-                <th>
-                    <a>Oven Temp</a>
-                    <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
-                    <i id="oven_temp_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
-                    <i id="oven_temp_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
-                </th>
-                {% for timing_type in timing_types %}
+                {% for attribute in matrix_attributes %}
                     <th>
-                        <a>{{ timing_type.1 }} time</a>
+                        <a>{{ attribute }}</a>
                         <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
-                        <i id="{{ timing_type.0 }}_time_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
-                        <i id="{{ timing_type.0 }}_time_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
+                        <i id="{{ attribute }}_asc_icon" class="fa fa-caret-down table_sort_icon"></i>
+                        <i id="{{ attribute }}_desc_icon" class="fa fa-caret-up table_sort_icon"></i>
                     </th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for recipe in recipes %}
+            {% for recipe, attribute_dict in recipe_attribute_matrix.items %}
                 <tr class="timing_table_row">
                     <td style="min-width: 75px;">
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
@@ -126,14 +120,9 @@
                         <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
                         <i class="fa-solid fa-cart-shopping add_to_cart_icon added" style="padding-left: 12px;" data-recipe_key="{{ recipe.clean_key }}"></i>
                     </td>
-                    <td>
-                        {% if recipe.oven_temp %}{{ recipe.oven_temp }}{% endif %}
-                    </td>
-                    {% for timing_type in timing_types %}
+                    {% for value in attribute_dict.values %}
                         <td>
-                            {% for timing in recipe.associated_times %}
-                                {% if timing.type == timing_type.0 %}{{ timing.duration_str }}{% endif %}
-                            {% endfor %}
+                            {% if value %}{{ value }}{% endif %}
                         </td>
                     {% endfor %}
                 </tr>
