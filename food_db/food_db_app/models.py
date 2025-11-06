@@ -434,7 +434,7 @@ class ViewConfig(models.Model):
     name = models.CharField(max_length=255, unique=True)
     key = models.CharField(max_length=255, unique=True)
     selected_fields = models.JSONField(default={
-        'recipe_attributes': {},
+        'recipe_attributes': [],
         'tags': [],
     })
     _date_created = models.DateTimeField(default=timezone.now)
