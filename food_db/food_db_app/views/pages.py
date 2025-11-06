@@ -960,11 +960,12 @@ def bulk_prep(request):
         if view_config:
             # The view config will specify which tags we want in the tag matrix. Update the matrix to remove/add tags as needed.
             config_tags = view_config.selected_fields['tags']
-            for tag in cart_tags_sorted.keys():
-                if tag.name not in config_tags:
-                    matrix_tags.pop(tag)
+            cart_tags = [tag.name for tag in cart_tags_sorted.keys()]
+            for tag in cart_tags:
+                if tag not in config_tags:
+                    matrix_tags.pop(Tag.objects.get(name=tag))
             for tag in config_tags:
-                if tag not in cart_tags_sorted.keys():
+                if tag not in cart_tags:
                     matrix_tags[Tag.objects.get(name=tag)] = 0
 
         # recipe_tag_matrix is a dict where the keys are recipe clean_keys and the values are dicts. Each inner dict has a key for every tag in cart_tags, and a 1 or 0 indicating if the recipe is associated with a given tag.
