@@ -109,4 +109,21 @@ $(document).ready(function() {
             }
         })
     })
+    
+    // Handle view config radio button selection
+    document.querySelectorAll('input[name="view_config_radio"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            let currentUrl = window.location.href
+            let currentUrlDomain = currentUrl.split("/bulk")[0]
+            let viewConfigKey = this.value
+            
+            if (viewConfigKey === '') {
+                // Redirect to bulk_prep without view_config_key (default)
+                window.location.href = currentUrlDomain + '/bulk/'
+            } else {
+                // Redirect to bulk_prep with the selected view_config_key
+                window.location.href = currentUrlDomain + '/bulk/?view_config_key=' + viewConfigKey
+            }
+        })
+    })
 })

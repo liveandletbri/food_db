@@ -995,6 +995,9 @@ def bulk_prep(request):
         all_attribute_tuples = [(attr_name, get_friendly_name(attr_name)) for attr_name in all_attributes]
         all_tags =  [tag.name for tag in Tag.objects.all().order_by('name')]
 
+        # Get all ViewConfigs for the radio buttons
+        all_view_configs = ViewConfig.objects.all().order_by('name')
+
         # choose attributes for the attribute table
         if view_config:
             selected_attributes = view_config.selected_fields['recipe_attributes']
@@ -1027,5 +1030,7 @@ def bulk_prep(request):
             'matrix_attributes': friendly_attribute_names,
             'all_attribute_tuples': all_attribute_tuples,
             'all_tags': all_tags,
+            'all_view_configs': all_view_configs,
+            'current_view_config_key': view_config_key,
         }
         return render(request, 'bulk_prep.html', context)

@@ -143,8 +143,23 @@
 </div>
 
 <div class="tab_container" id="view_config_tab_content" style="display: none;">
-    <h2>Create View Config</h2>
-    <form id="view_config_form" method="POST" action="{% url 'bulk_prep' %}">
+    <h2>Select a View Config</h2>
+    <div style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input type="radio" name="view_config_radio" value="" {% if not current_view_config_key %}checked{% endif %} style="margin-right: 5px;">
+            Default
+        </label>
+        {% for view_config in all_view_configs %}
+        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input type="radio" name="view_config_radio" value="{{ view_config.key }}" {% if current_view_config_key == view_config.key %}checked{% endif %} style="margin-right: 5px;">
+            {{ view_config.name }}
+        </label>
+        {% endfor %}
+    </div>
+    
+    <details style="margin-top: 20px;">
+        <summary><h2 style="display: inline;">Add New View Config</h2></summary>
+        <form id="view_config_form" method="POST" action="{% url 'bulk_prep' %}">
         {% csrf_token %}
         <div style="margin-bottom: 20px; position: relative;">
             <label for="view_config_name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
@@ -180,6 +195,7 @@
         
         <button type="button" id="submit_view_config_button" style="padding: 10px 20px; font-size: 16px; background-color: #5685bc; color: white; border: none; border-radius: 4px; cursor: pointer;">Create View Config</button>
     </form>
+    </details>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
