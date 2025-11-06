@@ -926,6 +926,14 @@ def bulk_prep(request, view_config_key=None):
         recipe_tag_matrix[recipe] = tag_presence
 
     # prep full list of possible options for creating a new view config
+
+    def get_friendly_name(attribute_raw_name):
+        '''get user-friendly names of attributes to display in UI'''
+        if attribute_raw_name in timing_attributes:
+            return next((tup[1] for tup in TIMING_TYPE_CHOICES if f'time-{tup[0]}' == attribute_raw_name), attribute_raw_name) + ' time'
+        else:
+            return Recipe._meta.get_field(attribute_raw_name).verbose_name
+
     attributes_to_hide = (
         'id',
         'clean_key',
@@ -948,6 +956,7 @@ def bulk_prep(request, view_config_key=None):
     timing_attributes = [f'time-{type[0]}' for type in TIMING_TYPE_CHOICES]
 
     all_attributes.extend(timing_attributes)
+    all_attribute_tuples = [(attr_name, get_friendly_name(attr_name)) for attr_name in all_attributes]
     all_tags =  [tag.name for tag in Tag.objects.all().order_by('name')]
 
     # choose attributes for the attribute table
@@ -968,14 +977,10 @@ def bulk_prep(request, view_config_key=None):
             else:
                 recipe_attribute_dict[attribute] = getattr(recipe, attribute)
         recipe_attribute_matrix[recipe] = recipe_attribute_dict
+    
 
-    # get user-friendly names of attributes to display in UI
-    friendly_attribute_names = []
-    for attribute_raw_name in selected_attributes:
-        if attribute_raw_name in timing_attributes:
-            friendly_attribute_names.append(next((tup[1] for tup in TIMING_TYPE_CHOICES if f'time-{tup[0]}' == attribute_raw_name), attribute_raw_name) + ' time')
-        else:
-            friendly_attribute_names.append(Recipe._meta.get_field(attribute_raw_name).verbose_name)
+    friendly_attribute_names = [get_friendly_name(attribute) for attribute in selected_attributes]
+    
 
     context = {
         'cart': cart,
@@ -985,5 +990,7 @@ def bulk_prep(request, view_config_key=None):
         'matrix_tags': matrix_tags,
         'recipe_attribute_matrix': recipe_attribute_matrix,
         'matrix_attributes': friendly_attribute_names,
+        'all_attribute_tuples': all_attribute_tuples,
+        'all_tags': all_tags,
     }
     return render(request, 'bulk_prep.html', context)
