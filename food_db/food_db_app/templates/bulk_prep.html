@@ -50,6 +50,7 @@
         <table id="tag_matrix_table" style="min-width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
+                    <th style="max-width: 10px;"></th>
                     <th style="min-width: 300px;">
                         <a>Recipe</a>
                         <!-- These two different <i> elements are the before and after click icons. They get swapped in toggleSortIcon(). -->
@@ -72,6 +73,10 @@
             <tbody>
                 {% for recipe, tag_dict in recipe_tag_matrix.items %}
                 <tr>
+                    <td style="background-color: white !important; padding: 0;">
+                        <!-- <i class="fa-solid fa-cart-shopping add_to_cart_icon added" data-recipe_key="{{ recipe.clean_key }}"></i> -->
+                        <img class="add_to_cart_icon added" src="{% static 'img/x-icon.svg' %}" width="20" height="20" data-recipe_key="{{ recipe.clean_key }}"/>
+                    </td>
                     <td style="min-width: 75px;">
                         <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
                     </td>
@@ -80,12 +85,10 @@
                         {% if boolean == 1 %}✅{% endif %}
                     </td>
                     {% endfor %}
-                    <td style="min-width: 75px; background-color: white !important;">
-                        <i class="fa-solid fa-cart-shopping add_to_cart_icon added" data-recipe_key="{{ recipe.clean_key }}"></i>
-                    </td>
                 </tr>
                 {% endfor %}
                 <tr class="ignore_row">
+                    <td></td>
                     <td>
                         <p class="search_result left_side_of_page"><b>Totals</b>
                     </td>
@@ -104,6 +107,7 @@
     <table id="attribute_matrix_table" class="table table-striped">
         <thead>
             <tr>
+                <th/>
                 <th>
                     <a>Recipe</a>
                 </th>
@@ -120,11 +124,16 @@
         <tbody>
             {% for recipe, attribute_dict in recipe_attribute_matrix.items %}
                 <tr class="attribute_matrix_table_row">
+                    <td style="background-color: white !important; padding: 0;">
+                        <!-- <i class="fa-solid fa-cart-shopping add_to_cart_icon added" data-recipe_key="{{ recipe.clean_key }}"></i> -->
+                        <img class="add_to_cart_icon added" src="{% static 'img/x-icon.svg' %}" width="20" height="20" data-recipe_key="{{ recipe.clean_key }}"/>
+                    </td>
                     <td style="min-width: 75px;">
-                        <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
-                        <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
-                        <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
-                        <i class="fa-solid fa-cart-shopping add_to_cart_icon added" style="padding-left: 12px;" data-recipe_key="{{ recipe.clean_key }}"></i>
+                        <p class="search_result">
+                            <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
+                            <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
+                            <a class="left_side_of_page" href="{% url 'recipe_detail' recipe.clean_key %}">{{ recipe }}</a>
+                        </p>
                     </td>
                     {% for value in attribute_dict.values %}
                         <td>
