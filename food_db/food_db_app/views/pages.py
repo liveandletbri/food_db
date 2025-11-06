@@ -1029,6 +1029,9 @@ def bulk_prep(request):
                 if attribute in timing_attributes:
                     timing_attribute_instance = RecipeTimingAttribute.objects.filter(recipe=recipe, type=attribute.split('-')[1])
                     recipe_attribute_dict[attribute] = timing_attribute_instance.first().duration_str if timing_attribute_instance else ''
+                elif attribute == 'cookie_style':
+                    style_raw_name = getattr(recipe, attribute)
+                    recipe_attribute_dict[attribute] = next((tup[1] for tup in COOKIE_STYLE_CHOICES if tup[0] == style_raw_name), style_raw_name)
                 else:
                     recipe_attribute_dict[attribute] = getattr(recipe, attribute)
             recipe_attribute_matrix[recipe] = recipe_attribute_dict
