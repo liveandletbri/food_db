@@ -48,10 +48,15 @@ $(document).ready(showHideTabs)
 let submitViewConfigButton = document.querySelector("#submit_view_config_button")
 let viewConfigForm = document.querySelector("#view_config_form")
 let viewConfigNameInput = document.querySelector("#view_config_name")
+let editViewConfigKeyInput = document.querySelector("#edit_view_config_key")
+let viewConfigFormSummary = document.querySelector("#view_config_form_summary")
 
 let viewConfigNameTooltip = document.querySelector("#view_config_name_tooltip")
 let viewConfigTagsTooltip = document.querySelector("#view_config_tags_tooltip")
 let viewConfigAttributesTooltip = document.querySelector("#view_config_attributes_tooltip")
+
+// Variable to store the current editing key
+let currentEditingKey = null
 
 function validateViewConfig(e) {
     e.preventDefault()
@@ -83,10 +88,122 @@ function validateViewConfig(e) {
     
     // Submit if all clear!
     if (invalid == false) {
-        submitViewConfigButton.innerText = 'Creating...'
+        if (currentEditingKey) {
+            submitViewConfigButton.innerText = 'Updating...'
+        } else {
+            submitViewConfigButton.innerText = 'Creating...'
+        }
         submitViewConfigButton.style.backgroundColor = 'lightgray'
         submitViewConfigButton.style.opacity = 0.25
         viewConfigForm.submit()
+    }
+}
+
+function populateViewConfigForm(viewConfigKey, viewConfigName, tags, attributes) {
+    // Set the editing key
+    currentEditingKey = viewConfigKey
+    if (editViewConfigKeyInput) {
+        editViewConfigKeyInput.value = viewConfigKey
+    }
+    
+    // Update form summary
+    if (viewConfigFormSummary) {
+        viewConfigFormSummary.innerText = `Edit View Config: ${viewConfigName}`
+    }
+    
+    // Update button text
+    if (submitViewConfigButton) {
+        submitViewConfigButton.innerText = 'Update View Config'
+    }
+    
+    // Populate name
+    if (viewConfigNameInput) {
+        viewConfigNameInput.value = viewConfigName
+    }
+    
+    // Uncheck all tag checkboxes first
+    document.querySelectorAll('input[name="tags"]').forEach(function(checkbox) {
+        checkbox.checked = false
+    })
+    
+    // Check the selected tags
+    if (tags && tags.length > 0) {
+        let tagArray = tags.split(',')
+        tagArray.forEach(function(tagName) {
+            let checkbox = document.querySelector(`input[name="tags"][value="${tagName.trim()}"]`)
+            if (checkbox) {
+                checkbox.checked = true
+            }
+        })
+    }
+    
+    // Uncheck all attribute checkboxes first
+    document.querySelectorAll('input[name="recipe_attributes"]').forEach(function(checkbox) {
+        checkbox.checked = false
+    })
+    
+    // Check the selected attributes
+    if (attributes && attributes.length > 0) {
+        let attrArray = attributes.split(',')
+        attrArray.forEach(function(attrValue) {
+            let checkbox = document.querySelector(`input[name="recipe_attributes"][value="${attrValue.trim()}"]`)
+            if (checkbox) {
+                checkbox.checked = true
+            }
+        })
+    }
+    
+    // Open the details element if it's closed
+    let detailsElement = viewConfigForm.closest('details')
+    if (detailsElement && !detailsElement.open) {
+        detailsElement.open = true
+    }
+}
+
+function resetViewConfigForm() {
+    // Clear the editing key
+    currentEditingKey = null
+    if (editViewConfigKeyInput) {
+        editViewConfigKeyInput.value = ''
+    }
+    
+    // Reset form summary
+    if (viewConfigFormSummary) {
+        viewConfigFormSummary.innerText = 'Add New View Config'
+    }
+    
+    // Reset button text
+    if (submitViewConfigButton) {
+        submitViewConfigButton.innerText = 'Create View Config'
+    }
+    
+    // Clear name
+    if (viewConfigNameInput) {
+        viewConfigNameInput.value = ''
+    }
+    
+    // Uncheck all checkboxes
+    document.querySelectorAll('input[name="tags"]').forEach(function(checkbox) {
+        checkbox.checked = false
+    })
+    document.querySelectorAll('input[name="recipe_attributes"]').forEach(function(checkbox) {
+        checkbox.checked = false
+    })
+}
+
+function updateEditLinksVisibility() {
+    // Hide all edit links
+    document.querySelectorAll('.edit_view_config_link').forEach(function(link) {
+        link.style.display = 'none'
+    })
+    
+    // Show edit link for the checked radio button (if not Default)
+    let checkedRadio = document.querySelector('input[name="view_config_radio"]:checked')
+    if (checkedRadio && checkedRadio.value !== '') {
+        let editLink = checkedRadio.closest('div').querySelector('.edit_view_config_link')
+        if (editLink) {
+            editLink.style.display = 'inline'
+        }
     }
 }
 
@@ -107,6 +224,15 @@ async function changeViewConfig(event) {
         // If not found, abort gracefully
         return;
     }
+    
+    // Update edit links visibility
+    updateEditLinksVisibility()
+    
+    // Reset form if switching away from editing
+    if (currentEditingKey && radioButton.value !== currentEditingKey) {
+        resetViewConfigForm()
+    }
+    
     let currentUrl = window.location.href;
     let currentUrlDomain = currentUrl.split("/bulk")[0];
     let viewConfigKey = radioButton.value;
@@ -168,5 +294,26 @@ $(document).ready(function() {
     // Handle view config radio button selection
     document.querySelectorAll('input[name="view_config_radio"]').forEach(function(radio) {
         radio.addEventListener('change', changeViewConfigHandler)
+    })
+    
+    // Initial update of edit links visibility
+    updateEditLinksVisibility()
+    
+    // Handle edit link clicks
+    document.querySelectorAll('.edit_view_config_link').forEach(function(editLink) {
+        editLink.addEventListener('click', function(event) {
+            event.preventDefault()
+            
+            // Find the associated radio button
+            let radioButton = editLink.parentElement.querySelector('input[type="radio"]')
+            if (radioButton) {
+                let viewConfigKey = radioButton.value
+                let viewConfigName = radioButton.getAttribute('data-view-config-name')
+                let tags = radioButton.getAttribute('data-view-config-tags')
+                let attributes = radioButton.getAttribute('data-view-config-attributes')
+                
+                populateViewConfigForm(viewConfigKey, viewConfigName, tags, attributes)
+            }
+        })
     })
 })

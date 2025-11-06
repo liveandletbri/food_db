@@ -882,14 +882,13 @@ def manage_food(request):
 
 
 def bulk_prep(request):
-    # If this is a POST request, create a new ViewConfig instance
+    # If this is a POST request, create or update a ViewConfig instance
     if request.method == 'POST':
         name = request.POST.get('name')
+        key = sanitize_string(name)
         tags = request.POST.getlist('tags')
         recipe_attributes = request.POST.getlist('recipe_attributes')
-        
-        # Create sanitized key from name
-        key = sanitize_string(name)
+        edit_view_config_key = request.POST.get('edit_view_config_key')
         
         # Create selected_fields dictionary
         selected_fields = {
@@ -897,19 +896,31 @@ def bulk_prep(request):
             'tags': tags,
         }
         
-        # Create and save ViewConfig instance
-        try:
-            view_config = ViewConfig(
-                name=name,
-                key=key,
-                selected_fields=selected_fields
-            )
-            view_config.save()
-        except IntegrityError:
-            # Handle duplicate name or key
-            return HttpResponseBadRequest('A View Config with this name already exists.')
+        # Check if we're editing an existing ViewConfig
+        if edit_view_config_key:
+            try:
+                view_config = ViewConfig.objects.get(key=edit_view_config_key)
+                # Update existing ViewConfig
+                view_config.name = name
+                view_config.key = key
+                view_config.selected_fields = selected_fields
+                view_config.save()
+            except ViewConfig.DoesNotExist:
+                return HttpResponseBadRequest('The View Config you are trying to edit does not exist.')
+        else:
+            # Create new ViewConfig instance
+            try:
+                view_config = ViewConfig(
+                    name=name,
+                    key=key,
+                    selected_fields=selected_fields
+                )
+                view_config.save()
+            except IntegrityError:
+                # Handle duplicate name or key
+                return HttpResponseBadRequest('A View Config with this name already exists.')
         
-        # Redirect to bulk_prep with the new view_config_key as a GET parameter
+        # Redirect to bulk_prep with the view_config_key as a GET parameter
         return redirect(f'{reverse("bulk_prep")}?view_config_key={key}')
     else:
         view_config_key = request.GET.get('view_config_key')

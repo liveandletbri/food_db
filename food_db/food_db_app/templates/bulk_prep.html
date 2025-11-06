@@ -145,22 +145,28 @@
 <div class="tab_container" id="view_config_tab_content" style="display: none;">
     <h2>Select a View Config</h2>
     <div style="margin-bottom: 20px;">
-        <label style="display: flex; align-items: center; margin-bottom: 10px;">
-            <input type="radio" name="view_config_radio" value="" {% if not current_view_config_key %}checked{% endif %} style="margin-right: 5px;">
-            Default
-        </label>
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <label style="display: flex; align-items: center; margin-right: 10px;">
+                <input type="radio" name="view_config_radio" value="" {% if not current_view_config_key %}checked{% endif %} style="margin-right: 5px;">
+                Default
+            </label>
+        </div>
         {% for view_config in all_view_configs %}
-        <label style="display: flex; align-items: center; margin-bottom: 10px;">
-            <input type="radio" name="view_config_radio" value="{{ view_config.key }}" {% if current_view_config_key == view_config.key %}checked{% endif %} style="margin-right: 5px;">
-            {{ view_config.name }}
-        </label>
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <label style="display: flex; align-items: center; margin-right: 10px;">
+                <input type="radio" name="view_config_radio" value="{{ view_config.key }}" data-view-config-name="{{ view_config.name }}" data-view-config-tags="{{ view_config.selected_fields.tags|join:',' }}" data-view-config-attributes="{{ view_config.selected_fields.recipe_attributes|join:',' }}" {% if current_view_config_key == view_config.key %}checked{% endif %} style="margin-right: 5px;">
+                {{ view_config.name }}
+            </label>
+            <a href="#" class="edit_view_config_link" style="display: none; margin-left: 10px; color: #5685bc; text-decoration: underline; cursor: pointer;">Edit</a>
+        </div>
         {% endfor %}
     </div>
     
     <details style="margin-top: 20px;">
-        <summary><h2 style="display: inline;">Add New View Config</h2></summary>
+        <summary><h2 id="view_config_form_summary" style="display: inline;">Add New View Config</h2></summary>
         <form id="view_config_form" method="POST" action="{% url 'bulk_prep' %}">
         {% csrf_token %}
+        <input type="hidden" id="edit_view_config_key" name="edit_view_config_key" value="">
         <div style="margin-bottom: 20px; position: relative;">
             <label for="view_config_name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
             <input type="text" id="view_config_name" name="name" required style="width: 300px; padding: 5px;">
