@@ -195,16 +195,16 @@ class Recipe(models.Model):
         return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='component')]
 
     @property
-    def variant_recipes(self):
+    def base_recipes(self):
         return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='variant')]
 
     @property
-    def base_recipes(self):
+    def variant_recipes(self):
         return [relationship.parent_recipe for relationship in ParentChildRecipe.objects.filter(child_recipe=self, relationship_type='variant')]
 
     @property
     def children(self):
-        return sorted(self.component_recipes + self.base_recipes, key=lambda x: x.order_number)
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self)]
 
     @property
     def has_children(self):
@@ -222,7 +222,7 @@ class Recipe(models.Model):
     def has_times(self):
         return RecipeTimingAttribute.objects.filter(recipe=self).count() > 0
 
-    def add_child(self, child_recipe):
+    def add_child(self, child_recipe, relationship_type):
         '''Adds a child recipe to this recipe.'''
         if not isinstance(child_recipe, Recipe):
             raise ValueError("child_recipe must be an instance of Recipe")
@@ -234,6 +234,7 @@ class Recipe(models.Model):
         ParentChildRecipe.objects.create(
             parent_recipe=self,
             child_recipe=child_recipe,
+            relationship_type=relationship_type,
             order_number=order_number,
         )
     
