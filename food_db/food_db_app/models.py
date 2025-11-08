@@ -3,6 +3,7 @@ import re
 import pytz
 from colorfield.fields import ColorField
 from django.db import models
+from django.db.models import Q
 from django.db.models.fields.related import ManyToOneRel
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
@@ -10,6 +11,11 @@ from django.utils.deconstruct import deconstructible
 from math import floor
 
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
+
+RELATIONSHIP_TYPE_CHOICES = [
+    ('component', 'Component'),
+    ('variant', 'Variant'),
+]
 
 TIMING_TYPE_CHOICES = [
     ('bake', 'Bake'),
@@ -60,6 +66,12 @@ class ParentChildRecipe(models.Model):
         'Recipe',
         on_delete=models.CASCADE,
         related_name='parent_relationship',
+    )
+    relationship_type = models.CharField(
+        max_length=15,
+        choices=RELATIONSHIP_TYPE_CHOICES,
+        null=True,
+        blank=True,
     )
     order_number = models.PositiveSmallIntegerField(
         default=0,
@@ -179,12 +191,24 @@ class Recipe(models.Model):
         return CookedMeal.objects.filter(recipe=self).count()
 
     @property
-    def has_children(self):
-        return self.child_relationship.count() > 0
+    def component_recipes(self):
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='component')]
+
+    @property
+    def variant_recipes(self):
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='variant')]
+
+    @property
+    def base_recipes(self):
+        return [relationship.parent_recipe for relationship in ParentChildRecipe.objects.filter(child_recipe=self, relationship_type='variant')]
 
     @property
     def children(self):
-        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self).order_by('order_number')]
+        return sorted(self.component_recipes + self.base_recipes, key=lambda x: x.order_number)
+
+    @property
+    def has_children(self):
+        return len(self.children) > 0
 
     @property
     def associated_tags(self):
