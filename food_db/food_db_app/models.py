@@ -203,12 +203,16 @@ class Recipe(models.Model):
         return [relationship.parent_recipe for relationship in ParentChildRecipe.objects.filter(child_recipe=self, relationship_type='variant')]
 
     @property
-    def children(self):
+    def child_recipes(self):
         return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self)]
 
     @property
+    def child_relationships(self):
+        return [{'recipe': relationship.child_recipe, 'relationship_type': relationship.relationship_type} for relationship in ParentChildRecipe.objects.filter(parent_recipe=self)]
+
+    @property
     def has_children(self):
-        return len(self.children) > 0
+        return len(self.child_recipes) > 0
 
     @property
     def associated_tags(self):

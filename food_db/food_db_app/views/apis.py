@@ -44,7 +44,7 @@ def cook_meal(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         recipe_instance = Recipe.objects.get(title=data['title'])
-        child_recipes = recipe_instance.children
+        child_recipes = recipe_instance.child_recipes
         for rec in child_recipes + [recipe_instance]:
             cooked_meal_instance = CookedMeal(recipe=rec)
             cooked_meal_instance.save()
