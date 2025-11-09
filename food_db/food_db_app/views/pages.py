@@ -46,7 +46,7 @@ def recipe_detail(request, key):
     
     recipe = get_object_or_404(Recipe, clean_key=key)
     multiplier = float(request.GET.get('multiplier', 1))
-    child_recipes = recipe.children
+    child_recipes = recipe.child_recipes
     
     # Calculate calories per serving before applying the multiplier (values won't change after the multiplier and it's easier before the servings are converted to strings)
     if recipe.servings_min and recipe.calories_per_recipe:
@@ -324,12 +324,24 @@ def add_recipe(request):
                 RecipeStep.objects.bulk_create(step_instances)
             log_debug_message(f'finished steps')
 
-            child_recipe_keys = request.POST.getlist('child_recipe')
-            child_recipe_keys.remove('recipe_key')  # this is the example value and can be ignored
-            if len(child_recipe_keys) > 0:
-                for child_recipe_key in child_recipe_keys:
+            number_of_child_recipes = request.POST.get('number_of_linked_recipes') or 0
+            number_of_child_recipes = int(number_of_child_recipes)
+
+            if number_of_child_recipes > 0:
+                for child_index in range(number_of_child_recipes):
+                    child_recipe_key = request.POST.get(f'child_recipe_{child_index}')
+                    if not child_recipe_key or child_recipe_key == 'recipe_key':
+                        continue
+                    relationship_type = request.POST.get(f'relationship_type_{child_index}', '')
+                    relationship_type = relationship_type.strip() if relationship_type else None
                     child_recipe = Recipe.objects.get(clean_key=child_recipe_key)
-                    recipe_instance.add_child(child_recipe)
+                    if relationship_type in ('variant', 'full'):
+                        # in these cases, the current recipe is being made the child, not the parent
+                        inverse_relationship_type = 'base' if relationship_type == 'variant' else 'component'
+                        child_recipe.add_child(recipe_instance, inverse_relationship_type)
+                    else:
+                        # current recipe is the parent
+                        recipe_instance.add_child(child_recipe, relationship_type)
 
             log_debug_message('created child recipes')
 
@@ -693,15 +705,25 @@ def edit_recipe(request, key):
             
             log_debug_message('saved tags')
 
-            child_recipe_keys = request.POST.getlist('child_recipe')
-            child_recipe_keys.remove('recipe_key')  # this is the example value and can be ignored
-            # First remove existing child recipes
+            number_of_child_recipes = request.POST.get('number_of_linked_recipes') or 0
+            number_of_child_recipes = int(number_of_child_recipes)
+
             recipe_instance.remove_all_children()
-            if len(child_recipe_keys) > 0:
-                # Add the ones declared here
-                for child_recipe_key in child_recipe_keys:
+            if number_of_child_recipes > 0:
+                for child_index in range(number_of_child_recipes):
+                    child_recipe_key = request.POST.get(f'child_recipe_{child_index}')
+                    if not child_recipe_key or child_recipe_key == 'recipe_key':
+                        continue
+                    relationship_type = request.POST.get(f'relationship_type_{child_index}', '')
+                    relationship_type = relationship_type.strip() if relationship_type else None
                     child_recipe = Recipe.objects.get(clean_key=child_recipe_key)
-                    recipe_instance.add_child(child_recipe)
+                    if relationship_type in ('variant', 'full'):
+                        # in these cases, the current recipe is being made the child, not the parent
+                        inverse_relationship_type = 'base' if relationship_type == 'variant' else 'component'
+                        child_recipe.add_child(recipe_instance, inverse_relationship_type)
+                    else:
+                        # current recipe is the parent
+                        recipe_instance.add_child(child_recipe, relationship_type)
 
             log_debug_message('created child recipes')
 
@@ -749,7 +771,7 @@ def edit_recipe(request, key):
         related_ingredients = Ingredient.objects.filter(recipe=recipe_instance).order_by('ingredient_category__order_number')
         related_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
         related_timing_attributes = recipe_instance.associated_times
-        child_recipes = recipe_instance.children
+        child_relationships = recipe_instance.child_relationships
 
         existing_foods = [food.name for food in Food.objects.all()]
         existing_units = [unit.name for unit in UnitOfMeasurement.objects.all()]
@@ -839,7 +861,7 @@ def edit_recipe(request, key):
         'book_list': existing_books,
         'tag_list': existing_tags,
         'recipe_list': existing_recipes,
-        'child_recipes': child_recipes,
+        'child_relationships': child_relationships,
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': get_cart(request),
         'timing_types': TIMING_TYPE_CHOICES,
@@ -939,7 +961,7 @@ def bulk_prep(request):
         cart = get_cart(request)
         cart_recipes = [Recipe.objects.get(clean_key = key) for key in cart]
 
-        all_recipes_with_children = [child for rec in cart_recipes for child in rec.children if rec.has_children] + cart_recipes
+        all_recipes_with_children = [child for rec in cart_recipes for child in rec.child_recipes if rec.has_children] + cart_recipes
         groceries = GroceryList([RecipeIngredientData(rec, 1) for rec in all_recipes_with_children], 1)
 
         # Build a set of all tags that are associated with any cart recipe

@@ -223,33 +223,32 @@
     <div id="child_recipes_div" class="left_side_of_page">
         <!-- Child recipes will go here -->
         {% if mode == 'edit' %}
-            {% for child_recipe in child_recipes %}
-                <div name="child_recipe" data-recipe_name="{{ child_recipe.title }}" class="attached_child_recipe_div">
-                    <input type="hidden" name="child_recipe" value="{{ child_recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
-                    <a href="" target="_blank">{{ child_recipe.title }}</a>
+            {% for rel in child_relationships %}
+                <div name="child_recipe" data-recipe_name="{{ rel.recipe.title }}" class="attached_child_recipe_div">
+                    <input type="hidden" name="child_recipe_{{ forloop.counter0 }}" value="{{ rel.recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
+                    <a href="{% url 'recipe_detail' rel.recipe.clean_key %}" target="_blank">{{ rel.recipe.title }}</a>
                     <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
                     <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
                     <img class="delete_row_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>
-                    <select class="relationship_type_dropdown" name="relationship_type" style="width: 200px; margin: 5px 0px 5px 10px;">
-                        <option value="" disabled selected>Relationship...</option>
+                    <select class="relationship_type_dropdown" name="relationship_type_{{ forloop.counter0 }}" style="width: 200px; margin: 5px 0px 5px 10px;">
                         <option value="full">Full</option>
-                        <option value="component">Component</option>
-                        <option value="base">Base</option>
+                        <option value="component" {% if rel.relationship_type == 'component' %}selected{% endif %}>Component</option>
+                        <option value="base" {% if rel.relationship_type == 'variant' %}selected{% endif %}>Base</option>
                         <option value="variant">Variant</option>
                     </select>
                 </div>
             {% endfor %}
         {% endif %}
     </div>
+    <input type="hidden" id="number_of_linked_recipes" name="number_of_linked_recipes" value="{% if mode == 'edit' %}{{ child_recipes|length }}{% else %}0{% endif %}">
     <!-- This is an example of a child recipe that is set to be invisible. The Javascript in add_child_recipe.js will clone it when adding new children. -->
     <div id="example_child_recipe" name="child_recipe" style="display: none;" data-recipe_name="Recipe Name" class="ignore_row attached_child_recipe_div">
-        
-        <input type="hidden" name="child_recipe" value="recipe_key"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
+        <input type="hidden" name="child_recipe_num" value="recipe_key"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
         <a href="" target="_blank">Recipe Name</a>
         <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
         <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
         <img class="delete_row_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>
-        <select class="relationship_type_dropdown" name="relationship_type" style="margin-right: 10px;">
+        <select class="relationship_type_dropdown" name="relationship_type_num" style="width: 200px; margin: 5px 0px 5px 10px;">
             <option value="" disabled selected>Relationship...</option>
             <option value="full">Full</option>
             <option value="component">Component</option>

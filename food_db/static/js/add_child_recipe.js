@@ -1,12 +1,49 @@
 let childRecipeSearchInput = document.getElementById('recipe_search_input')
 let exampleChildRecipe = document.getElementById('example_child_recipe')
 let childRecipeContainer = document.getElementById('child_recipes_div')
+let numberOfLinkedRecipesInput = document.getElementById('number_of_linked_recipes')
 let existingRecipes = JSON.parse(existingRecipesRaw.textContent)
 let existingRecipeTitles = Object.keys(existingRecipes)
 let submitButton = document.getElementById('add_child_recipe_button')
 
+function updateChildRecipeNames() {
+    if (!childRecipeContainer) {
+        return
+    }
+
+    let childRecipeRows = Array.from(childRecipeContainer.querySelectorAll('.attached_child_recipe_div')).filter(function(row) {
+        return !row.classList.contains('ignore_row')
+    })
+
+    childRecipeRows.forEach(function(row, index) {
+        let hiddenInput = row.querySelector('input[type="hidden"]')
+        if (hiddenInput) {
+            hiddenInput.setAttribute('name', `child_recipe_${index}`)
+        }
+
+        let relationshipSelect = row.querySelector('.relationship_type_dropdown')
+        if (relationshipSelect) {
+            relationshipSelect.setAttribute('name', `relationship_type_${index}`)
+        }
+    })
+
+    if (numberOfLinkedRecipesInput) {
+        numberOfLinkedRecipesInput.value = childRecipeRows.length
+    }
+}
+
+window.updateChildRecipeNames = updateChildRecipeNames
+
 window.addEventListener('load', function() {
     initializeRowShiftFunctionality('.attached_child_recipe_div', '#child_recipes_div')
+    updateChildRecipeNames()
+
+    if (childRecipeContainer) {
+        let observer = new MutationObserver(function() {
+            updateChildRecipeNames()
+        })
+        observer.observe(childRecipeContainer, { childList: true })
+    }
 })
 
 function attachChildRecipe(e) {
@@ -47,6 +84,7 @@ function attachChildRecipe(e) {
     childRecipeInput.setAttribute('value', recipeKey)
 
     childRecipeContainer.appendChild(childRecipe)
+    updateChildRecipeNames()
     childRecipeSearchInput.value = ''
     initializeRowShiftFunctionality('.attached_child_recipe_div', '#child_recipes_div')
 }
