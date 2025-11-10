@@ -221,6 +221,7 @@
         </datalist>
     </div>
     <div id="child_recipes_div" class="left_side_of_page">
+        <span id="relationship_type_tooltip" class="form_validate_tooltip tooltip">If you have linked recipes, you must select a relationship type for each one</span>
         <!-- Child recipes will go here -->
         {% if mode == 'edit' %}
             {% for rel in child_relationships %}

@@ -27,6 +27,7 @@ let caloriesTooltip = document.querySelector("#calories_per_recipe_tooltip")
 let ingredFoodTooltip = document.querySelector("#ingred_0_food_tooltip")
 let stepTooltip = document.querySelector("#step_0_description_tooltip")
 let timingTooltip = document.querySelector("#timing_attribute_tooltip")
+let relationshipTypeTooltip = document.querySelector("#relationship_type_tooltip")
 
 async function validateAddRecipe(e) {
     e.preventDefault()
@@ -141,6 +142,27 @@ async function validateAddRecipe(e) {
     if (timingTypeSet.size != timingTypes.length) {
         showAndHideTooltip(timingTooltip)
         invalid = true
+    }
+
+    // Relationship Types - if there are any linked recipes, all must have a relationship type selected
+    if (childRecipeCollection) {
+        let childRecipeRows = Array.from(childRecipeCollection.querySelectorAll('.attached_child_recipe_div')).filter(function(row) {
+            return !row.classList.contains('ignore_row')
+        })
+        if (childRecipeRows.length > 0) {
+            let validRelationshipTypes = ['full', 'component', 'base', 'variant']
+            let missingRelationshipType = false
+            childRecipeRows.forEach(function(row) {
+                let relationshipSelect = row.querySelector('.relationship_type_dropdown')
+                if (!relationshipSelect || !validRelationshipTypes.includes(relationshipSelect.value)) {
+                    missingRelationshipType = true
+                }
+            })
+            if (missingRelationshipType) {
+                showAndHideTooltip(relationshipTypeTooltip)
+                invalid = true
+            }
+        }
     }
 
     // Rename rows so the ID numbers are ordered the same as what's visible on the page
