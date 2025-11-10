@@ -161,6 +161,13 @@
     </tr>
     {% endif %}
 </table>
+{% if recipe.has_variants %}
+    <h2>Variants</h2>
+    <h4>These are the different versions of this recipe. Each variant contains all the ingredients and steps of this base recipe, plus its own unique ingredients and steps.</h4>
+    <ul style="padding-left: 40px; padding-bottom: 30px;">{% for variant in recipe.variant_recipes %}
+        <p><a class="search_result" href="{% url 'recipe_detail' variant.clean_key %}" target="_blank">{{ variant.title }}</a></p>
+    {% endfor %}</ul>
+{% endif %}
 {% if has_steps or has_children %}
     <div id="ingredients_header">
         <h2>Ingredients</h2>
