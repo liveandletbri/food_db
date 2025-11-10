@@ -201,13 +201,13 @@
     the results. -->
     <h2>Linked Recipes</h2>
     <h4>Search here to link related recipes. There are two types of relationships: Full/Component and Variant/Base. 
-        The parent recipe (either the Full or the Variant, depending on the relationship type) inherits the ingredients and steps of the child (I know,
-        it's backwards from <i>real</i> inheritance). It does not need its own ingredients or steps, but you can optionally add some (like for
-        topping and/or assembly instructions). Parent-specific ingredients/steps will always be shown last, after the children.
+        The "parent" recipe (either the Full or the Variant, depending on the relationship type) is composed of, and therefore displays, all the
+        ingredients and steps of the "child" recipes (Component or Base). The parent does not need its own ingredients or steps, but you can
+        optionally add some (like for topping and/or assembly instructions). Parent-specific ingredients/steps will always bge shown last, after the children.
         <br><br>Full/Component relationships are used in cases like cakes, where the sponge and frosting are separate Component recipes and the 
-        complete cake is the Full recipe.
+        complete cake is the Full recipe. 
         <br><br>Variant/Base relationships are when you have multiple different versions of a food that are mutually exclusive. For example, you might
-        have a Base recipe for a type of bread, and then have Variant recipes for sweet and savory versions.
+        have a Base recipe for a type of bread, and then have Variant recipes for sweet and savory versions. 
         <br><br>Indicate the relationship each recipe has to this one using the dropdown menu. Use the arrows to change the display order of your child
         recipes. If you are establishing this recipe as a child and a different one as a parent, you can change the display order of this recipe from
         the parent's page.</h4>
@@ -233,7 +233,7 @@
                     <select class="relationship_type_dropdown" name="relationship_type_{{ forloop.counter0 }}" style="width: 200px; margin: 5px 0px 5px 10px;">
                         <option value="full">Full</option>
                         <option value="component" {% if rel.relationship_type == 'component' %}selected{% endif %}>Component</option>
-                        <option value="base" {% if rel.relationship_type == 'variant' %}selected{% endif %}>Base</option>
+                        <option value="base" {% if rel.relationship_type == 'base' %}selected{% endif %}>Base</option>
                         <option value="variant">Variant</option>
                     </select>
                 </div>
