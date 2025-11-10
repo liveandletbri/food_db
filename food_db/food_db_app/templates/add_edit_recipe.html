@@ -199,8 +199,18 @@
     <!-- On the search page, I use a form for searching recipes. Since this is in the middle of the add/edit form,
     and you can't nest forms, I am using Javascript to manage the GET requests of the search and the injection of
     the results. -->
-    <h2>Linked Sub-Recipes</h2>
-    <h4>You can search for recipes here that make up components of this parent recipe. A parent recipe does not need ingredients or steps if it's made up of child recipes, but you can add ingredients/steps to the parent recipe as well (like for topping and/or assembly instructions). Drag the sub-recipes to determine the order they are displayed in. Anything you add to the parent recipe here will always be shown last.</h4>
+    <h2>Linked Recipes</h2>
+    <h4>Search here to link related recipes. There are two types of relationships: Full/Component and Variant/Base. 
+        The "parent" recipe (either the Full or the Variant, depending on the relationship type) is composed of, and therefore displays, all the
+        ingredients and steps of the "child" recipes (Component or Base). The parent does not need its own ingredients or steps, but you can
+        optionally add some (like for topping and/or assembly instructions). Parent-specific ingredients/steps will always bge shown last, after the children.
+        <br><br>Full/Component relationships are used in cases like cakes, where the sponge and frosting are separate Component recipes and the 
+        complete cake is the Full recipe. 
+        <br><br>Variant/Base relationships are when you have multiple different versions of a food that are mutually exclusive. For example, you might
+        have a Base recipe for a type of bread, and then have Variant recipes for sweet and savory versions. 
+        <br><br>Indicate the relationship each recipe has to this one using the dropdown menu. Use the arrows to change the display order of your child
+        recipes. If you are establishing this recipe as a child and a different one as a parent, you can change the display order of this recipe from
+        the parent's page.</h4>
     <div style="display: flex;">
         <input type="text" id="recipe_search_input" placeholder="Search for a recipe to add as a child recipe" list="list__recipe-list">
         <img id="add_child_recipe_button" src="{% static 'img/plus-icon.svg' %}" width="30" height="30" alt="Attach sub-recipe"/>
@@ -213,24 +223,38 @@
     <div id="child_recipes_div" class="left_side_of_page">
         <!-- Child recipes will go here -->
         {% if mode == 'edit' %}
-            {% for child_recipe in child_recipes %}
-                <div name="child_recipe" data-recipe_name="{{ child_recipe.title }}" class="attached_child_recipe_div">
-                    <input type="hidden" name="child_recipe" value="{{ child_recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
-                    <a href="" target="_blank">{{ child_recipe.title }}</a>
+            {% for rel in child_relationships %}
+                <div name="child_recipe" data-recipe_name="{{ rel.recipe.title }}" class="attached_child_recipe_div">
+                    <input type="hidden" name="child_recipe_{{ forloop.counter0 }}" value="{{ rel.recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
+                    <a href="{% url 'recipe_detail' rel.recipe.clean_key %}" target="_blank">{{ rel.recipe.title }}</a>
                     <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
                     <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
                     <img class="delete_row_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>
+                    <select class="relationship_type_dropdown" name="relationship_type_{{ forloop.counter0 }}" style="width: 200px; margin: 5px 0px 5px 10px;">
+                        <option value="full">Full</option>
+                        <option value="component" {% if rel.relationship_type == 'component' %}selected{% endif %}>Component</option>
+                        <option value="base" {% if rel.relationship_type == 'base' %}selected{% endif %}>Base</option>
+                        <option value="variant">Variant</option>
+                    </select>
                 </div>
             {% endfor %}
         {% endif %}
     </div>
+    <input type="hidden" id="number_of_linked_recipes" name="number_of_linked_recipes" value="{% if mode == 'edit' %}{{ child_recipes|length }}{% else %}0{% endif %}">
     <!-- This is an example of a child recipe that is set to be invisible. The Javascript in add_child_recipe.js will clone it when adding new children. -->
     <div id="example_child_recipe" name="child_recipe" style="display: none;" data-recipe_name="Recipe Name" class="ignore_row attached_child_recipe_div">
-        <input type="hidden" name="child_recipe" value="recipe_key"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
+        <input type="hidden" name="child_recipe_num" value="recipe_key"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
         <a href="" target="_blank">Recipe Name</a>
         <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
         <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
         <img class="delete_row_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>
+        <select class="relationship_type_dropdown" name="relationship_type_num" style="width: 200px; margin: 5px 0px 5px 10px;">
+            <option value="" disabled selected>Relationship...</option>
+            <option value="full">Full</option>
+            <option value="component">Component</option>
+            <option value="base">Base</option>
+            <option value="variant">Variant</option>
+        </select>
     </div>
 
     <!-- This is an input to the form, but its value is set in recipe_add_form_validate.js. The user changes the switch on the navbar, and then this input's value is set to match it. This input is invisble. -->

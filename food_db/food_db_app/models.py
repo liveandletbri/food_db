@@ -3,6 +3,7 @@ import re
 import pytz
 from colorfield.fields import ColorField
 from django.db import models
+from django.db.models import Q
 from django.db.models.fields.related import ManyToOneRel
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
@@ -10,6 +11,11 @@ from django.utils.deconstruct import deconstructible
 from math import floor
 
 from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
+
+RELATIONSHIP_TYPE_CHOICES = [
+    ('component', 'Component'),
+    ('base', 'Base'),
+]
 
 TIMING_TYPE_CHOICES = [
     ('bake', 'Bake'),
@@ -60,6 +66,12 @@ class ParentChildRecipe(models.Model):
         'Recipe',
         on_delete=models.CASCADE,
         related_name='parent_relationship',
+    )
+    relationship_type = models.CharField(
+        max_length=15,
+        choices=RELATIONSHIP_TYPE_CHOICES,
+        null=True,
+        blank=True,
     )
     order_number = models.PositiveSmallIntegerField(
         default=0,
@@ -179,12 +191,32 @@ class Recipe(models.Model):
         return CookedMeal.objects.filter(recipe=self).count()
 
     @property
-    def has_children(self):
-        return self.child_relationship.count() > 0
+    def component_recipes(self):
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='component')]
 
     @property
-    def children(self):
-        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self).order_by('order_number')]
+    def base_recipes(self):
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='base')]
+
+    @property
+    def variant_recipes(self):
+        return [relationship.parent_recipe for relationship in ParentChildRecipe.objects.filter(child_recipe=self, relationship_type='base')]
+
+    @property
+    def child_recipes(self):
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self)]
+
+    @property
+    def child_relationships(self):
+        return [{'recipe': relationship.child_recipe, 'relationship_type': relationship.relationship_type} for relationship in ParentChildRecipe.objects.filter(parent_recipe=self)]
+
+    @property
+    def has_children(self):
+        return len(self.child_recipes) > 0
+
+    @property
+    def has_variants(self):
+        return len(self.variant_recipes) > 0
 
     @property
     def associated_tags(self):
@@ -198,7 +230,7 @@ class Recipe(models.Model):
     def has_times(self):
         return RecipeTimingAttribute.objects.filter(recipe=self).count() > 0
 
-    def add_child(self, child_recipe):
+    def add_child(self, child_recipe, relationship_type):
         '''Adds a child recipe to this recipe.'''
         if not isinstance(child_recipe, Recipe):
             raise ValueError("child_recipe must be an instance of Recipe")
@@ -210,6 +242,7 @@ class Recipe(models.Model):
         ParentChildRecipe.objects.create(
             parent_recipe=self,
             child_recipe=child_recipe,
+            relationship_type=relationship_type,
             order_number=order_number,
         )
     

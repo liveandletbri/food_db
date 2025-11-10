@@ -22,7 +22,7 @@ def convert_recipe_to_html(recipe_instance, bucket_url):
     recipes = []
     has_children = recipe_instance.has_children
     if has_children:
-        recipes.extend(recipe_instance.children)
+        recipes.extend(recipe_instance.child_recipes)
     recipes.append(recipe_instance)
         
     

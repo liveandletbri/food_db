@@ -15,19 +15,34 @@ function initializeRowShiftFunctionality(rowSelector, containerSelector) {
     let downButtons = container.querySelectorAll('.move_row_down_button');
     let deleteButtons = container.querySelectorAll('.delete_row_button');
     
-    upButtons.forEach(btn => btn.addEventListener('click', function(e) {
-        moveRow(e, rowSelector, containerSelector, 'up');
-    }));
+    upButtons.forEach(btn => {
+        // Only add listener if there isn't already one
+        if (!btn.hasAttribute('data-listener-added')) {
+            btn.addEventListener('click', function(e) {
+                moveRow(e, rowSelector, containerSelector, 'up');
+            });
+            btn.setAttribute('data-listener-added', 'true');
+        }
+    });
     
-    downButtons.forEach(btn => btn.addEventListener('click', function(e) {
-        moveRow(e, rowSelector, containerSelector, 'down');
-    }));
+    downButtons.forEach(btn => {
+        if (!btn.hasAttribute('data-listener-added')) {
+            btn.addEventListener('click', function(e) {
+                moveRow(e, rowSelector, containerSelector, 'down');
+            });
+            btn.setAttribute('data-listener-added', 'true');
+        }
+    });
 
-    if ( deleteButtons ) {
-    
-        deleteButtons.forEach(btn => btn.addEventListener('click', function(e) {
-            deleteRow(e, rowSelector);
-        }));
+    if (deleteButtons) {
+        deleteButtons.forEach(btn => {
+            if (!btn.hasAttribute('data-listener-added')) {
+                btn.addEventListener('click', function(e) {
+                    deleteRow(e, rowSelector);
+                });
+                btn.setAttribute('data-listener-added', 'true');
+            }
+        });
     }
     
     // Initial call to hide top/bottom buttons
