@@ -14,7 +14,7 @@ from .cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 RELATIONSHIP_TYPE_CHOICES = [
     ('component', 'Component'),
-    ('variant', 'Variant'),
+    ('base', 'Base'),
 ]
 
 TIMING_TYPE_CHOICES = [
@@ -196,11 +196,11 @@ class Recipe(models.Model):
 
     @property
     def base_recipes(self):
-        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='variant')]
+        return [relationship.child_recipe for relationship in ParentChildRecipe.objects.filter(parent_recipe=self, relationship_type='base')]
 
     @property
     def variant_recipes(self):
-        return [relationship.parent_recipe for relationship in ParentChildRecipe.objects.filter(child_recipe=self, relationship_type='variant')]
+        return [relationship.parent_recipe for relationship in ParentChildRecipe.objects.filter(child_recipe=self, relationship_type='base')]
 
     @property
     def child_recipes(self):
@@ -213,6 +213,10 @@ class Recipe(models.Model):
     @property
     def has_children(self):
         return len(self.child_recipes) > 0
+
+    @property
+    def has_variants(self):
+        return len(self.variant_recipes) > 0
 
     @property
     def associated_tags(self):
