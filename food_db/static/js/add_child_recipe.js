@@ -44,6 +44,15 @@ window.addEventListener('load', function() {
         })
         observer.observe(childRecipeContainer, { childList: true })
     }
+
+    let linkedRecipesHelpIcon = document.querySelector("#linked_recipes_help_icon")
+    let linkedRecipesHelpTooltip = document.querySelector("#linked_recipes_help_tooltip")
+    linkedRecipesHelpIcon.addEventListener('mouseenter', () => setTimeout(showToolTip, 300, linkedRecipesHelpTooltip))
+    linkedRecipesHelpIcon.addEventListener('mouseleave', () => setTimeout(hideToolTip, 300, linkedRecipesHelpTooltip))
+
+    let linkedRecipesHeader = document.querySelector("#linked_recipes_header")
+    linkedRecipesHelpTooltip.style.left = `${linkedRecipesHeader.offsetLeft + 300}px`;
+    linkedRecipesHelpTooltip.style.top = `${linkedRecipesHeader.offsetTop + 8}px`;
 })
 
 function attachChildRecipe(e) {
