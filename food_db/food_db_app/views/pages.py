@@ -383,6 +383,16 @@ def add_recipe(request):
     else:
         create_recipe_form = CreateRecipeForm()
 
+        # If Create Variant button is clicked, a recipe key is put in as URL parameter
+        base_recipe_key = request.GET.get('base_recipe_key')
+        if base_recipe_key:
+            child_relationships = [{
+                'recipe': Recipe.objects.get(clean_key=base_recipe_key),
+                'relationship_type': 'base',
+            }]
+        else:
+            child_relationships = None
+
     context = {
         'mode': 'add',
         'create_recipe_form': create_recipe_form,
@@ -404,6 +414,7 @@ def add_recipe(request):
         'cart': get_cart(request),
         'timing_types': TIMING_TYPE_CHOICES,
         'cookie_style_choices': COOKIE_STYLE_CHOICES,
+        'child_relationships': child_relationships,
     }
 
     return render(request, 'add_edit_recipe.html', context)

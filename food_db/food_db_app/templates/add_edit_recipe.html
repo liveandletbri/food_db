@@ -223,7 +223,7 @@
     <div id="child_recipes_div" class="left_side_of_page">
         <span id="relationship_type_tooltip" class="form_validate_tooltip tooltip">If you have linked recipes, you must select a relationship type for each one</span>
         <!-- Child recipes will go here -->
-        {% if mode == 'edit' %}
+        {% if child_relationships %}
             {% for rel in child_relationships %}
                 <div name="child_recipe" data-recipe_name="{{ rel.recipe.title }}" class="attached_child_recipe_div">
                     <input type="hidden" name="child_recipe_{{ forloop.counter0 }}" value="{{ rel.recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
