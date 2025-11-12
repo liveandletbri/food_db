@@ -36,7 +36,7 @@ from .utils import (
 def index(request):
     all_charts = AllCharts()
     context = {
-        'charts': list(all_charts.charts.keys()),
+        'charts': all_charts.charts,
         'cart': get_cart(request),
     }
     return render(request, 'index.html', context)

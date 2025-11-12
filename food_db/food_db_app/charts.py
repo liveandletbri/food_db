@@ -29,9 +29,12 @@ class BaseChart():
             'x_labels': cls.x_labels, 
             'y_data': cls.y_data,
             'type': cls.type,
-            'step_size': 1  # default value
+            # defaults for optional attributes
+            'step_size': 1,
+            'filter_datasets': False,
         }
         optional_attributes = [
+            'filter_datasets',
             'step_size',
             'y_axis_min',
             'y_axis_max',
@@ -115,6 +118,7 @@ class TagOverTime(BaseChart):
     type = 'line'
     y_axis_min = 0
     title = 'Tag Cooks Over Time'
+    filter_datasets = True
 
     try:
         earliest_meal = CookedMeal.objects.filter(recipe__is_component_recipe=False).order_by('_date_created').first()  # ordering by date created instead of date cooked to avoid back-dated meals
@@ -146,7 +150,8 @@ class TagOverTime(BaseChart):
                 tag_dict[tag.name][cooked_date_month] += 1
         
         x_labels = list(months_dict.keys())
-        y_data = {tag_name: list(monthly_data.values()) for tag_name, monthly_data in tag_dict.items() if tag_name in ['Healthy', 'Cookies', 'Soup', 'Asian', 'Mexican', 'Bread']}
+        y_data_raw = {tag_name: list(monthly_data.values()) for tag_name, monthly_data in tag_dict.items() if tag_name in ['Healthy', 'Cookies', 'Soup', 'Asian', 'Mexican', 'Bread']}
+        y_data = OrderedDict(sorted(y_data_raw.items(), key=lambda item: item[0]))
     except OperationalError:
         # During migrations, database schema may not match models yet
         pass

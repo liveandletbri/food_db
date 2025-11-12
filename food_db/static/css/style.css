@@ -953,6 +953,39 @@ details[open] summary {
     height: 300px;
 }
 
+.chart_filter_box {
+    height: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.chart_filter_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.chart_filter_item {
+    padding: 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.chart_filter_item.selected {
+    background-color: #3cc382;
+    color: white;
+}
+
+.chart_filter_item:hover {
+    background-color: #4040cc;
+    color:  white;
+}
+
 .add_to_cart_icon {
     cursor: pointer;
     transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
