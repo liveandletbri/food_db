@@ -1,7 +1,10 @@
+from copy import deepcopy
+import pytz
 import re
 import sys
 
 from collections import defaultdict, OrderedDict
+from datetime import datetime
 from django.db.utils import OperationalError
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -107,6 +110,46 @@ class Top10BakedTags(BaseTopTags):
     baked_counts = BaseTopTags.cooked_baking_tag_counts
     x_labels = list(baked_counts.keys())[:10]
     y_data = {title: list(baked_counts.values())[:10]}
+
+class TagOverTime(BaseChart):
+    type = 'line'
+    y_axis_min = 0
+    title = 'Tag Cooks Over Time'
+
+    try:
+        earliest_meal = CookedMeal.objects.filter(recipe__is_component_recipe=False).order_by('_date_created').first()  # ordering by date created instead of date cooked to avoid back-dated meals
+        earliest_date = earliest_meal.date_cooked 
+
+        # Create a dictionary where each key is the first of a month
+        now = datetime.now(pytz.timezone('America/Los_Angeles'))
+        month_iter = earliest_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        last_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        months_dict = OrderedDict()
+        while month_iter <= last_month:
+            key = month_iter.strftime('%Y-%m')
+            # months_dict[key] = {tag: 0 for tag in all_tags}
+            months_dict[key] = 0
+            # Advance to next month
+            if month_iter.month == 12:
+                month_iter = month_iter.replace(year=month_iter.year+1, month=1)
+            else:
+                month_iter = month_iter.replace(month=month_iter.month+1)
+
+        # dataset will be split/keyed by Tag
+        tag_dict = {}
+        for tag in Tag.objects.all():
+            tag_dict[tag.name] = deepcopy(months_dict)  # doing this in a loop instead of a comprehension to ensure months_dict is always defined
+
+        for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
+            cooked_date_month = meal.date_cooked.replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m')
+            for tag in meal.recipe.associated_tags:
+                tag_dict[tag.name][cooked_date_month] += 1
+        
+        x_labels = list(months_dict.keys())
+        y_data = {tag_name: list(monthly_data.values()) for tag_name, monthly_data in tag_dict.items() if tag_name in ['Healthy', 'Cookies', 'Soup', 'Asian', 'Mexican', 'Bread']}
+    except OperationalError:
+        # During migrations, database schema may not match models yet
+        pass
 
 class AllCharts(APIView):
     def __init__(self):
