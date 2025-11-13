@@ -949,16 +949,18 @@ details[open] summary {
     color: #47d3e5;
 }
 
-/* .chart {
-    height: 300px;
-} */
-
 /* Ensure all chart containers take up the same size */
 .row > .chart_container {
     flex: 0 1 50%;
     min-width: 0;
     box-sizing: border-box;
-    /* max-width: 50%; */
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    .row > .chart_container {
+        flex: 0 1 100%;
+        max-width: 100%;
+    }
 }
 
 /* Make chart divs with filter boxes use flexbox layout */
