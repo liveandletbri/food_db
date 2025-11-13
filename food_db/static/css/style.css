@@ -949,12 +949,38 @@ details[open] summary {
     color: #47d3e5;
 }
 
-.chart {
+/* .chart {
     height: 300px;
+} */
+
+/* Ensure all chart containers take up the same size */
+.row > .chart_container {
+    flex: 0 1 50%;
+    min-width: 0;
+    box-sizing: border-box;
+    /* max-width: 50%; */
+}
+
+/* Make chart divs with filter boxes use flexbox layout */
+.row > .chart_container:has(.chart_filter_box) {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.row > .chart_container:has(.chart_filter_box) .chart {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 0; /* Force flex to respect constraints */
+    box-sizing: border-box;
 }
 
 .chart_filter_box {
     height: 300px;
+    width: 25%;
+    flex-shrink: 0;
+    flex-grow: 0;
     border: 1px solid #ccc;
     border-radius: 5px;
     overflow-y: auto;

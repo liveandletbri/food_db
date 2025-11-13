@@ -1,6 +1,26 @@
 let endpoint = '/charts';
 let chartInstances = {};
 
+function setCanvasSize(canvas) {
+    // Set canvas dimensions using HTML attributes (not CSS) as the charts get squished otherwise
+    let container = canvas.closest('.chart_container');
+    if (container && container.querySelector('.chart_filter_box')) {
+        // For charts with filter boxes, calculate available width
+        let containerRect = container.getBoundingClientRect();
+        let filterBox = container.querySelector('.chart_filter_box');
+        let filterBoxRect = filterBox.getBoundingClientRect();
+        let gap = 10; // gap from CSS
+        let availableWidth = Math.floor(containerRect.width - filterBoxRect.width - gap);
+        canvas.setAttribute('width', availableWidth);
+        canvas.setAttribute('height', 300);
+    } else {
+        // For charts without filter boxes, use container width
+        let containerRect = container ? container.getBoundingClientRect() : canvas.parentElement.getBoundingClientRect();
+        canvas.setAttribute('width', Math.floor(containerRect.width));
+        canvas.setAttribute('height', 300);
+    }
+}
+
 async function onLoadSetup() {
     await fetch(endpoint, {
         method: "GET",
@@ -32,7 +52,10 @@ async function onLoadSetup() {
 }
 
 function drawLineGraph(data, id) {
-    let ctx = document.getElementById(id).getContext('2d');
+    let canvas = document.getElementById(id);
+    setCanvasSize(canvas);
+    
+    let ctx = canvas.getContext('2d');
     let datasets = []
     Object.keys(data.y_data).forEach(dataLabel => {
         let dataset = {
@@ -50,6 +73,8 @@ function drawLineGraph(data, id) {
             datasets: datasets,
         },
         options: {
+            responsive: false,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     min: data.y_axis_min,
@@ -70,7 +95,10 @@ function drawLineGraph(data, id) {
 }
 
 function drawBarGraph(data, id) {
-    let ctx = document.getElementById(id).getContext('2d');
+    let canvas = document.getElementById(id);
+    setCanvasSize(canvas);
+    
+    let ctx = canvas.getContext('2d');
     let datasets = []
     Object.keys(data.y_data).forEach(dataLabel => {
         let dataset = {
@@ -104,6 +132,8 @@ function drawBarGraph(data, id) {
             
         },
         options: {
+            responsive: false,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     min: data.y_axis_min,

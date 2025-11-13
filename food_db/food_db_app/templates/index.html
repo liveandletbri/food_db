@@ -7,7 +7,7 @@
     </p>
     <div class="row">
         {% for chart_id, chart_data in charts.items %}
-        <div id="{{ chart_id }}_div">
+        <div id="{{ chart_id }}_div" class="chart_container">
             <canvas class="left_side_of_page chart" id="{{ chart_id }}"></canvas>
             {% if chart_data.filter_datasets %}
                 <div class="chart_filter_box left_side_of_page">
