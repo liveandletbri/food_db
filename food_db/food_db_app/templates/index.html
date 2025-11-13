@@ -6,12 +6,22 @@
         Eventually we can put food recommendations here? Dashboards of food information? Whatever we want 🤷‍♂️
     </p>
     <div class="row">
-        {% for chart_id in charts %}
-        <div>
+        {% for chart_id, chart_data in charts.items %}
+        <div id="{{ chart_id }}_div" class="chart_container">
             <canvas class="left_side_of_page chart" id="{{ chart_id }}"></canvas>
+            {% if chart_data.filter_datasets %}
+                <div class="chart_filter_box left_side_of_page">
+                    <ul class="chart_filter_list">
+                        {% for dataset_name in chart_data.y_data.keys %}
+                            <li class="chart_filter_item {% if forloop.first %}selected{% endif %}" data-dataset="{{ dataset_name }}">{{ dataset_name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
     <script src="{% static 'js/charts.js' %}"></script>

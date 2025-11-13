@@ -1,4 +1,25 @@
 let endpoint = '/charts';
+let chartInstances = {};
+
+function setCanvasSize(canvas) {
+    // Set canvas dimensions using HTML attributes (not CSS) as the charts get squished otherwise
+    let container = canvas.closest('.chart_container');
+    if (container && container.querySelector('.chart_filter_box')) {
+        // For charts with filter boxes, calculate available width
+        let containerRect = container.getBoundingClientRect();
+        let filterBox = container.querySelector('.chart_filter_box');
+        let filterBoxRect = filterBox.getBoundingClientRect();
+        let gap = 10; // gap from CSS
+        let availableWidth = Math.floor(containerRect.width - filterBoxRect.width - gap);
+        canvas.setAttribute('width', availableWidth);
+        canvas.setAttribute('height', 300);
+    } else {
+        // For charts without filter boxes, use container width
+        let containerRect = container ? container.getBoundingClientRect() : canvas.parentElement.getBoundingClientRect();
+        canvas.setAttribute('width', Math.floor(containerRect.width));
+        canvas.setAttribute('height', 300);
+    }
+}
 
 async function onLoadSetup() {
     await fetch(endpoint, {
@@ -14,9 +35,14 @@ async function onLoadSetup() {
         Object.keys(data).forEach(key => {
             let chart = data[key]
             if (chart['type'] == 'line') {
-                drawLineGraph(chart, chart.element_id);
+                let chartInstance = drawLineGraph(chart, chart.element_id);
+                chartInstances[chart.element_id] = chartInstance;
             } else if (chart['type'] == 'bar') {
-                drawBarGraph(chart, chart.element_id);
+                let chartInstance = drawBarGraph(chart, chart.element_id);
+                chartInstances[chart.element_id] = chartInstance;
+            }
+            if (chart.filter_datasets) {
+                setupDatasetFilter(chart.element_id);
             }
         });
     })
@@ -26,14 +52,17 @@ async function onLoadSetup() {
 }
 
 function drawLineGraph(data, id) {
-    let ctx = document.getElementById(id).getContext('2d');
+    let canvas = document.getElementById(id);
+    setCanvasSize(canvas);
+    
+    let ctx = canvas.getContext('2d');
     let datasets = []
     Object.keys(data.y_data).forEach(dataLabel => {
         let dataset = {
             label: dataLabel,
             backgroundColor: 'rgb(255, 100, 200)',
             borderColor: 'rgb(55, 99, 132)',
-            data: data.y_data[datalabel],
+            data: data.y_data[dataLabel],
         }
         datasets.push(dataset)
     })
@@ -44,6 +73,8 @@ function drawLineGraph(data, id) {
             datasets: datasets,
         },
         options: {
+            responsive: false,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     min: data.y_axis_min,
@@ -52,14 +83,22 @@ function drawLineGraph(data, id) {
                         stepSize: data.step_size,
                     }
                 }
+            },
+            plugins: {
+                legend: {
+                    display: !data.filter_datasets,
+                }
             }
         }
-
     });
+    return chart;
 }
 
 function drawBarGraph(data, id) {
-    let ctx = document.getElementById(id).getContext('2d');
+    let canvas = document.getElementById(id);
+    setCanvasSize(canvas);
+    
+    let ctx = canvas.getContext('2d');
     let datasets = []
     Object.keys(data.y_data).forEach(dataLabel => {
         let dataset = {
@@ -93,6 +132,8 @@ function drawBarGraph(data, id) {
             
         },
         options: {
+            responsive: false,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     min: data.y_axis_min,
@@ -104,6 +145,45 @@ function drawBarGraph(data, id) {
             }
         }
     });
+    return myChart;
+}
+
+function setupDatasetFilter(chartId) {
+    let chartDiv = document.getElementById(`${chartId}_div`);
+    let filterItems = chartDiv.querySelectorAll('.chart_filter_item');
+    
+    filterItems.forEach(item => {
+        item.addEventListener('click', function() {
+            let selectedDataset = this.getAttribute('data-dataset');
+            
+            // Remove selected class from all items
+            filterItems.forEach(li => li.classList.remove('selected'));
+            
+            // Add selected class to clicked item
+            this.classList.add('selected');
+            
+            // Filter the chart
+            filterChartByDataset(chartId, selectedDataset);
+        });
+    });
+    
+    // Initially filter to show only the first item
+    let firstDataset = filterItems[0].getAttribute('data-dataset');
+    filterChartByDataset(chartId, firstDataset);
+}
+
+function filterChartByDataset(chartId, selectedDataset) {
+    let chart = chartInstances[chartId];
+    // Hide all datasets except the selected one
+    chart.data.datasets.forEach(dataset => {
+        if (dataset.label === selectedDataset) {
+            dataset.hidden = false;
+        } else {
+            dataset.hidden = true;
+        }
+    });
+    
+    chart.update();
 }
 
 window.addEventListener('load', onLoadSetup)
