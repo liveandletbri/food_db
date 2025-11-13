@@ -131,7 +131,6 @@ class TagOverTime(BaseChart):
         months_dict = OrderedDict()
         while month_iter <= last_month:
             key = month_iter.strftime('%Y-%m')
-            # months_dict[key] = {tag: 0 for tag in all_tags}
             months_dict[key] = 0
             # Advance to next month
             if month_iter.month == 12:
@@ -144,14 +143,18 @@ class TagOverTime(BaseChart):
         for tag in Tag.objects.all():
             tag_dict[tag.name] = deepcopy(months_dict)  # doing this in a loop instead of a comprehension to ensure months_dict is always defined
 
+        max_tag_count = 0
+
         for meal in CookedMeal.objects.filter(recipe__is_component_recipe=False):
             cooked_date_month = meal.date_cooked.replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m')
             for tag in meal.recipe.associated_tags:
                 tag_dict[tag.name][cooked_date_month] += 1
+                max_tag_count = max(max_tag_count, tag_dict[tag.name][cooked_date_month])
         
         x_labels = list(months_dict.keys())
-        y_data_raw = {tag_name: list(monthly_data.values()) for tag_name, monthly_data in tag_dict.items() if tag_name in ['Healthy', 'Cookies', 'Soup', 'Asian', 'Mexican', 'Bread']}
+        y_data_raw = {tag_name: list(monthly_data.values()) for tag_name, monthly_data in tag_dict.items()}
         y_data = OrderedDict(sorted(y_data_raw.items(), key=lambda item: item[0]))
+        y_axis_max = max_tag_count
     except OperationalError:
         # During migrations, database schema may not match models yet
         pass
