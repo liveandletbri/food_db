@@ -11,6 +11,29 @@ from rest_framework.response import Response
 
 from .models import CookedMeal, Recipe, Tag
 
+try:
+    earliest_meal = CookedMeal.objects.filter(recipe__is_component_recipe=False).order_by('_date_created').first()  # ordering by date created instead of date cooked to avoid back-dated meals
+    EARLIEST_DATE = earliest_meal.date_cooked 
+
+    # Create a dictionary where each key is the first of a month
+    now = datetime.now(pytz.timezone('America/Los_Angeles'))
+    month_iter = EARLIEST_DATE.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    MONTHS_DICT = OrderedDict()
+
+
+    while month_iter <= last_month:
+        key = month_iter.strftime('%Y-%m')
+        MONTHS_DICT[key] = 0
+        # Advance to next month
+        if month_iter.month == 12:
+            month_iter = month_iter.replace(year=month_iter.year+1, month=1)
+        else:
+            month_iter = month_iter.replace(month=month_iter.month+1)
+except OperationalError:
+    # During migrations, database schema may not match models yet
+    pass
+
 # Any class name that starts with 'Base' is not treated as a chart. 'Base' classes are created for chart classes to inherit.
 class BaseChart():
     def __init__(cls):
@@ -121,27 +144,10 @@ class TagOverTime(BaseChart):
     filter_datasets = True
 
     try:
-        earliest_meal = CookedMeal.objects.filter(recipe__is_component_recipe=False).order_by('_date_created').first()  # ordering by date created instead of date cooked to avoid back-dated meals
-        earliest_date = earliest_meal.date_cooked 
-
-        # Create a dictionary where each key is the first of a month
-        now = datetime.now(pytz.timezone('America/Los_Angeles'))
-        month_iter = earliest_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        last_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        months_dict = OrderedDict()
-        while month_iter <= last_month:
-            key = month_iter.strftime('%Y-%m')
-            months_dict[key] = 0
-            # Advance to next month
-            if month_iter.month == 12:
-                month_iter = month_iter.replace(year=month_iter.year+1, month=1)
-            else:
-                month_iter = month_iter.replace(month=month_iter.month+1)
-
         # dataset will be split/keyed by Tag
         tag_dict = {}
         for tag in Tag.objects.all():
-            tag_dict[tag.name] = deepcopy(months_dict)  # doing this in a loop instead of a comprehension to ensure months_dict is always defined
+            tag_dict[tag.name] = deepcopy(MONTHS_DICT)  # doing this in a loop instead of a comprehension to ensure months_dict is always defined
 
         max_tag_count = 0
 
@@ -151,7 +157,7 @@ class TagOverTime(BaseChart):
                 tag_dict[tag.name][cooked_date_month] += 1
                 max_tag_count = max(max_tag_count, tag_dict[tag.name][cooked_date_month])
         
-        x_labels = list(months_dict.keys())
+        x_labels = list(MONTHS_DICT.keys())
         y_data_raw = {tag_name: list(monthly_data.values()) for tag_name, monthly_data in tag_dict.items()}
         y_data = OrderedDict(sorted(y_data_raw.items(), key=lambda item: item[0]))
         y_axis_max = max_tag_count
