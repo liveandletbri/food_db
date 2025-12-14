@@ -91,6 +91,7 @@ def recipe_detail(request, key):
             'ingred_data': ingred_data,
             'ingreds_by_category': ingred_data.ingreds_by_category,
             'ingredients_have_categories': ingred_data.ingredients_have_categories,
+            'has_steps': rec.has_steps,
             'steps': RecipeStep.objects.filter(recipe=rec).order_by('order_number')
         }
     
@@ -115,6 +116,7 @@ def recipe_detail(request, key):
         'total_cooked_meal_counts': total_cooked_meal_counts,
         'last_cooked_date': last_cooked_date,
         'has_steps': recipe.has_steps,
+        'has_ingredients': recipe.has_ingredients,
         'is_baking_recipe': str(recipe.is_baking_recipe),
         'has_children': recipe.has_children,
         'cloud_sync_enabled': S3_SYNC_ENABLED,

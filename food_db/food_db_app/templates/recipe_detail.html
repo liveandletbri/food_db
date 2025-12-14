@@ -171,7 +171,7 @@
         <p><a class="search_result" href="{% url 'recipe_detail' variant.clean_key %}" target="_blank">{{ variant.title }}</a></p>
     {% endfor %}</ul>
 {% endif %}
-{% if has_steps or has_children %}
+{% if has_ingredients or has_steps or has_children %}
     <div id="ingredients_header">
         <h2>Ingredients</h2>
         <button type="button" id="show_groceries_button">Show grocery list</button>
@@ -239,23 +239,26 @@
         {% endif %}
     {% endfor %}
 
-    <h2>Steps</h2>
+    {% if has_steps or has_children %}<h2>Steps</h2>
         {% for title, recipe_step_data in recipe_ingreds_and_steps.items %}
-            {% if has_children %}<details class="child_recipe_details" open><summary class="child_recipe_summary_title">Steps for {{ title }}</summary>{% endif %}
-            <table class="steps_table">
-            {% for step in recipe_step_data.steps %}
-                <tr>
-                    <td class="step_number">
-                        <p class="step_number_text">{{ step.order_number }}.</p>
-                        <input type="checkbox" class="cooking-checkbox step-checkbox" data-step-id="{{ step.order_number }}">
-                    </td>
-                    <td class="step_description_text">
-                        {{ step.description | markdown:recipe.title | safe }}
-                    </td>
-                </tr>
-            {% endfor %}
-            </table>{% if has_children %}</details>{% endif %}
+            {% if recipe_step_data.has_steps %}
+                {% if has_children %}<details class="child_recipe_details" open><summary class="child_recipe_summary_title">Steps for {{ title }}</summary>{% endif %}
+                    <table class="steps_table">
+                    {% for step in recipe_step_data.steps %}
+                        <tr>
+                            <td class="step_number">
+                                <p class="step_number_text">{{ step.order_number }}.</p>
+                                <input type="checkbox" class="cooking-checkbox step-checkbox" data-step-id="{{ step.order_number }}">
+                            </td>
+                            <td class="step_description_text">
+                                {{ step.description | markdown:recipe.title | safe }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </table>{% if has_children %}</details>{% endif %}
+            {% endif %}
         {% endfor %}
+    {% endif %}
     <div id="grocery_list_modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
