@@ -201,6 +201,17 @@ def edit_baking_switch_cookie(request):
         return HttpResponseNotAllowed(permitted_methods=['POST'])
 
 @csrf_exempt
+def edit_view_config_key(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        view_config_key = data.get('view_config_key', '')
+        # Store empty string as None to match the pattern used elsewhere
+        request.session['view_config_key'] = view_config_key if view_config_key else None
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
 def add_recipe_to_cart(request):
     if request.method == 'POST':
         data = json.loads(request.body)

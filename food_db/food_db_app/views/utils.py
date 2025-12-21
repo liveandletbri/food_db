@@ -271,3 +271,8 @@ def get_cart(request):
         print("Reset cart due to None values")
     
     return cart
+
+def get_view_config_key(request):
+    """Get the value of the view_config_key from the session, which is used to determine which Bulk Prep View config is selected.
+    This persists the selected view config as the user navigates across pages. This variable is only used on page load."""
+    return request.session.get('view_config_key', None)

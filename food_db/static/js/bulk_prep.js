@@ -207,6 +207,27 @@ function updateEditLinksVisibility() {
     }
 }
 
+async function updateViewConfigKeySession(viewConfigKey) {
+    let updateSuccess = await fetch(`/edit_view_config_key/`, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            view_config_key: viewConfigKey,
+        })
+    })
+    .then(function(response) {
+        if (response.status == 200) {
+            return true
+        } else {
+            return false
+        }
+    })
+    console.log(`View config key session updated: ${updateSuccess ? 'success' : 'failure'}`)
+}
+
 async function changeViewConfig(event) {
     // The event target could be a div or span; find the input[type="radio"] within or nearby.
     let radioButton;
@@ -236,6 +257,9 @@ async function changeViewConfig(event) {
     let currentUrl = window.location.href;
     let currentUrlDomain = currentUrl.split("/bulk")[0];
     let viewConfigKey = radioButton.value;
+    
+    // Update session variable asynchronously
+    await updateViewConfigKeySession(viewConfigKey)
     
     // Fetch bulk_prep with the selected view_config_key via AJAX, then replace the prep_tab_content div in the current page.
     let url;

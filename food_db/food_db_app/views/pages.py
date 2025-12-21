@@ -28,6 +28,7 @@ from .utils import (
     remove_dupes_preserve_order,
     log_debug_message,
     get_only_relevant_tags,
+    get_view_config_key,
     get_derived_tags,
     get_is_baking_cookie,
     get_cart,
@@ -964,11 +965,27 @@ def bulk_prep(request):
         # Redirect to bulk_prep with the view_config_key as a GET parameter
         return redirect(f'{reverse("bulk_prep")}?view_config_key={key}')
     else:
-        view_config_key = request.GET.get('view_config_key')
-
-        if view_config_key:
-            view_config = ViewConfig.objects.get(key=view_config_key)
+        # Get view_config_key from GET parameter, or fall back to session variable
+        # If GET parameter is provided (even if empty string), use it; otherwise use session
+        get_param = request.GET.get('view_config_key')
+        if get_param is not None:
+            view_config_key = get_param if get_param else None
         else:
+            view_config_key = get_view_config_key(request)
+        
+        # Save to session
+        if view_config_key:
+            request.session['view_config_key'] = view_config_key
+            try:
+                view_config = ViewConfig.objects.get(key=view_config_key)
+            except ViewConfig.DoesNotExist:
+                # If the view config doesn't exist, clear the session and use default
+                request.session['view_config_key'] = None
+                view_config = None
+                view_config_key = None
+        else:
+            # Clear session if no view config is selected
+            request.session['view_config_key'] = None
             view_config = None
 
         cart = get_cart(request)
