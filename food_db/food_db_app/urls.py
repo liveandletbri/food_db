@@ -38,6 +38,7 @@ urlpatterns = [
     path('add_tag/', views.add_tag, name='add_tag'),
     path('cook/', views.cook_meal, name='cook_meal'),
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
+    path('delete_recipe/', views.delete_recipe, name='delete_recipe'),
     path('delete_food_category/', views.delete_food_category, name='delete_food_category'),
     path('delete_food/', views.delete_food, name='delete_food'),
     path('edit_baking_switch_cookie/', views.edit_baking_switch_cookie, name='edit_baking_switch_cookie'),

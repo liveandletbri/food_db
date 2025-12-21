@@ -156,6 +156,16 @@ def delete_food(request):
         return HttpResponse(status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def delete_recipe(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        recipe = Recipe.objects.get(clean_key=data['recipe_key'])
+        recipe.delete()
+        return HttpResponse(status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
     
 @csrf_exempt
 def edit_food_category(request):
