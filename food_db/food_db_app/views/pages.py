@@ -541,6 +541,9 @@ def edit_recipe(request, key):
             if servings_min:
                 recipe_instance.servings_min=servings_min
                 recipe_instance.servings_max=servings_max
+            else:
+                recipe_instance.servings_min = None
+                recipe_instance.servings_max = None
 
             if create_recipe_form.cleaned_data['recipe_book'] != '':
                 try:
