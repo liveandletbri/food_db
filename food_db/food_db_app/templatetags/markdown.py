@@ -35,7 +35,7 @@ def process_ingredient_links(text, recipe_title):
 
             # First case is the ingredient name written just in brackets, like [ingredient name]
             if not parentheses_clause:
-                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name=link_text)
+                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=link_text)
             else:
                 # In this case, both brackets and parenetheses were used
                 # Checking the second case: [visible text](!ingredient name)
