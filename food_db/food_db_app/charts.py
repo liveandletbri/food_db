@@ -12,11 +12,16 @@ from rest_framework.response import Response
 from .models import CookedMeal, Recipe, Tag
 
 try:
+    now = datetime.now(pytz.timezone('America/Los_Angeles'))
     earliest_meal = CookedMeal.objects.filter(recipe__is_component_recipe=False).order_by('_date_created').first()  # ordering by date created instead of date cooked to avoid back-dated meals
-    EARLIEST_DATE = earliest_meal.date_cooked 
+    if earliest_meal:
+        EARLIEST_DATE = earliest_meal.date_cooked
+        HAS_COOKED_MEALS = True
+    else:
+        EARLIEST_DATE = now
+        HAS_COOKED_MEALS = False
 
     # Create a dictionary where each key is the first of a month
-    now = datetime.now(pytz.timezone('America/Los_Angeles'))
     month_iter = EARLIEST_DATE.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     last_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     MONTHS_DICT = OrderedDict()
