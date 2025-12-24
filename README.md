@@ -15,7 +15,7 @@ winpty docker exec -it...
 For now, you need to create an empty file called `.env`. As you read below, you may decide you want to enable [cloud sync](food_db/food_db_app/cloud_sync/README.md), in which case you'll put variables into this file. 
 
 ### Renaming the database
-I have included a database file, [starter-db.sqlite3](food_db/db_data/starter-db.sqlite3), to make cloning this repo and getting started easy. The rest app, however, is looking for a file named `db.sqlite3`. Copy the starter file and paste it in the same directory, naming the new file `db.sqlite3`. Your app will store its data in this one. The file by this name is ignored by git, so you can store changes in your local DB without worrying about checking it into the repo.
+I have included a database file, [starter-db.sqlite3](food_db/db_data/starter-db.sqlite3), to make cloning this repo and getting started easy. The rest app, however, is looking for a file named `db.sqlite3`. Copy the starter file and paste it in the same directory, naming the new file `db.sqlite3` (bash: `cp food_db/db_data/starter-db.sqlite3 food_db/db_data/db.sqlite3`). Your app will store its data in this one. The file by this name is ignored by git, so you can store changes in your local DB without worrying about checking it into the repo.
 
 ### Running Docker
 I love Docker compose because you never have to think about if the image is already built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build` (see the note on `--build` [below](#docker)). If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running `docker logs food-db-django` and look for `Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)` (this is the Mac-specific flavor of the error).
@@ -31,7 +31,7 @@ Set up a super user by running `docker compose exec backend sh -c 'python manage
 
 A few code changes to get things personalized to you:
 - To get the app running in your timezone, search this repo for `America/Los_Angeles` and update each instance accordingly.
-- Check out the [port forwarding section below](#port-forwarding), which must be concluded swith a trip to [settings.py](food_db/settings.py)
+- Check out the [port forwarding section below](#port-forwarding), which might be concluded with a trip to [settings.py](food_db/settings.py)
 
 ## Accessing your site
 First and foremost, as long as the Docker images are running, you can access your website from your local computer by visiting http://127.0.0.1:8000 in your browser. But that's not the most convenient thing. You have a few options for accessing the Food DB remotely:
