@@ -121,7 +121,7 @@ def recipe_detail(request, key):
         'is_baking_recipe': str(recipe.is_baking_recipe),
         'has_children': recipe.has_children,
         'cloud_sync_enabled': S3_SYNC_ENABLED,
-        'cloud_url': S3Sync().bucket_url,
+        'cloud_url': S3Sync().bucket_url if S3_SYNC_ENABLED else None,
         'cart': (cart := get_cart(request)),
         'in_cart': str(recipe.clean_key in cart).lower(),
         'timing_types': TIMING_TYPE_CHOICES,
