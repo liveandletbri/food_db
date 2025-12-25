@@ -13,7 +13,7 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from food_db_app.charts import AllCharts
+from food_db_app.charts import AllCharts, HAS_COOKED_MEALS
 from food_db_app.filters import RecipeTextFilter, FoodTextFilter, FoodCategoryTextFilter
 from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
@@ -35,9 +35,12 @@ from .utils import (
 )
 
 def index(request):
-    all_charts = AllCharts()
+    if HAS_COOKED_MEALS:
+        all_charts = AllCharts().charts
+    else:
+        all_charts = []
     context = {
-        'charts': all_charts.charts,
+        'charts': all_charts,
         'cart': get_cart(request),
     }
     return render(request, 'index.html', context)
