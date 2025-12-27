@@ -276,3 +276,26 @@ def get_view_config_key(request):
     """Get the value of the view_config_key from the session, which is used to determine which Bulk Prep View config is selected.
     This persists the selected view config as the user navigates across pages. This variable is only used on page load."""
     return request.session.get('view_config_key', None)
+
+def validate_ingredient_name(ingredient_name, existing_foods):
+    """
+    Validate an ingredient name. This function can be customized to add validation logic.
+    
+    Args:
+        ingredient_name: The name of the ingredient to validate
+        existing_foods: List of existing food names in the database
+    
+    Returns:
+        tuple: (is_valid: bool, validation_message: str or None, suggested_corrections: list or None)
+        - is_valid: True if the ingredient name is valid, False otherwise
+        - validation_message: Message to display to the user if validation fails
+        - suggested_corrections: List of suggested corrections if validation fails
+    """
+    # Example validation: Check if ingredient name is too short
+    # You can customize this function to add your own validation logic
+    if len(ingredient_name.strip()) < 2:
+        return False, "Ingredient name is too short. Please provide a valid ingredient name.", None
+    
+    # Example: Check for similar existing foods (fuzzy matching could be added here)
+    # For now, just return valid
+    return True, None, None

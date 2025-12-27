@@ -29,6 +29,7 @@ from .utils import (
     log_debug_message,
     get_only_relevant_tags,
     get_view_config_key,
+    validate_ingredient_name,
     get_derived_tags,
     get_is_baking_cookie,
     get_cart,
@@ -143,16 +144,68 @@ def add_recipe(request):
     # If this is a POST request then process the Form data
     if request.method == 'POST':
         log_debug_message('is POST')
-        # Create a form instance and populate it with data from the request (binding):
-        extra_ingred_count = int(request.POST.get('extra_ingred_count'))
-        total_ingred_count = extra_ingred_count + 1
+        
+        # Check if this is a confirmation POST (user confirmed ingredient validation)
+        is_confirmation = request.POST.get('confirm_ingredient_validation') == 'true'
+        
+        # If this is a confirmation, restore form data from session and apply corrections
+        if is_confirmation:
+            session_data = request.session.get('pending_recipe_data', None)
+            if not session_data:
+                return HttpResponseBadRequest("No pending recipe data found. Please submit the form again.")
+            
+            # Restore POST data from session and apply corrections
+            from django.http import QueryDict
+            
+            # Restore the stored POST data (already a dict from JSON)
+            post_dict = session_data['post_data'].copy()
+            
+            # Apply corrections from the confirmation form
+            for key, value in request.POST.items():
+                if key.startswith('correction_'):
+                    ingred_id = key.replace('correction_', '')
+                    if value:  # User provided a correction
+                        post_dict[f'{ingred_id}_food'] = value
+            
+            # Convert back to QueryDict
+            restored_post = QueryDict('', mutable=True)
+            for key, value in post_dict.items():
+                if isinstance(value, list):
+                    for v in value:
+                        restored_post.appendlist(key, v)
+                else:
+                    restored_post[key] = value
+            
+            # Also restore any files that were uploaded (though they'll be empty on confirmation)
+            # User will need to re-upload files, but we preserve the structure
+            
+            # Temporarily replace request.POST for form creation and the rest of the function
+            # Store original to restore if needed (though we won't need to in this flow)
+            original_post = request.POST
+            request._post = restored_post
+            request.POST = restored_post
+            
+            # Extract counts for form creation
+            extra_ingred_count = int(restored_post.get('extra_ingred_count', 0))
+            extra_step_count = int(restored_post.get('extra_step_count', 0))
+            extra_timing_count = int(restored_post.get('extra_timing_count', 0))
+            
+            # Note: Files cannot be restored from session, user will need to re-upload
+            create_recipe_form = CreateRecipeForm(restored_post, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count, extra_timings=extra_timing_count)
+            
+            # Clear session data
+            del request.session['pending_recipe_data']
+        else:
+            # Create a form instance and populate it with data from the request (binding):
+            extra_ingred_count = int(request.POST.get('extra_ingred_count'))
+            total_ingred_count = extra_ingred_count + 1
 
-        extra_step_count = int(request.POST.get('extra_step_count'))
-        total_step_count = extra_step_count + 1
+            extra_step_count = int(request.POST.get('extra_step_count'))
+            total_step_count = extra_step_count + 1
 
-        extra_timing_count = int(request.POST.get('extra_timing_count', 0))
-        total_timing_count = extra_timing_count + 1
-        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count, extra_timings=extra_timing_count)
+            extra_timing_count = int(request.POST.get('extra_timing_count', 0))
+            total_timing_count = extra_timing_count + 1
+            create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count, extra_timings=extra_timing_count)
 
         log_debug_message('is valid?')
 
@@ -235,6 +288,50 @@ def add_recipe(request):
             step_instances = []
 
             if create_recipe_form.cleaned_data['ingred_0_food'] != '':  # ingredients were entered for this recipe
+                # Validate ingredients before processing (only on initial submission, not confirmation)
+                validation_issues = []
+                if not is_confirmation:
+                    existing_foods = [food.name for food in Food.objects.all()]
+                    for ingred_id_prefix in sorted(ingredient_ids):
+                        ingred = {field: create_recipe_form.cleaned_data[f'{ingred_id_prefix}_{field}'] for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
+                        ingredient_name = ingred['food']
+                        
+                        if ingredient_name:  # Only validate if ingredient name is provided
+                            is_valid, validation_message, suggested_corrections = validate_ingredient_name(ingredient_name, existing_foods)
+                            
+                            if not is_valid:
+                                validation_issues.append({
+                                    'ingredient_id': ingred_id_prefix,
+                                    'ingredient_name': ingredient_name,
+                                    'message': validation_message,
+                                    'suggested_corrections': suggested_corrections,
+                                })
+                    
+                    # If validation issues found, store data in session and return validation page
+                    if validation_issues:
+                        # Store POST data in session (files will need to be re-uploaded on confirmation)
+                        # Note: Files cannot be stored in session, so user will need to re-upload them
+                        # Convert POST QueryDict to a regular dict for JSON serialization
+                        post_data_dict = {}
+                        for key in request.POST:
+                            values = request.POST.getlist(key)
+                            if len(values) == 1:
+                                post_data_dict[key] = values[0]
+                            else:
+                                post_data_dict[key] = values
+                        
+                        request.session['pending_recipe_data'] = {
+                            'post_data': post_data_dict,
+                            'validation_issues': validation_issues,
+                        }
+                        request.session.modified = True
+                        
+                        context = {
+                            'validation_issues': validation_issues,
+                            'form_data': create_recipe_form.cleaned_data,
+                        }
+                        return render(request, 'validate_ingredients.html', context)
+                
                 # For each ingredient in the form
                 for ingred_id_prefix in sorted(ingredient_ids):
                     
