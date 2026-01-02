@@ -36,6 +36,7 @@ urlpatterns = [
     # apis
     path('add_recipe_to_cart/', views.add_recipe_to_cart, name='add_recipe_to_cart'),
     path('add_tag/', views.add_tag, name='add_tag'),
+    path('recipe_validation/', views.recipe_validation, name='recipe_validation'),
     path('cook/', views.cook_meal, name='cook_meal'),
     path('delete_recipe_image/', views.delete_recipe_image, name='delete_recipe_image'),
     path('delete_recipe/', views.delete_recipe, name='delete_recipe'),

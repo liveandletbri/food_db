@@ -1,14 +1,18 @@
 import json
+import re
 import requests
 
 from django.db import transaction
 from django.db.utils import IntegrityError
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseBadRequest
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
+from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 
-from .utils import get_cart
+from .utils import get_cart, validate_ingredient_name
 
 @csrf_exempt
 def add_tag(request):
@@ -290,3 +294,70 @@ def get_cart_size(request):
         return HttpResponse(str(len(cart)))
     else:
         return HttpResponseNotAllowed(permitted_methods=['GET'])
+
+@csrf_exempt
+def recipe_validation(request):
+    """Validate recipe ingredients and store form data in session for later processing."""
+    if request.method == 'POST':
+        # Create form instance to validate structure
+        extra_ingred_count = int(request.POST.get('extra_ingred_count', 0))
+        extra_step_count = int(request.POST.get('extra_step_count', 0))
+        extra_timing_count = int(request.POST.get('extra_timing_count', 0))
+        
+        create_recipe_form = CreateRecipeForm(request.POST, request.FILES, extra_ingreds=extra_ingred_count, extra_steps=extra_step_count, extra_timings=extra_timing_count)
+        
+        if not create_recipe_form.is_valid():
+            return HttpResponseBadRequest(create_recipe_form.errors)
+        
+        # Store all POST data in session as JSON-serializable dict
+        post_data_dict = {}
+        for key in request.POST:
+            values = request.POST.getlist(key)
+            if len(values) == 1:
+                post_data_dict[key] = values[0]
+            else:
+                post_data_dict[key] = values
+        
+        # Validate ingredients
+        validation_issues = []
+        if create_recipe_form.cleaned_data.get('ingred_0_food', '') != '':
+            existing_foods = [food.name for food in Food.objects.all()]
+            
+            # Get all ingredient IDs
+            ingredient_ids = {re.search(r'ingred_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('ingred_')}
+            
+            for ingred_id_prefix in sorted(ingredient_ids):
+                ingred = {field: create_recipe_form.cleaned_data.get(f'{ingred_id_prefix}_{field}', '') for field in ['food', 'unit_of_measurement', 'quantity', 'ingredient_category', 'notes']}
+                ingredient_name = ingred['food']
+                
+                if ingredient_name:  # Only validate if ingredient name is provided
+                    is_valid, validation_message, suggested_corrections = validate_ingredient_name(ingredient_name, existing_foods)
+                    
+                    if not is_valid:
+                        validation_issues.append({
+                            'ingredient_id': ingred_id_prefix,
+                            'ingredient_name': ingredient_name,
+                            'message': validation_message,
+                            'suggested_corrections': suggested_corrections,
+                        })
+        
+        # Store data in session
+        request.session['pending_recipe_data'] = {
+            'post_data': post_data_dict,
+            'validation_issues': validation_issues,
+        }
+        request.session.modified = True
+        
+        # If validation issues found, return validation page
+        if validation_issues:
+            context = {
+                'validation_issues': validation_issues,
+                'form_data': create_recipe_form.cleaned_data,
+            }
+            return render(request, 'validate_ingredients.html', context)
+        else:
+            # No validation issues, redirect to add_recipe with auto_confirm flag
+            # This will trigger automatic processing
+            return redirect(reverse('add_recipe') + '?auto_confirm=true')
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
