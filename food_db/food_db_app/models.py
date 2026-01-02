@@ -332,7 +332,7 @@ class IngredientCategory(models.Model):
 class Tag(models.Model):
     def __str__(self):
         return self.name
-    name = models.CharField(max_length=25)
+    name = models.CharField(max_length=25, unique=True)
     fill_color = ColorField(default='#3cc382')
     border_color = ColorField(default='#000000')
     text_color = ColorField(default='#ffffff')
