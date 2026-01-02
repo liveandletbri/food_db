@@ -175,7 +175,6 @@ def add_recipe(request):
                 restored_post[key] = value
         
         # Temporarily replace request.POST for form creation and the rest of the function
-        request._post = restored_post
         request.POST = restored_post
         
         # Extract counts for form creation
@@ -206,7 +205,6 @@ def add_recipe(request):
                 restored_post[key] = value
         
         # Temporarily replace request.POST
-        request._post = restored_post
         request.POST = restored_post
         
         extra_ingred_count = int(restored_post.get('extra_ingred_count', 0))
