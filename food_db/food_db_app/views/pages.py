@@ -141,11 +141,11 @@ def add_recipe(request):
     existing_tags = [tag for tag in Tag.objects.all().order_by('name')]
     existing_recipes = {recipe.title: recipe.clean_key for recipe in Recipe.objects.all().order_by('title')}
 
-    # If this is a POST request, it should only be a confirmation from validation
+    # If this is a POST request, it should only be a confirmation from validation. This should only be reached by submitting the form in validate_ingredients.html
     if request.method == 'POST':
         log_debug_message('is POST')
         
-        # This should only be a confirmation POST (user confirmed ingredient validation)
+        # This should only be a confirmation POST (user confirmed ingredient validation in validate_ingredients.html)
         if request.POST.get('confirm_ingredient_validation') != 'true':
             return HttpResponseBadRequest("This endpoint only accepts confirmation POSTs. Submit recipe to /recipe_validation/ first.")
         
@@ -188,7 +188,7 @@ def add_recipe(request):
         # Clear session data after restoring
         del request.session['pending_recipe_data']
     
-    # Check for auto_confirm flag (no validation issues, proceed directly from GET)
+    # Check for auto_confirm flag. This flag is set when there are no validation issues. This is a redirect from the recipe_validation API
     elif request.method == 'GET' and request.GET.get('auto_confirm') == 'true':
         # Automatically process from session data (no validation issues found)
         session_data = request.session.get('pending_recipe_data', None)
@@ -216,7 +216,7 @@ def add_recipe(request):
         del request.session['pending_recipe_data']
         # Continue to shared form processing below (both POST and auto_confirm GET reach here)
     
-    # Shared form processing for POST (confirmation) and GET (auto_confirm)
+    # Shared form processing for POST (submission from validate_ingredients.html) and GET (auto_confirm flag from recipe_validation API)
     if request.method == 'POST' or (request.method == 'GET' and request.GET.get('auto_confirm') == 'true'):
         if 'create_recipe_form' not in locals():
             return HttpResponseBadRequest("Invalid request. Submit recipe to /recipe_validation/ first.")
@@ -452,7 +452,7 @@ def add_recipe(request):
         else:
            return(HttpResponseBadRequest(create_recipe_form.errors))
 
-    # If this is a GET request, handle form display (possibly with session restoration)
+    # This is a GET request that is not an auto confirmation from the recipe_validation API, so load the page and populate the form (possibly populating the form with session restoration if the user clicked "go back" from validate_ingredients.html)
     else:
         # Check if we should restore form data from session (for "Go Back" button)
         restore_from_session = request.GET.get('restore_from_session') == 'true'
