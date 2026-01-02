@@ -346,7 +346,6 @@ def recipe_validation(request):
             'post_data': post_data_dict,
             'validation_issues': validation_issues,
         }
-        request.session.modified = True
         
         # If validation issues found, return validation page
         if validation_issues:
