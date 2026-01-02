@@ -33,7 +33,7 @@ from .utils import (
     get_derived_tags,
     get_is_baking_cookie,
     get_cart,
-)``
+)
 
 def index(request):
     if HAS_COOKED_MEALS:

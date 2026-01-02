@@ -5,11 +5,7 @@ from django.http import HttpResponseBadRequest, QueryDict
 from django.shortcuts import render, redirect
 
 from food_db_app.forms import CreateRecipeForm
-from food_db_app.models import (
-    *,
-    TIMING_TYPE_CHOICES,
-    COOKIE_STYLE_CHOICES,
-)
+from food_db_app.models import *
 from food_db_app.cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
 from .utils import (
