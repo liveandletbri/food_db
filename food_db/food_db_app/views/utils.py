@@ -171,6 +171,35 @@ class DerivedTagRule:
             print(f"Skipping DerivedTagRule for tag {self.tag_name} because it does not exist")
             return False
 
+    
+class IngredientValidationRule:
+    def __init__(self, validation_func, validation_message, suggestion_func=None):
+        self.validation_func = validation_func
+        self.validation_message = validation_message
+        self.suggestion_func = suggestion_func
+
+    def validate(self, ingredient_name):
+        is_valid = self.validation_func(ingredient_name)
+        if not is_valid:
+            validation_message = self.validation_message
+            suggested_corrections = self.suggestion_func(ingredient_name) if self.suggestion_func else None
+        else:
+            validation_message = None
+            suggested_corrections = None
+        return is_valid, validation_message, suggested_corrections
+
+INGREDIENT_VALIDATION_RULES = [
+    IngredientValidationRule(
+        validation_func=lambda x: len(x.strip()) >= 2,
+        validation_message="Ingredient name is too short. Please provide a valid ingredient name."
+    ),
+    # IngredientValidationRule(
+    #     validation_func=lambda x: x.strip() in existing_foods,
+    #     validation_message="Ingredient name is not in the database. Please provide a valid ingredient name.",
+    #     suggestion_func=lambda x: [food for food in existing_foods if fuzzy_match(x, food)],
+    # ),
+]
+
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
     hours = floor(float(minutes)/60.0)
@@ -287,3 +316,29 @@ def get_view_config_key(request):
     """Get the value of the view_config_key from the session, which is used to determine which Bulk Prep View config is selected.
     This persists the selected view config as the user navigates across pages. This variable is only used on page load."""
     return request.session.get('view_config_key', None)
+
+def validate_ingredient_name(ingredient_name, existing_foods):
+    """
+    Validate an ingredient name. This function can be customized to add validation logic.
+    
+    Args:
+        ingredient_name: The name of the ingredient to validate
+        existing_foods: List of existing food names in the database
+    
+    Returns:
+        tuple: (is_valid: bool, validation_message: str or None, suggested_corrections: list or None)
+        - is_valid: True if the ingredient name is valid, False otherwise
+        - validation_message: Message to display to the user if validation fails
+        - suggested_corrections: List of suggested corrections if validation fails
+    """
+
+    is_valid = True
+    validation_message = None
+    suggested_corrections = None
+
+    for rule in INGREDIENT_VALIDATION_RULES:
+        is_valid, validation_message, suggested_corrections = rule.validate(ingredient_name)
+        if not is_valid:
+            break
+
+    return is_valid, validation_message, suggested_corrections

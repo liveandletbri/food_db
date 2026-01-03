@@ -1,0 +1,50 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<h1>Ingredient Validation Required</h1>
+
+<p>The following ingredient names need your attention:</p>
+
+<form method="post" action="{% url 'add_recipe' %}">
+    {% csrf_token %}
+    <input type="hidden" name="confirm_ingredient_validation" value="true">
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Issue</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in validation_issues %}
+            <tr>
+                <td>{{ issue.ingredient_name }}</td>
+                <td>{{ issue.message }}</td>
+                <td>
+                    {% if issue.suggested_corrections %}
+                        <select name="correction_{{ issue.ingredient_id }}">
+                            <option value="">Keep original</option>
+                            {% for suggestion in issue.suggested_corrections %}
+                                <option value="{{ suggestion }}">{{ suggestion }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="text" name="correction_{{ issue.ingredient_id }}" placeholder="Enter corrected name (or leave blank to keep)">
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <p><strong>Note:</strong> You will need to re-upload any images/files when you confirm, as they cannot be stored between requests.</p>
+    
+    <button type="submit" name="action" value="confirm">Confirm and Continue</button>
+    <a href="{% url 'add_recipe' %}?restore_from_session=true"><button type="button">Go Back and Edit</button></a>
+</form>
+
+{% endblock content %}
+
