@@ -4,6 +4,58 @@ import django.db.models.deletion
 import django.utils.timezone
 from django.db import migrations, models
 
+def write_food_categories(apps, schema_editor):
+    FoodCategory = apps.get_model("food_db_app", "FoodCategory")
+    cats = [
+        'Fresh Herbs',
+        'Water',
+        'Liquor',
+        'Produce',
+        'Yogurt',
+        'Other Dairy',
+        'Butter',
+        'Egg',
+        'Condiment',
+        'Pasta Sauce',
+        'Dried Pasta',
+        'Rice/Grain',
+        'Mexican Food',
+        'Asian Food',
+        'Stock/Broth',
+        'Canned Meat',
+        'Pickled Vegetable',
+        'Canned Vegetable',
+        'Canned Fruit',
+        'Canned Tomato',
+        'Canned Bean',
+        'Milk/Cream',
+        'Vinegar',
+        'Oil',
+        'Spice',
+        'Baking Supplies',
+        'Candy',
+        'Jam/Jelly/Honey',
+        'Nut Butter',
+        'Bread',
+        'Nut',
+        'Chip',
+        'Frozen Fruit',
+        'Frozen Vegetable',
+        'Seltzer',
+        'Meat',
+        'Juice',
+        'Sports Drinks',
+        'Soda',
+        'Beer',
+        'Wine',
+        'Fresh Pasta',
+        'Cheese',
+        'Sliced Deli Meat',
+        'Fresh Baked Good',
+    ]
+
+    for cat in cats:
+        FoodCategory.objects.create(name=cat)
 
 class Migration(migrations.Migration):
 
@@ -21,6 +73,8 @@ class Migration(migrations.Migration):
                 ('_date_modified', models.DateTimeField(default=django.utils.timezone.now)),
             ],
         ),
+        # pre-populate FoodCategory with these values
+        migrations.RunPython(write_food_categories, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
             model_name='food',
             name='qfc_aisle',
