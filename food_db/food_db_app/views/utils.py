@@ -104,18 +104,25 @@ class DerivedTagRule:
         step_regex_patterns=[],
         recipe_attributes={},
     ):
+        self.skip = False
         self.tag_name = tag_name
         self.ingredient_regex_patterns = ingredient_regex_patterns
         self.step_regex_patterns = step_regex_patterns
         self.recipe_attributes = recipe_attributes
         assert ingredient_regex_patterns or step_regex_patterns or recipe_attributes, "You must define at least one of: ingredient_regex_patterns, step_regex_patterns, recipe_attributes"
 
-        # Confirm tag already exists
+        # This code would strictly enforce tag rules
+        # try:
+        #     tag = Tag.objects.get(name=tag_name)
+        # except Tag.DoesNotExist as err:
+        #     err.args = (f"You tried to create a DerivedTagRule for a tag named '{tag_name}' in {__file__}, but it does not yet exist. Create and save it in the database first.",)
+        #     raise err
+
+        # Instead this just skips the rule if the tag does not exist
         try:
             tag = Tag.objects.get(name=tag_name)
         except Tag.DoesNotExist as err:
-            err.args = (f"You tried to create a DerivedTagRule for a tag named '{tag_name}' in {__file__}, but it does not yet exist. Create and save it in the database first.",)
-            raise err
+            self.skip = True
 
 
     def _check_ingredients(self, recipe):
@@ -144,21 +151,25 @@ class DerivedTagRule:
         return True
     
     def check(self, recipe):
-        print(f"Checking recipe to see if it should be tagged with {self.tag_name}")
-        ingred_match = self._check_ingredients(recipe)
-        step_match = self._check_steps(recipe)
-        attr_match = self._check_attributes(recipe)
+        if not self.skip:
+            print(f"Checking recipe to see if it should be tagged with {self.tag_name}")
+            ingred_match = self._check_ingredients(recipe)
+            step_match = self._check_steps(recipe)
+            attr_match = self._check_attributes(recipe)
 
-        match_dict = {key: True for key in ('ingred', 'step', 'attr')}
+            match_dict = {key: True for key in ('ingred', 'step', 'attr')}
 
-        if self.ingredient_regex_patterns:
-            match_dict['ingred'] = ingred_match
-        if self.step_regex_patterns:
-            match_dict['step'] = step_match
-        if self.recipe_attributes:
-            match_dict['attr'] = attr_match
+            if self.ingredient_regex_patterns:
+                match_dict['ingred'] = ingred_match
+            if self.step_regex_patterns:
+                match_dict['step'] = step_match
+            if self.recipe_attributes:
+                match_dict['attr'] = attr_match
 
-        return all(match_dict.values())  # returns True only if all values are True
+            return all(match_dict.values())  # returns True only if all values are True
+        else:
+            print(f"Skipping DerivedTagRule for tag {self.tag_name} because it does not exist")
+            return False
 
     
 class IngredientValidationRule:
