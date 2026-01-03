@@ -11,11 +11,11 @@ For use on Windows, I recommend installing [Git Bash](https://git-scm.com/downlo
 winpty docker exec -it...
 ```
 
-### Create a .env file
-For now, you need to create an empty file called `.env`. As you read below, you may decide you want to enable [cloud sync](food_db/food_db_app/cloud_sync/README.md), in which case you'll put variables into this file. 
-
 ### Renaming the database
 I have included a database file, [starter-db.sqlite3](food_db/db_data/starter-db.sqlite3), to make cloning this repo and getting started easy. The rest app, however, is looking for a file named `db.sqlite3`. Copy the starter file and paste it in the same directory, naming the new file `db.sqlite3` (bash: `cp food_db/db_data/starter-db.sqlite3 food_db/db_data/db.sqlite3`). Your app will store its data in this one. The file by this name is ignored by git, so you can store changes in your local DB without worrying about checking it into the repo.
+
+### Create a .env file
+You need to create a file called `.env`. This is used to set environment variables that trigger behaviors in the FoodDB. For example, as you read below, you may decide you want to enable [cloud sync](food_db/food_db_app/cloud_sync/README.md). For now, do the same thing you just did for the database file: copy the file [starter.env](starter.env) to a new file called `.env` (bash: `cp starter.env .env`). There is [more about each environment variable](#environment-variables) below.
 
 ### Running Docker
 I love Docker compose because you never have to think about if the image is already built and/or if the container exists and has run before. As long as there isn't an actively running container, run this to start everything up: `docker compose up --build` (see the note on `--build` [below](#docker)). If starts and stops immediately, rather than staying running, you may not have enough hard drive space free. Try running `docker logs food-db-django` and look for `Error writing file '/var/lib/mysql/auto.cnf' (OS errno 28 - No space left on device)` (this is the Mac-specific flavor of the error).
@@ -60,6 +60,14 @@ If you want to your Food DB on the public internet, it'll take some work. I have
 - User-uploaded images are stored locally, then served. This is enabled by adding `MEDIA_URL` and `MEDIA_ROOT` to `urlpatterns`.
 
 That said, if you open up to the world, you can access Food DB from anywhere. At the grocery store and trying to decide what to eat? Log into Food DB from your phone! If that sounds good to you, do a little (ok, a lot of) resarch on how to secure your setup, maybe starting [here](https://docs.djangoproject.com/en/5.1/topics/security).
+
+### Environment Variables
+These are the values you can set in your `.env` file and what they do:
+- `S3_SYNC`: This can be `true` or `false`. Setting it to `true` means you have to fill out the other S3/AWS-related variables, but it will enable S3 backups of all your recipes and your database file. Read more [here](food_db/food_db_app/cloud_sync/README.md).
+- `S3_BUCKET_NAME`: If you have S3 Sync enabled, put your bucket name here (just the name, like `my-bucket`, and not the full URL, e.g. `s3://my-bucket`)
+- `AWS_REGION`: If you have S3 Sync enalbed, put your preferred AWS region here, e.g. `us-west-2`.
+- `AWS_SHARED_CREDENTIALS_FILE`: Always leave this set to `/.aws/credentials` - this is the path inside the Docker image at which your AWS access key and secret access key are copied.
+- `SUGGEST_FOOD_NAME_MATCHES`: This can be `true` or `false`. When `true`, when modifying a recipe your ingredient names will be compared to previously used ingredient names, and suggestions will be made encouraging you to reuse the same names across recipes (e.g. so you use `salt and pepper` everywhere instead of `salt & pepper`, `fresh ground salt & pepper`, `Salt N Pepa`, etc.). This is only helpful if you want to use the "Show Grocery List" feature and you use the Food Manager page to categorize your foods.
 
 ## Testing
 Run both services using `docker compose up`, then run in a separate terminal, `docker compose exec backend sh -c 'python manage.py test'`. If you use `pdb.set_trace()` anywhere in your tests, you can engage with the `pdb` terminal in this same window.
