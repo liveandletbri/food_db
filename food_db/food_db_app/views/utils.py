@@ -160,6 +160,35 @@ class DerivedTagRule:
 
         return all(match_dict.values())  # returns True only if all values are True
 
+    
+class IngredientValidationRule:
+    def __init__(self, validation_func, validation_message, suggestion_func=None):
+        self.validation_func = validation_func
+        self.validation_message = validation_message
+        self.suggestion_func = suggestion_func
+
+    def validate(self, ingredient_name):
+        is_valid = self.validation_func(ingredient_name)
+        if not is_valid:
+            validation_message = self.validation_message
+            suggested_corrections = self.suggestion_func(ingredient_name) if self.suggestion_func else None
+        else:
+            validation_message = None
+            suggested_corrections = None
+        return is_valid, validation_message, suggested_corrections
+
+INGREDIENT_VALIDATION_RULES = [
+    IngredientValidationRule(
+        validation_func=lambda x: len(x.strip()) >= 2,
+        validation_message="Ingredient name is too short. Please provide a valid ingredient name."
+    ),
+    # IngredientValidationRule(
+    #     validation_func=lambda x: x.strip() in existing_foods,
+    #     validation_message="Ingredient name is not in the database. Please provide a valid ingredient name.",
+    #     suggestion_func=lambda x: [food for food in existing_foods if fuzzy_match(x, food)],
+    # ),
+]
+
 def convert_minutes_to_string(minutes: int):
     '''Convert minutes into string with hours and minutes'''
     hours = floor(float(minutes)/60.0)
@@ -291,11 +320,14 @@ def validate_ingredient_name(ingredient_name, existing_foods):
         - validation_message: Message to display to the user if validation fails
         - suggested_corrections: List of suggested corrections if validation fails
     """
-    # Example validation: Check if ingredient name is too short
-    # You can customize this function to add your own validation logic
-    if len(ingredient_name.strip()) < 2:
-        return False, "Ingredient name is too short. Please provide a valid ingredient name.", None
-    
-    # Example: Check for similar existing foods (fuzzy matching could be added here)
-    # For now, just return valid
-    return True, None, None
+
+    is_valid = True
+    validation_message = None
+    suggested_corrections = None
+
+    for rule in INGREDIENT_VALIDATION_RULES:
+        is_valid, validation_message, suggested_corrections = rule.validate(ingredient_name)
+        if not is_valid:
+            break
+
+    return is_valid, validation_message, suggested_corrections
