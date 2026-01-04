@@ -454,6 +454,42 @@ def recipe_image_delete(sender, instance, **kwargs):
     # Pass false so FileField doesn't save the model.
     instance.image.delete(False)
 
+class RecipeImageTemp(models.Model):
+    """
+    Temporary storage for recipe images during validation.
+    Stores images before recipe creation, using recipe clean_key as a string instead of ForeignKey.
+    
+    TODO: Periodically clean up orphaned RecipeImageTemp objects that were never converted to RecipeImage.
+    Consider adding an expiration date (e.g., delete RecipeImageTemp objects older than 24 hours)
+    or a cleanup task that runs periodically to remove temporary images that were never finalized.
+    """
+    def __str__(self):
+        return self._file_name or f"Temp image for {self.recipe_clean_key}"
+    
+    def save(self, **kwargs):
+        # Generate file name similar to RecipeImage, but using recipe_clean_key string
+        if not self._file_name:
+            self._file_name = self.recipe_clean_key + '__' + self._date_created.astimezone(pytz.timezone('America/Los_Angeles')).strftime('%Y-%m-%d-%H%M%S.%f')
+        
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "_file_name" in update_fields:
+            kwargs["update_fields"] = {"_file_name"}.union(update_fields)
+        
+        super().save(**kwargs)
+    
+    recipe_clean_key = models.CharField(max_length=255, help_text="Clean key of the recipe this image belongs to (recipe may not exist yet)")
+    image = models.ImageField(upload_to=rename_image_recipe)
+    _file_name = models.CharField(max_length=300, null=True, blank=True)
+    _date_created = models.DateTimeField(default=timezone.now)
+
+@receiver(models.signals.pre_delete, sender=RecipeImageTemp)
+def recipe_image_temp_delete(sender, instance, **kwargs):
+    '''Deletes the image file from the media folder when a
+    RecipeImageTemp instance is deleted from the database'''
+    # Pass false so FileField doesn't save the model.
+    instance.image.delete(False)
+
 class FoodCategory(models.Model):
     def __str__(self):
         return self.name

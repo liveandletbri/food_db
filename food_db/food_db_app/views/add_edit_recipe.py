@@ -1,6 +1,10 @@
+import os
 import re
+import shutil
+import tempfile
 
 from collections import Counter
+from django.core.files import File
 from django.http import HttpResponseBadRequest, QueryDict
 from django.shortcuts import render, redirect
 
@@ -148,15 +152,32 @@ def _process_recipe_creation(request, create_recipe_form):
     
     log_debug_message('saved tags')
     
-    recipe_images = request.FILES.getlist('images')
-    if recipe_images:
-        # Using a for loop instead of bulk_create to ensure RecipeImage.save() is triggered
-        for recipe_image in recipe_images:
-            recipe_image_instance = RecipeImage(
-                recipe=recipe_instance,
-                image=recipe_image,
-            )
-            recipe_image_instance.save()
+    # Convert RecipeImageTemp to RecipeImage (images were saved during validation)
+    recipe_image_temps = RecipeImageTemp.objects.filter(recipe_clean_key=clean_key)
+    if recipe_image_temps.exists():
+        for recipe_image_temp in recipe_image_temps:
+            # Copy the image file to a new RecipeImage
+            # We need to copy the file since deleting RecipeImageTemp will delete the original file
+            temp_image_file = recipe_image_temp.image
+            # Create a temporary copy of the file
+            with temp_image_file.open('rb') as source:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(temp_image_file.name)[1]) as temp_file:
+                    shutil.copyfileobj(source, temp_file)
+                    temp_file_path = temp_file.name
+                
+                # Create RecipeImage with the copied file
+                with open(temp_file_path, 'rb') as f:
+                    recipe_image_instance = RecipeImage(
+                        recipe=recipe_instance,
+                        image=File(f, name=os.path.basename(temp_image_file.name)),
+                    )
+                    recipe_image_instance.save()
+                
+                # Clean up temporary file
+                os.unlink(temp_file_path)
+            
+            # Delete the temp image (this will delete the original file via the signal)
+            recipe_image_temp.delete()
     
     log_debug_message('saved pics')
     
@@ -413,6 +434,11 @@ def _handle_restore_from_session_get(request, existing_data):
     if session_data:
         # Restore form data from session
         post_data_dict = session_data['post_data']
+        
+        # Delete any RecipeImageTemp objects for this recipe (user is going back to edit)
+        recipe_title = post_data_dict['title']
+        recipe_clean_key = sanitize_string(recipe_title)
+        RecipeImageTemp.objects.filter(recipe_clean_key=recipe_clean_key).delete()
         
         # Create form with restored data
         restored_post = _restore_post_from_session(session_data)

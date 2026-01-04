@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 
-from .utils import get_cart
+from .utils import get_cart, sanitize_string
 from .validate_ingredients import validate_ingredient_name
 
 @csrf_exempt
@@ -318,6 +318,24 @@ def recipe_validation(request):
                 post_data_dict[key] = values[0]
             else:
                 post_data_dict[key] = values
+        
+        # Save images as RecipeImageTemp (recipe doesn't exist yet, so we use clean_key string)
+        recipe_images = request.FILES.getlist('images')
+        if recipe_images:
+            # Generate recipe clean_key from title (same logic as in add_recipe)
+            recipe_title = create_recipe_form.cleaned_data['title']
+            recipe_clean_key = sanitize_string(recipe_title)
+            
+            # Delete any existing RecipeImageTemp for this recipe (in case user resubmitted)
+            RecipeImageTemp.objects.filter(recipe_clean_key=recipe_clean_key).delete()
+            
+            # Save new images as RecipeImageTemp
+            for recipe_image in recipe_images:
+                recipe_image_temp = RecipeImageTemp(
+                    recipe_clean_key=recipe_clean_key,
+                    image=recipe_image,
+                )
+                recipe_image_temp.save()
         
         # Validate ingredients
         validation_issues = []
