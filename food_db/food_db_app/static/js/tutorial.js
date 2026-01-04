@@ -83,13 +83,8 @@ function positionTutorialTooltip(tooltip, targetElement) {
 }
 
 function showTutorialTooltip(stepData, targetElement) {
-    let allSteps = JSON.parse(document.getElementById('tutorialStepsData').textContent)
-    let isLastStep = false
-    
-    // Check if this is the last step
-    let currentOrder = stepData.order
-    let maxOrder = Math.max(...allSteps.map(s => s.order))
-    isLastStep = currentOrder >= maxOrder
+    // Check if this is the last step (determined on server side)
+    let isLastStep = stepData.is_last_step || false
     
     let tooltip = createTutorialTooltip(stepData.tooltip_content, isLastStep)
     positionTutorialTooltip(tooltip, targetElement)

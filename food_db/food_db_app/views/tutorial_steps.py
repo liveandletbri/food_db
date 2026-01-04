@@ -14,6 +14,7 @@ When adding a new step:
 6. 'scroll_target' is a CSS selector (e.g., '#recipe_title', '.navbar', 'h1')
 """
 
+import sys
 from django.urls import reverse
 
 
@@ -49,7 +50,7 @@ class TutorialStep:
         Returns:
             dict: Dictionary with step data including resolved URL.
                 Includes: step_id, title, page_url, page_kwargs, scroll_target, 
-                tooltip_class, tooltip_content, order, url
+                tooltip_class, tooltip_content, order, url, is_last_step
         """
         url = None
         try:
@@ -59,6 +60,8 @@ class TutorialStep:
                 url = reverse(self.page_url)
         except:
             url = None
+        
+        is_last_step = self.order == len(TUTORIAL_STEPS)
         
         return {
             'step_id': self.step_id,
@@ -70,6 +73,7 @@ class TutorialStep:
             'tooltip_content': self.tooltip_content,
             'order': self.order,
             'url': url,
+            'is_last_step': is_last_step,
         }
 
 
