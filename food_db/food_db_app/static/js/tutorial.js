@@ -33,7 +33,7 @@ function createTutorialTooltip(content, isLastStep) {
     
     let nextButton = document.createElement('button')
     nextButton.textContent = isLastStep ? 'Finish' : 'Next'
-    nextButton.style.padding = '8px 16px'
+    nextButton.style.padding = '2px 8px'
     nextButton.style.marginTop = '10px'
     nextButton.style.cursor = 'pointer'
     nextButton.addEventListener('click', function() {
