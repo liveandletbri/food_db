@@ -1,4 +1,5 @@
 import nltk
+import os
 
 def find_similar_foods(ingredient_name, existing_foods, max_distance=3):
     """
@@ -15,19 +16,25 @@ def find_similar_foods(ingredient_name, existing_foods, max_distance=3):
     """
     ingredient_name = ingredient_name.strip().lower()
     similar_foods = []
-    
-    for food in existing_foods:
-        food_lower = food.strip().lower()
-        # Skip exact matches
-        if food_lower == ingredient_name:
-            continue
+
+    # By default, skip this behavior. Users must opt in.
+    if os.getenv('SUGGEST_FOOD_NAME_MATCHES', 'false').lower() == 'true':
+        for food in existing_foods:
+            food_lower = food.strip().lower()
+            # Skip exact matches
+            if food_lower == ingredient_name:
+                continue
+            
+            # Calculate Levenshtein distance
+            distance = nltk.edit_distance(ingredient_name, food_lower)
+            
+            # Consider foods with distance <= max_distance as similar
+            if distance <= max_distance:
+                similar_foods.append(food)
+            
+            
+
         
-        # Calculate Levenshtein distance
-        distance = nltk.edit_distance(ingredient_name, food_lower)
-        
-        # Consider foods with distance <= max_distance as similar
-        if distance <= max_distance:
-            similar_foods.append(food)
     
     return similar_foods
 
