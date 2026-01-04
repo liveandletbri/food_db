@@ -195,7 +195,7 @@ INGREDIENT_VALIDATION_RULES = [
         validation_message="Ingredient name is too short. Please provide a valid ingredient name."
     ),
     IngredientValidationRule(
-        validation_func=lambda x, existing_foods: x.strip() in existing_foods or os.getenv('SUGGEST_FOOD_NAME_MATCHES', 'false').lower() == 'false',
+        validation_func=lambda x, existing_foods: x.strip().lower() in existing_foods or os.getenv('SUGGEST_FOOD_NAME_MATCHES', 'false').lower() == 'false',
         validation_message="Ingredient name does not currently exist in the database. Either confirm this new ingredient or select a similar existing ingredient.",
         suggestion_func=lambda x, existing_foods: find_similar_foods(x, existing_foods),
     ),
