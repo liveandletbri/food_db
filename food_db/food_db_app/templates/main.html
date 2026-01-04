@@ -17,6 +17,12 @@
     {% block content %}
     
     {% endblock content %}
+    {% if tutorial_state %}
+        {{ tutorial_state|json_script:"tutorialStateData" }}
+    {% endif %}
+    {% if tutorial_current_step %}
+        {{ tutorial_current_step|json_script:"tutorialCurrentStepData" }}
+    {% endif %}
     <script src="{% static 'js/tooltip.js' %}"></script>
     <script src="{% static 'js/cart.js' %}"></script>
     <script src="{% static 'js/tutorial.js' %}"></script>
