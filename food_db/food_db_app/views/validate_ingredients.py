@@ -132,47 +132,45 @@ def find_similar_foods(ingredient_name, existing_foods):
     ingredient_name = ingredient_name.strip().lower()
     similar_foods = []
 
-    # By default, skip this behavior. Users must opt in.
-    if os.getenv('SUGGEST_FOOD_NAME_MATCHES', 'false').lower() == 'true':
-        max_levenshtein_distance = 3
-        max_hamming_distance = 2
-        max_damerau_levenshtein_distance = 3
-        min_ngram_similarity = 0.6
-        
-        for food in existing_foods:
-            food_lower = food.strip().lower()
-            # Skip exact matches
-            if food_lower == ingredient_name:
-                continue
-            
-            # Calculate Levenshtein distance
-            # Only match if distance is small relative to string length
-            lev_distance = nltk.edit_distance(ingredient_name, food_lower)
-            max_len = max(len(ingredient_name), len(food_lower))
-            if lev_distance <= max_levenshtein_distance and lev_distance <= max_len * 0.4:
-                similar_foods.append(food)
-            
-            # Calculate Hamming distance (only for strings of equal length)
-            if len(ingredient_name) == len(food_lower):
-                ham_distance = sum(c1 != c2 for c1, c2 in zip(ingredient_name, food_lower))
-                if ham_distance <= max_hamming_distance:
-                    similar_foods.append(food)
-            
-            # Calculate Damerau-Levenshtein distance
-            # Only match if distance is small relative to string length
-            dam_lev_distance = damerau_levenshtein_distance(ingredient_name, food_lower)
-            if dam_lev_distance <= max_damerau_levenshtein_distance and dam_lev_distance <= max_len * 0.4:
-                similar_foods.append(food)
-            
-            # Calculate n-gram similarity
-            ngram_sim = ngram_similarity(ingredient_name, food_lower)
-            if ngram_sim >= min_ngram_similarity:
-                similar_foods.append(food)
-            
-            # Check for substring matches (e.g., "all purpose flour" vs "flour")
-            if is_substring_match(ingredient_name, food_lower):
-                similar_foods.append(food)
+    max_levenshtein_distance = 3
+    max_hamming_distance = 2
+    max_damerau_levenshtein_distance = 3
+    min_ngram_similarity = 0.6
     
+    for food in existing_foods:
+        food_lower = food.strip().lower()
+        # Skip exact matches
+        if food_lower == ingredient_name:
+            continue
+        
+        # Calculate Levenshtein distance
+        # Only match if distance is small relative to string length
+        lev_distance = nltk.edit_distance(ingredient_name, food_lower)
+        max_len = max(len(ingredient_name), len(food_lower))
+        if lev_distance <= max_levenshtein_distance and lev_distance <= max_len * 0.4:
+            similar_foods.append(food)
+        
+        # Calculate Hamming distance (only for strings of equal length)
+        if len(ingredient_name) == len(food_lower):
+            ham_distance = sum(c1 != c2 for c1, c2 in zip(ingredient_name, food_lower))
+            if ham_distance <= max_hamming_distance:
+                similar_foods.append(food)
+        
+        # Calculate Damerau-Levenshtein distance
+        # Only match if distance is small relative to string length
+        dam_lev_distance = damerau_levenshtein_distance(ingredient_name, food_lower)
+        if dam_lev_distance <= max_damerau_levenshtein_distance and dam_lev_distance <= max_len * 0.4:
+            similar_foods.append(food)
+        
+        # Calculate n-gram similarity
+        ngram_sim = ngram_similarity(ingredient_name, food_lower)
+        if ngram_sim >= min_ngram_similarity:
+            similar_foods.append(food)
+        
+        # Check for substring matches (e.g., "all purpose flour" vs "flour")
+        if is_substring_match(ingredient_name, food_lower):
+            similar_foods.append(food)
+
     return list(set(similar_foods))
 
 class IngredientValidationRule:
@@ -197,7 +195,7 @@ INGREDIENT_VALIDATION_RULES = [
         validation_message="Ingredient name is too short. Please provide a valid ingredient name."
     ),
     IngredientValidationRule(
-        validation_func=lambda x, existing_foods: x.strip() in existing_foods,
+        validation_func=lambda x, existing_foods: x.strip() in existing_foods or os.getenv('SUGGEST_FOOD_NAME_MATCHES', 'false').lower() == 'false',
         validation_message="Ingredient name does not currently exist in the database. Either confirm this new ingredient or select a similar existing ingredient.",
         suggestion_func=lambda x, existing_foods: find_similar_foods(x, existing_foods),
     ),
