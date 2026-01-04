@@ -291,6 +291,14 @@ textarea.default_text {
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
     transition: opacity 0.8s;
 }
+.tutorial_exit_button {
+    background: #d65f5f;
+    color: white;
+    position: fixed;
+    bottom: 30px;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
+    transition: opacity 0.8s;
+}
 .ingredient_link_tooltip {
     background: #3cc382;
     color: white;
@@ -311,6 +319,15 @@ textarea.default_text {
         background: #86f9c1;
         color: #161616;
     }
+    .tutorial_exit_button {
+        /* Left align */
+        left: 30px;
+        max-width: 200px;
+    }
+    .tutorial_exit_button:hover {
+        background: #f08989;
+        color: #161616;
+    }
 }
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
@@ -322,6 +339,15 @@ textarea.default_text {
     }
     .cooking_mode_tooltip:active {
         background: #86f9c1;
+        color: #161616;
+    }
+    .tutorial_exit_button {
+        /* Left align on small screens */
+        left: 30px;
+        width: 200px;
+    }
+    .tutorial_exit_button:active {
+        background: #f08989;
         color: #161616;
     }
 }
