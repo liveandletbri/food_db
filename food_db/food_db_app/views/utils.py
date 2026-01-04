@@ -287,3 +287,37 @@ def get_view_config_key(request):
     """Get the value of the view_config_key from the session, which is used to determine which Bulk Prep View config is selected.
     This persists the selected view config as the user navigates across pages. This variable is only used on page load."""
     return request.session.get('view_config_key', None)
+
+def get_tutorial_state(request):
+    """Get the tutorial state from the session.
+    This persists the tutorial state as the user navigates across pages.
+    
+    Returns:
+        dict: Dictionary with keys:
+            - 'tutorial_active' (bool): Whether the tutorial is currently active
+            - 'current_step_id' (str or None): The step_id of the current tutorial step, or None if no step is active
+    """
+    return {
+        'tutorial_active': request.session.get('tutorial_active', False),
+        'current_step_id': request.session.get('tutorial_current_step_id', None)
+    }
+
+def set_tutorial_state(request, step_id=None, active=False):
+    """Set the tutorial state in the session.
+    
+    Args:
+        request: The Django request object
+        step_id (str, optional): The step_id to set as the current step. If None, clears the current step.
+        active (bool): Whether the tutorial should be active. Defaults to False.
+    """
+    request.session['tutorial_active'] = active
+    if step_id is not None:
+        request.session['tutorial_current_step_id'] = step_id
+    elif not active:
+        # If setting active to False, also clear the step_id
+        request.session['tutorial_current_step_id'] = None
+
+def clear_tutorial_state(request):
+    """Clear the tutorial state from the session."""
+    request.session['tutorial_active'] = False
+    request.session['tutorial_current_step_id'] = None
