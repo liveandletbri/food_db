@@ -35,6 +35,9 @@ urlpatterns = [
     path('help/', views.help_page, name='help'),
 
     # apis
+    path('start_tutorial/', views.start_tutorial, name='start_tutorial'),
+    path('next_tutorial_step/', views.next_tutorial_step, name='next_tutorial_step'),
+    path('exit_tutorial/', views.exit_tutorial, name='exit_tutorial'),
     path('add_recipe_to_cart/', views.add_recipe_to_cart, name='add_recipe_to_cart'),
     path('add_tag/', views.add_tag, name='add_tag'),
     path('recipe_validation/', views.recipe_validation, name='recipe_validation'),
