@@ -3,9 +3,11 @@ from collections import defaultdict, OrderedDict
 from datetime import datetime
 from decimal import Decimal
 from django.forms.models import model_to_dict
+from django.urls import reverse
 from math import floor
 
 from food_db_app.models import *
+from .tutorial_steps import get_step_by_id
 
 LAST_DEBUG_LOG_START_TIME = None
 LAST_DEBUG_LOG_TIME = None
@@ -321,3 +323,43 @@ def clear_tutorial_state(request):
     """Clear the tutorial state from the session."""
     request.session['tutorial_active'] = False
     request.session['tutorial_current_step_id'] = None
+
+def get_current_step_data(request):
+    """Get the current tutorial step data with resolved URL.
+    
+    Returns:
+        dict: Dictionary containing step data with resolved URL, or None if no active step.
+            Includes: step_id, title, page_url, scroll_target, tooltip_class, tooltip_content, order, url
+    """
+    tutorial_state = get_tutorial_state(request)
+    if not tutorial_state['tutorial_active'] or not tutorial_state['current_step_id']:
+        return None
+    
+    step = get_step_by_id(tutorial_state['current_step_id'])
+    if step is None:
+        return None
+    
+    # Resolve the URL
+    url = None
+    try:
+        if step.page_kwargs:
+            url = reverse(step.page_url, kwargs=step.page_kwargs)
+        else:
+            url = reverse(step.page_url)
+    except:
+        url = None
+    
+    # Convert TutorialStep object to dictionary
+    step_dict = {
+        'step_id': step.step_id,
+        'title': step.title,
+        'page_url': step.page_url,
+        'page_kwargs': step.page_kwargs,
+        'scroll_target': step.scroll_target,
+        'tooltip_class': step.tooltip_class,
+        'tooltip_content': step.tooltip_content,
+        'order': step.order,
+        'url': url,
+    }
+    
+    return step_dict
