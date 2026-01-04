@@ -12,7 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 
-from .utils import get_cart, validate_ingredient_name
+from .utils import get_cart
+from .validate_ingredients import validate_ingredient_name
 
 @csrf_exempt
 def add_tag(request):
