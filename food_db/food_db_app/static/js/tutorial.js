@@ -193,7 +193,13 @@ function createTutorialExitButton() {
     button.id = 'tutorial_exit_button'
     button.classList.add('tutorial_exit_button')
     button.classList.add('tooltip')
-    button.textContent = 'Exit Tutorial'
+    
+    let titleSpan = document.createElement('span')
+    titleSpan.textContent = 'Exit Tutorial'
+    titleSpan.style.fontSize = '20px'
+    titleSpan.style.fontWeight = '900'
+    button.appendChild(titleSpan)
+    
     button.style.cursor = 'pointer'
     button.addEventListener('click', exitTutorial)
     

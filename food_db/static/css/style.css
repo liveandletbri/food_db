@@ -320,8 +320,8 @@ textarea.default_text {
         color: #161616;
     }
     .tutorial_exit_button {
-        /* Left align */
-        left: 30px;
+        /* Right align to match cooking mode button */
+        right: 30px;
         max-width: 200px;
     }
     .tutorial_exit_button:hover {
@@ -342,9 +342,10 @@ textarea.default_text {
         color: #161616;
     }
     .tutorial_exit_button {
-        /* Left align on small screens */
-        left: 30px;
-        width: 200px;
+        /* Centered to match cooking mode button */
+        left: 50%;
+        transform: translate(-50%, 0);
+        width: 350px;
     }
     .tutorial_exit_button:active {
         background: #f08989;
