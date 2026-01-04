@@ -26,7 +26,7 @@
                 <td>
                     {% if issue.suggested_corrections %}
                         <select name="correction_{{ issue.ingredient_id }}">
-                            <option value="">Keep original</option>
+                            <option value="">Keep "{{ issue.ingredient_name }}"</option>
                             {% for suggestion in issue.suggested_corrections %}
                                 <option value="{{ suggestion }}">{{ suggestion }}</option>
                             {% endfor %}
