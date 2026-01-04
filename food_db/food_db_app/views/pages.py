@@ -19,6 +19,7 @@ from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 from food_db_app.cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
+from .tutorial_steps import get_tutorial_steps
 from .utils import (
     RecipeIngredientData,
     GroceryList,
@@ -851,3 +852,16 @@ def bulk_prep(request):
             'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
         }
         return render(request, 'bulk_prep.html', context)
+
+
+def help_page(request):
+    """Display the help page with tutorial steps and feature explanations."""
+    tutorial_steps = get_tutorial_steps()
+    tutorial_state = get_tutorial_state(request)
+    context = {
+        'tutorial_steps': tutorial_steps,
+        'cart': get_cart(request),
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
+    }
+    return render(request, 'help.html', context)

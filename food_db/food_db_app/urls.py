@@ -32,6 +32,7 @@ urlpatterns = [
     path('recipe/<str:key>', views.recipe_detail, name='recipe_detail'),
     path('recipe/<str:key>/edit', views.edit_recipe, name='edit_recipe'),
     path('search/', views.search, name='search'),
+    path('help/', views.help_page, name='help'),
 
     # apis
     path('add_recipe_to_cart/', views.add_recipe_to_cart, name='add_recipe_to_cart'),
