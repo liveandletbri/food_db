@@ -129,8 +129,23 @@ async function nextTutorialStep() {
     })
     
     if (response.success && response.step_data) {
-        // Navigate to the next step's page
-        window.location.href = response.step_data.url
+        // Check if next step is on the same page
+        let currentUrl = window.location.pathname
+        let nextStepUrl = response.step_data.url
+        
+        // Extract pathname from nextStepUrl if it's a full URL
+        if (nextStepUrl.startsWith('http')) {
+            let urlObj = new URL(nextStepUrl)
+            nextStepUrl = urlObj.pathname
+        }
+        
+        if (currentUrl === nextStepUrl) {
+            // Same page - just show the next step without reloading
+            showTutorialStep(response.step_data)
+        } else {
+            // Different page - navigate to the next step's page
+            window.location.href = response.step_data.url
+        }
     } else if (response.success && !response.step_data) {
         // No more steps, exit tutorial
         exitTutorial()
