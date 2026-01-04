@@ -339,27 +339,5 @@ def get_current_step_data(request):
     if step is None:
         return None
     
-    # Resolve the URL
-    url = None
-    try:
-        if step.page_kwargs:
-            url = reverse(step.page_url, kwargs=step.page_kwargs)
-        else:
-            url = reverse(step.page_url)
-    except:
-        url = None
-    
-    # Convert TutorialStep object to dictionary
-    step_dict = {
-        'step_id': step.step_id,
-        'title': step.title,
-        'page_url': step.page_url,
-        'page_kwargs': step.page_kwargs,
-        'scroll_target': step.scroll_target,
-        'tooltip_class': step.tooltip_class,
-        'tooltip_content': step.tooltip_content,
-        'order': step.order,
-        'url': url,
-    }
-    
-    return step_dict
+    # Convert TutorialStep object to dictionary using the class method
+    return step.to_dict_with_url()

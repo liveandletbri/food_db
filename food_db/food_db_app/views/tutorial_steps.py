@@ -14,6 +14,8 @@ When adding a new step:
 6. 'scroll_target' is a CSS selector (e.g., '#recipe_title', '.navbar', 'h1')
 """
 
+from django.urls import reverse
+
 
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
@@ -40,6 +42,35 @@ class TutorialStep:
         self.tooltip_class = tooltip_class
         self.tooltip_content = tooltip_content
         self.order = order
+    
+    def to_dict_with_url(self):
+        """Convert TutorialStep object to a dictionary with resolved URL.
+        
+        Returns:
+            dict: Dictionary with step data including resolved URL.
+                Includes: step_id, title, page_url, page_kwargs, scroll_target, 
+                tooltip_class, tooltip_content, order, url
+        """
+        url = None
+        try:
+            if self.page_kwargs:
+                url = reverse(self.page_url, kwargs=self.page_kwargs)
+            else:
+                url = reverse(self.page_url)
+        except:
+            url = None
+        
+        return {
+            'step_id': self.step_id,
+            'title': self.title,
+            'page_url': self.page_url,
+            'page_kwargs': self.page_kwargs,
+            'scroll_target': self.scroll_target,
+            'tooltip_class': self.tooltip_class,
+            'tooltip_content': self.tooltip_content,
+            'order': self.order,
+            'url': url,
+        }
 
 
 TUTORIAL_STEPS = [

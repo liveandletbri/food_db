@@ -12,7 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 
-from .utils import get_cart, sanitize_string
+from .utils import get_cart, sanitize_string, set_tutorial_state, clear_tutorial_state, get_tutorial_state
+from .tutorial_steps import get_step_by_id, get_next_step, get_tutorial_steps
 from .validate_ingredients import validate_ingredient_name
 
 @csrf_exempt
@@ -377,5 +378,71 @@ def recipe_validation(request):
             # No validation issues, redirect to add_recipe with auto_confirm flag
             # This will trigger automatic processing
             return redirect(reverse('add_recipe') + '?auto_confirm=true')
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def start_tutorial(request):
+    """Start the tutorial from a specific step, or from the first step if step_id is None."""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        step_id = data.get('step_id', None)
+        
+        # If no step_id provided, start from first step
+        if step_id is None:
+            all_steps = get_tutorial_steps()
+            if len(all_steps) > 0:
+                step_id = all_steps[0].step_id
+            else:
+                return HttpResponse(json.dumps({'success': False, 'error': 'No tutorial steps available'}), content_type='application/json', status=400)
+        
+        # Validate step exists
+        step = get_step_by_id(step_id)
+        if step is None:
+            return HttpResponse(json.dumps({'success': False, 'error': f'Step {step_id} not found'}), content_type='application/json', status=400)
+        
+        # Set tutorial state
+        set_tutorial_state(request, step_id=step_id, active=True)
+        
+        # Convert step to dict with resolved URL
+        step_data = step.to_dict_with_url()
+        
+        return HttpResponse(json.dumps({'success': True, 'step_data': step_data}), content_type='application/json', status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def next_tutorial_step(request):
+    """Advance to the next step in the tutorial."""
+    if request.method == 'POST':
+        tutorial_state = get_tutorial_state(request)
+        
+        if not tutorial_state['tutorial_active'] or not tutorial_state['current_step_id']:
+            return HttpResponse(json.dumps({'success': False, 'error': 'Tutorial is not active'}), content_type='application/json', status=400)
+        
+        # Get next step
+        next_step = get_next_step(tutorial_state['current_step_id'])
+        
+        if next_step is None:
+            # No more steps, exit tutorial
+            clear_tutorial_state(request)
+            return HttpResponse(json.dumps({'success': True, 'step_data': None}), content_type='application/json', status=200)
+        
+        # Update session state to next step
+        set_tutorial_state(request, step_id=next_step.step_id, active=True)
+        
+        # Convert step to dict with resolved URL
+        step_data = next_step.to_dict_with_url()
+        
+        return HttpResponse(json.dumps({'success': True, 'step_data': step_data}), content_type='application/json', status=200)
+    else:
+        return HttpResponseNotAllowed(permitted_methods=['POST'])
+
+@csrf_exempt
+def exit_tutorial(request):
+    """Exit the tutorial and clear session state."""
+    if request.method == 'POST':
+        clear_tutorial_state(request)
+        return HttpResponse(json.dumps({'success': True}), content_type='application/json', status=200)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
