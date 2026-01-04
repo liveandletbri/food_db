@@ -719,6 +719,36 @@ button.merge_selected {
     opacity: 100%;
     z-index: 1000;
 }
+.tutorial_tooltip {
+    background: white;
+    border: 2px solid #47D3E5;
+    color: #000000;
+    position: absolute;
+    font-size: 0.9rem;
+    text-align: left;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.8s, z-index 0.8s ease-in-out;
+    z-index: -1;
+}
+.tutorial_tooltip.visible {
+    opacity: 100%;
+    z-index: 1500;
+}
+.tutorial_tooltip button {
+    background-color: #47D3E5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+.tutorial_tooltip button:hover {
+    background-color: #3cc382;
+}
 .markdown_help_indented_text {
     margin-left: 1rem;
 }
