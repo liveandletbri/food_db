@@ -329,7 +329,7 @@ def get_current_step_data(request):
     
     Returns:
         dict: Dictionary containing step data with resolved URL, or None if no active step.
-            Includes: step_id, title, page_url, scroll_target, tooltip_class, tooltip_content, order, url
+            Includes: step_id, title, page_url, scroll_target, tooltip_content, order, url
     """
     tutorial_state = get_tutorial_state(request)
     if not tutorial_state['tutorial_active'] or not tutorial_state['current_step_id']:

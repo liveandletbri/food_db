@@ -7,11 +7,10 @@ Steps are displayed in the order they appear in the TUTORIAL_STEPS list (order n
 When adding a new step:
 1. Add a TutorialStep instance to TUTORIAL_STEPS list
 2. Use a unique 'step_id' (lowercase with underscores, e.g., 'welcome', 'add_recipe_basic')
-3. Ensure 'tooltip_class' is unique (used for CSS/HTML targeting)
-4. 'page_url' must match a Django URL name from urls.py
-5. 'page_kwargs' should be None for simple pages, or a dict for pages requiring URL parameters
+3. 'page_url' must match a Django URL name from urls.py
+4. 'page_kwargs' should be None for simple pages, or a dict for pages requiring URL parameters
    (e.g., {'key': 'recipe-key'} for recipe_detail)
-6. 'scroll_target' is a CSS selector (e.g., '#recipe_title', '.navbar', 'h1')
+5. 'scroll_target' is a CSS selector (e.g., '#recipe_title', '.navbar', 'h1')
 """
 
 import sys
@@ -21,7 +20,7 @@ from django.urls import reverse
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
     
-    def __init__(self, step_id, title, page_url, scroll_target, tooltip_class, tooltip_content, page_kwargs=None, order=None):
+    def __init__(self, step_id, title, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None):
         """
         Initialize a tutorial step.
         
@@ -30,7 +29,6 @@ class TutorialStep:
             title (str): Display name for the step
             page_url (str): Django URL name (e.g., 'index', 'recipe_detail')
             scroll_target (str): CSS selector for the element to scroll to
-            tooltip_class (str): HTML class name for the tooltip element
             tooltip_content (str): Text/HTML content for the tooltip
             page_kwargs (dict, optional): URL parameters if needed (e.g., {'key': 'recipe-key'})
             order (int, optional): Order number (automatically assigned if None)
@@ -40,7 +38,6 @@ class TutorialStep:
         self.page_url = page_url
         self.page_kwargs = page_kwargs
         self.scroll_target = scroll_target
-        self.tooltip_class = tooltip_class
         self.tooltip_content = tooltip_content
         self.order = order
     
@@ -50,7 +47,7 @@ class TutorialStep:
         Returns:
             dict: Dictionary with step data including resolved URL.
                 Includes: step_id, title, page_url, page_kwargs, scroll_target, 
-                tooltip_class, tooltip_content, order, url, is_last_step
+                tooltip_content, order, url, is_last_step
         """
         url = None
         try:
@@ -69,7 +66,6 @@ class TutorialStep:
             'page_url': self.page_url,
             'page_kwargs': self.page_kwargs,
             'scroll_target': self.scroll_target,
-            'tooltip_class': self.tooltip_class,
             'tooltip_content': self.tooltip_content,
             'order': self.order,
             'url': url,
@@ -84,7 +80,6 @@ TUTORIAL_STEPS = [
         page_url='index',
         page_kwargs=None,
         scroll_target='#logo_title',
-        tooltip_class='tutorial-step-welcome',
         tooltip_content='Welcome to Food DB! This is your personal recipe management system. Let\'s take a quick tour of the features.',
     ),
     TutorialStep(
@@ -93,7 +88,6 @@ TUTORIAL_STEPS = [
         page_url='index',
         page_kwargs=None,
         scroll_target='#baking_switch_label',
-        tooltip_class='tutorial-step-cooking-baking-switch',
         tooltip_content='Switch between Cooking and Baking modes. This changes the color scheme and filters recipes based on your selection.',
     ),
     TutorialStep(
@@ -102,7 +96,6 @@ TUTORIAL_STEPS = [
         page_url='index',
         page_kwargs=None,
         scroll_target='.left_side_of_page',
-        tooltip_class='tutorial-step-navigation-bar',
         tooltip_content='Use the navigation bar to access different sections: Home, Add Recipe, Recipes (search), Food Manager, and Bulk Prep.',
     ),
     TutorialStep(
@@ -111,7 +104,6 @@ TUTORIAL_STEPS = [
         page_url='search',
         page_kwargs=None,
         scroll_target='h1',
-        tooltip_class='tutorial-step-search-recipes',
         tooltip_content='Search and filter your recipes. Use tags, text search, and other filters to find exactly what you\'re looking for.',
     ),
     TutorialStep(
@@ -120,7 +112,6 @@ TUTORIAL_STEPS = [
         page_url='add_recipe',
         page_kwargs=None,
         scroll_target='h1',
-        tooltip_class='tutorial-step-add-recipe',
         tooltip_content='Create new recipes here. Add ingredients, steps, images, tags, and more to build your recipe collection.',
     ),
     # Add more steps here as features are developed
@@ -131,7 +122,6 @@ TUTORIAL_STEPS = [
     #     page_url='url_name',
     #     page_kwargs=None,  # or {'key': 'value'} if URL needs parameters
     #     scroll_target='#element-id',
-    #     tooltip_class='tutorial-step-feature-name',
     #     tooltip_content='Explanation of the feature...',
     # ),
 ]

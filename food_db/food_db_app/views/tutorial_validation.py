@@ -16,10 +16,9 @@ def validate_tutorial_steps():
     Validate all tutorial steps configuration.
     
     Checks:
-    - All steps have required fields (step_id, page_url, scroll_target, tooltip_class, tooltip_content)
+    - All steps have required fields (step_id, page_url, scroll_target, tooltip_content)
     - All steps are in sequential order (no gaps, starts at 1)
     - All page_url values are valid Django URL names
-    - All tooltip_class values are unique
     - All step_id values are unique
     
     Raises:
@@ -29,7 +28,6 @@ def validate_tutorial_steps():
         raise ImproperlyConfigured('TUTORIAL_STEPS list is empty. At least one tutorial step is required.')
     
     step_ids = set()
-    tooltip_classes = set()
     orders = []
     
     for index, step in enumerate(TUTORIAL_STEPS, start=1):
@@ -43,9 +41,6 @@ def validate_tutorial_steps():
         if not step.scroll_target:
             raise ImproperlyConfigured(f'Tutorial step "{step.step_id}" is missing scroll_target.')
         
-        if not step.tooltip_class:
-            raise ImproperlyConfigured(f'Tutorial step "{step.step_id}" is missing tooltip_class.')
-        
         if not step.tooltip_content:
             raise ImproperlyConfigured(f'Tutorial step "{step.step_id}" is missing tooltip_content.')
         
@@ -53,11 +48,6 @@ def validate_tutorial_steps():
         if step.step_id in step_ids:
             raise ImproperlyConfigured(f'Duplicate step_id found: "{step.step_id}". All step_id values must be unique.')
         step_ids.add(step.step_id)
-        
-        # Check for unique tooltip_class
-        if step.tooltip_class in tooltip_classes:
-            raise ImproperlyConfigured(f'Duplicate tooltip_class found: "{step.tooltip_class}". All tooltip_class values must be unique.')
-        tooltip_classes.add(step.tooltip_class)
         
         # Collect order numbers
         if step.order is not None:
