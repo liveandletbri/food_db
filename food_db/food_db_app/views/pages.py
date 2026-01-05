@@ -20,7 +20,7 @@ from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 from food_db_app.cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
-from .tutorial_steps import get_tutorial_steps
+from .tutorial_steps import get_tutorial_steps, TUTORIAL_STEPS
 from .utils import (
     RecipeIngredientData,
     GroceryList,
@@ -866,8 +866,14 @@ def help_page(request):
     if markdown_path.exists():
         help_page_markdown = markdown_path.read_text(encoding='utf-8')
     
+    # get unique list of sections
+    sections = remove_dupes_preserve_order([step.section for step in tutorial_steps])
+
+    # group steps by section
+    steps_by_section = OrderedDict((section, [step for step in tutorial_steps if step.section == section]) for section in sections)
+
     context = {
-        'tutorial_steps': tutorial_steps,
+        'steps_by_section': steps_by_section,
         'cart': get_cart(request),
         'tutorial_state': tutorial_state,
         'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,

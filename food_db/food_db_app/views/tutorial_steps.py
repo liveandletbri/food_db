@@ -20,13 +20,14 @@ from django.urls import reverse
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
     
-    def __init__(self, step_id, title, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None):
+    def __init__(self, step_id, title, section, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None):
         """
         Initialize a tutorial step.
         
         Args:
             step_id (str): Unique identifier for the step
             title (str): Display name for the step
+            section (str): Section the step is under
             page_url (str): Django URL name (e.g., 'index', 'recipe_detail')
             scroll_target (str): CSS selector for the element to scroll to
             tooltip_content (str): Text/HTML content for the tooltip
@@ -35,6 +36,7 @@ class TutorialStep:
         """
         self.step_id = step_id
         self.title = title
+        self.section = section
         self.page_url = page_url
         self.page_kwargs = page_kwargs
         self.scroll_target = scroll_target
@@ -63,6 +65,7 @@ class TutorialStep:
         return {
             'step_id': self.step_id,
             'title': self.title,
+            'section': self.section,
             'page_url': self.page_url,
             'page_kwargs': self.page_kwargs,
             'scroll_target': self.scroll_target,
@@ -77,6 +80,7 @@ TUTORIAL_STEPS = [
     TutorialStep(
         step_id='welcome',
         title='Welcome to Food DB',
+        section='Getting Started',
         page_url='index',
         page_kwargs=None,
         scroll_target='#logo_title',
@@ -85,6 +89,7 @@ TUTORIAL_STEPS = [
     TutorialStep(
         step_id='cooking_baking_switch',
         title='Cooking vs Baking Mode',
+        section='Getting Started',
         page_url='index',
         page_kwargs=None,
         scroll_target='#baking_switch_label',
@@ -93,6 +98,7 @@ TUTORIAL_STEPS = [
     TutorialStep(
         step_id='navigation_bar',
         title='Navigation',
+        section='Getting Started',
         page_url='index',
         page_kwargs=None,
         scroll_target='.left_side_of_page',
@@ -101,6 +107,7 @@ TUTORIAL_STEPS = [
     TutorialStep(
         step_id='search_recipes',
         title='Search Recipes',
+        section='Searching Recipes',
         page_url='search',
         page_kwargs=None,
         scroll_target='h1',
@@ -109,6 +116,7 @@ TUTORIAL_STEPS = [
     TutorialStep(
         step_id='add_recipe',
         title='Add a New Recipe',
+        section='Adding Recipes',
         page_url='add_recipe',
         page_kwargs=None,
         scroll_target='h1',
