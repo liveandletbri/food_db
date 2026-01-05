@@ -16,5 +16,6 @@
 <a href="{% url 'add_recipe' %}">Add a new recipe</a> | 
 <a href="{% url 'search' %}">Recipes</a> |
 <a href="{% url 'manage_food' %}">Food Manager</a> | 
+<a href="{% url 'help' %}">Help</a> |
 <a href="{% url 'bulk_prep' %}">Bulk Prep</a> <span {% if cart|length <= 0 %}style="display: none;" {% endif %}id="cart_size">{{ cart|length }}</span>
 <hr>

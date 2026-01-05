@@ -20,6 +20,8 @@ from .utils import (
     get_only_relevant_tags,
     get_is_baking_cookie,
     get_cart,
+    get_tutorial_state,
+    get_current_step_data,
 )
 
 
@@ -65,6 +67,7 @@ def _create_form_from_post_data(post_data, files=None):
 
 def _build_form_context(request, create_recipe_form, ingredient_list, step_list, timing_list, existing_data, child_relationships=None):
     """Build context dictionary for rendering the add/edit recipe form."""
+    tutorial_state = get_tutorial_state(request)
     return {
         'mode': 'add',
         'create_recipe_form': create_recipe_form,
@@ -81,6 +84,8 @@ def _build_form_context(request, create_recipe_form, ingredient_list, step_list,
         'timing_types': TIMING_TYPE_CHOICES,
         'cookie_style_choices': COOKIE_STYLE_CHOICES,
         'child_relationships': child_relationships,
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
     }
 
 

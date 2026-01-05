@@ -19,6 +19,7 @@ from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 from food_db_app.cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
+from .tutorial_steps import get_tutorial_steps
 from .utils import (
     RecipeIngredientData,
     GroceryList,
@@ -31,6 +32,8 @@ from .utils import (
     get_derived_tags,
     get_is_baking_cookie,
     get_cart,
+    get_tutorial_state,
+    get_current_step_data,
 )
 
 def index(request):
@@ -38,9 +41,12 @@ def index(request):
         all_charts = AllCharts().charts
     else:
         all_charts = []
+    tutorial_state = get_tutorial_state(request)
     context = {
         'charts': all_charts,
         'cart': get_cart(request),
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
     }
     return render(request, 'index.html', context)
 
@@ -109,6 +115,7 @@ def recipe_detail(request, key):
     else:
         last_cooked_date = ''
 
+    tutorial_state = get_tutorial_state(request)
     context = {
         'recipe': recipe,
         'recipe_ingreds_and_steps': recipes,
@@ -128,6 +135,8 @@ def recipe_detail(request, key):
         'in_cart': str(recipe.clean_key in cart).lower(),
         'timing_types': TIMING_TYPE_CHOICES,
         'cookie_style_choices': COOKIE_STYLE_CHOICES,
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
     }
     return render(request, 'recipe_detail.html', context)
 
@@ -176,6 +185,7 @@ def search(request):
         in text_search_form.filters['tag'].extra['queryset']
     ]
 
+    tutorial_state = get_tutorial_state(request)
     context = {
         'text_search': text_search_form,
         'recipe_data': recipe_data,
@@ -184,6 +194,8 @@ def search(request):
         'is_baking_recipe': search_params['is_baking_recipe'],
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': cart,
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
     }
     return render(request, 'search.html', context)
 
@@ -574,6 +586,7 @@ def edit_recipe(request, key):
         # Change the cookie for is_baking_mode to match the recipe's is_baking_recipe value
         request.session['is_baking_mode'] = recipe_instance.is_baking_recipe
 
+    tutorial_state = get_tutorial_state(request)
     context = {
         'mode': 'edit',
         'create_recipe_form': create_recipe_form,
@@ -592,6 +605,8 @@ def edit_recipe(request, key):
         'cart': get_cart(request),
         'timing_types': TIMING_TYPE_CHOICES,
         'cookie_style_choices': COOKIE_STYLE_CHOICES,
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
     }
 
     return render(request, 'add_edit_recipe.html', context)
@@ -618,6 +633,7 @@ def manage_food(request):
         for cat in found_categories
     ]
     all_categories = [cat.name for cat in FoodCategory.objects.all().order_by('name')]
+    tutorial_state = get_tutorial_state(request)
     context = {
         'foods': foods,
         'categories': categories,
@@ -625,6 +641,8 @@ def manage_food(request):
         'food_search': food_search_form,
         'category_search': food_category_search_form,
         'cart': get_cart(request),
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
     }
     return render(request, 'manage_food.html', context)
 
@@ -817,6 +835,7 @@ def bulk_prep(request):
         if sum_times:
             friendly_attribute_names.append('Total time')
         
+        tutorial_state = get_tutorial_state(request)
         context = {
             'cart': cart,
             'recipes': cart_recipes,
@@ -829,5 +848,20 @@ def bulk_prep(request):
             'all_tags': all_tags,
             'all_view_configs': all_view_configs,
             'current_view_config_key': view_config_key,
+            'tutorial_state': tutorial_state,
+            'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
         }
         return render(request, 'bulk_prep.html', context)
+
+
+def help_page(request):
+    """Display the help page with tutorial steps and feature explanations."""
+    tutorial_steps = get_tutorial_steps()
+    tutorial_state = get_tutorial_state(request)
+    context = {
+        'tutorial_steps': tutorial_steps,
+        'cart': get_cart(request),
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
+    }
+    return render(request, 'help.html', context)
