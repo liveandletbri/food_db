@@ -2,6 +2,7 @@ import json
 from this import d
 import pytz
 import re
+from pathlib import Path
 
 from collections import Counter, defaultdict, OrderedDict
 from copy import deepcopy
@@ -858,10 +859,18 @@ def help_page(request):
     """Display the help page with tutorial steps and feature explanations."""
     tutorial_steps = get_tutorial_steps()
     tutorial_state = get_tutorial_state(request)
+    
+    # Read feature guides markdown file
+    markdown_path = Path(__file__).parent.parent / 'help_page.md'
+    help_page_markdown = ''
+    if markdown_path.exists():
+        help_page_markdown = markdown_path.read_text(encoding='utf-8')
+    
     context = {
         'tutorial_steps': tutorial_steps,
         'cart': get_cart(request),
         'tutorial_state': tutorial_state,
         'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
+        'help_page_markdown': help_page_markdown,
     }
     return render(request, 'help.html', context)

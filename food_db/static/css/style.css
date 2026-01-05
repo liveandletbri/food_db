@@ -154,6 +154,24 @@ td.step_number {
 .left_side_of_page {
     padding-left: 10px;
 }
+.left_side_of_page h1,
+.left_side_of_page h2,
+.left_side_of_page h3,
+.left_side_of_page h4 {
+    margin-left: -10px;
+    margin-top: 20px;
+}
+.left_side_of_page ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+.left_side_of_page li {
+    list-style-position: outside;
+}
+.left_side_of_page .tutorial_steps_list {
+    list-style-type: none;
+    padding-left: 0;
+}
 .duration_search_label {
     font-size: 0.8rem;
     margin-top: 0.6rem;
