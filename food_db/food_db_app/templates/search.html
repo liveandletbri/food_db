@@ -39,8 +39,7 @@
                         {% for tag in tags %}
                             <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
                                 <input id="id_tag_{{ forloop.counter0 }}" name="tag" type="checkbox" value="{{ tag.name }}" {% if tag.checked %}checked{% endif %}>
-                                {{ tag.name }}
-                                <span class="result_count_label" data-tag_name="{{ tag.name }}">{{ tag.result_count }}</span>
+                                <label for="id_tag_{{ forloop.counter0 }}">{{ tag.name }}<span class="result_count_label" data-tag_name="{{ tag.name }}">{{ tag.result_count }}</span></label>
                             </div>
                         {% endfor %}
                     </ul></label>
@@ -57,7 +56,7 @@
                         {% for tag in tags %}
                             <div class="ui checkbox tag_check" data-is_baking_tag="{{ tag.is_baking_tag }}" data-is_cooking_tag="{{ tag.is_cooking_tag }}">
                                 <input id="id_excluded_tag_{{ forloop.counter0 }}" name="excluded_tag" type="checkbox" value="{{ tag.name }}">
-                                {{ tag.name }}
+                                <label for="id_excluded_tag_{{ forloop.counter0 }}">{{ tag.name }}</label>
                             </div>
                         {% endfor %}
                     </ul></label>

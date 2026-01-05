@@ -32,7 +32,7 @@
                                 value="{{ tag.name }}"
                                 {% if tag.name in checked_tags %} checked="checked"{% endif %}
                             >
-                            {{ tag.name }}
+                            <label for="id_tags_{{ forloop.counter0 }}">{{ tag.name }}</label>
                         </div>
                         <!-- {% if forloop.counter|divisibleby:2 %}</ul><ul>{% endif %} -->
                     {% endfor %}

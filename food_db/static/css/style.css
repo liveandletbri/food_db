@@ -119,6 +119,26 @@ span.tag_display_label.Warm.weather {
 .tag_check {
     min-width: 100px;
 }
+/* Override story.css custom checkbox styling for tag checkboxes - use native checkboxes */
+.tag_check input[type="checkbox"] {
+    -moz-appearance: checkbox !important;
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+    display: inline-block !important;
+    float: none !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: auto !important;
+    margin-right: 5px;
+}
+.tag_check input[type="checkbox"] + label {
+    padding-left: 0 !important;
+    position: static !important;
+}
+.tag_check input[type="checkbox"] + label:before {
+    display: none !important;
+    content: none !important;
+}
 #id_tags-label {
     width: 50px;
 }

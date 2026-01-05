@@ -135,16 +135,55 @@ durationHoursSearch.addEventListener("input", stealthSubmit);
 durationMinutesSearch.addEventListener("input", stealthSubmit);
 tags.forEach(tag => tag.addEventListener("change", stealthSubmit));
 tagExclusions.forEach(tag => tag.addEventListener("change", stealthSubmit));
+// Prevent clicks on empty space from triggering the first checkbox (Firefox issue)
+// Handle clicks on the outer label that wraps the ul
+let tagsRowLabels = document.querySelectorAll('label.tags_row')
+tagsRowLabels.forEach(label => {
+    label.addEventListener("click", function (event) {
+        // If clicking directly on the label itself (not on its children), prevent default
+        // to stop Firefox from triggering the first checkbox
+        if (event.target === label) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    })
+})
+
+// Also handle clicks on the ul element itself (empty space between checkboxes)
+let tagsUlElements = document.querySelectorAll('label.tags_row > ul')
+tagsUlElements.forEach(ul => {
+    ul.addEventListener("click", function (event) {
+        // If clicking directly on the ul (empty space), stop propagation to prevent Firefox
+        // from triggering the first checkbox via the outer label
+        if (event.target === ul) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    })
+})
+
 tagDivs.forEach(div => div.addEventListener("click", function (event) {
-    if (event.target.nodeName == 'DIV') {  // Don't trigger if clicking the input directly
+    // Only handle clicks that are directly on the div or its label
+    let clickedElement = event.target
+    let isClickOnDiv = clickedElement === div
+    let isClickOnLabel = clickedElement.nodeName === 'LABEL' && div.contains(clickedElement)
+    
+    // If clicking directly on the input, let the browser handle it naturally
+    if (clickedElement.nodeName === 'INPUT' && clickedElement.type === 'checkbox') {
+        return
+    }
+    
+    // Only proceed if clicking on the div or its label (not empty space)
+    if (isClickOnDiv || isClickOnLabel) {
         // Block the event from triggering multiple tags
         event.preventDefault();
         event.stopPropagation();
-        console.log(event.target)
         let tag = div.querySelector('input[type=checkbox]')
-        tag.checked = !tag.checked
-        // Trigger the change event to update the search
-        tag.dispatchEvent(new Event('change', { bubbles: true }))
+        if (tag) {
+            tag.checked = !tag.checked
+            // Trigger the change event to update the search
+            tag.dispatchEvent(new Event('change', { bubbles: true }))
+        }
     }
 }));
 standaloneRecipeInput.addEventListener("change", stealthSubmit);
