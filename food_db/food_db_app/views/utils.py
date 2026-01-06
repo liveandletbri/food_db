@@ -1,9 +1,9 @@
+import os
 import re
 from collections import defaultdict, OrderedDict
 from datetime import datetime
 from decimal import Decimal
 from django.forms.models import model_to_dict
-from django.urls import reverse
 from math import floor
 
 from food_db_app.models import *
@@ -354,6 +354,7 @@ def context(request, **kwargs):
         'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
         'cloud_sync_enabled': S3_SYNC_ENABLED,
         'cloud_url': S3Sync().bucket_url if S3_SYNC_ENABLED else None,
+        'potty_mouth': os.getenv('POTTY_MOUTH', 'false').lower() == 'true',
     }
     context_values.update(kwargs)
     return context_values

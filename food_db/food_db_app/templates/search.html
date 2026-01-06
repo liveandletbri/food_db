@@ -69,7 +69,7 @@
 </form>
 <div id="search_results">
     {% with result_count=text_search.qs|length %}
-    <h2>{% if result_count == 0 %}Ah shit, no matching recipes found 😔{% else %}Found {{ result_count }} {% if is_baking_recipe == 'true' %}baking{% else %}cooking{% endif %} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
+    <h2>{% if result_count == 0 %}Ah {% if potty_mouth %}shit{% else %}man{% endif %}, no matching recipes found 😔{% else %}Found {{ result_count }} {% if is_baking_recipe == 'true' %}baking{% else %}cooking{% endif %} recipe{% endif %}{% if result_count > 1 %}s{% endif %}</h2>
     {% endwith %}
     <table id="search_results_table">
         <thead>

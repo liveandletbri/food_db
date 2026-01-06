@@ -1,7 +1,7 @@
 {% load static %}
 <div id="logo_header">
     <a href="{% url 'index' %}"><img id="logo_img" src="{% static 'img/logo.png' %}"></img></a>
-    <h1 id="logo_title">Food DB, biiiitch</h1>
+    <h1 id="logo_title">Food DB{% if potty_mouth %}, biiiitch{% endif %}</h1>
     <label class="slider_switch" id="baking_switch_label">
         <input type="checkbox" id="cooking_baking_switch" {% if current_is_baking_mode == 'True' %}checked{% endif %}>
         <div class="slider">

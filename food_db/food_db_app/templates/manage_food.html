@@ -31,7 +31,7 @@
     <br><br>
 
     {% with result_count=food_search.qs|length %}
-    <h3 id="food_result_count">{% if result_count == 0 %}Ah shit, no matching foods found 😔{% else %}Found {{ result_count }} food{% endif %}{% if result_count > 1 %}s{% endif %}</h3>
+    <h3 id="food_result_count">{% if result_count == 0 %}Ah {% if potty_mouth %}shit{% else %}man{% endif %}, no matching foods found 😔{% else %}Found {{ result_count }} food{% endif %}{% if result_count > 1 %}s{% endif %}</h3>
     {% endwith %}
 
     <table id="foods_categories_table" class="manage_food_table">
@@ -88,7 +88,7 @@
     <br><br>
 
     {% with result_count=category_search.qs|length %}
-    <h3 id="category_result_count">{% if result_count == 0 %}Ah shit, no matching categories found 😔{% else %}Found {{ result_count }} {% endif %}{% if result_count > 1 %}categories{% else %}category{% endif %}</h3>
+    <h3 id="category_result_count">{% if result_count == 0 %}Ah {% if potty_mouth %}shit{% else %}man{% endif %}, no matching categories found 😔{% else %}Found {{ result_count }} {% endif %}{% if result_count > 1 %}categories{% else %}category{% endif %}</h3>
     {% endwith %}
 
     <table id="categories_table" class="manage_food_table">
