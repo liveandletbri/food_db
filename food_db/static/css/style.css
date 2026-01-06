@@ -1101,6 +1101,7 @@ details[open] summary {
 .chart_filter_item {
     padding: 10px;
     margin-bottom: 5px;
+    list-style: none;
     cursor: pointer;
     border-radius: 3px;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
