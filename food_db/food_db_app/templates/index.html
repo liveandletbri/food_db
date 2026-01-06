@@ -5,7 +5,7 @@
     <p class="left_side_of_page">
         Eventually we can put food recommendations here? Dashboards of food information? Whatever we want 🤷‍♂️
     </p>
-    <div class="row">
+    <div id="home_page_charts" class="row">
         {% for chart_id, chart_data in charts.items %}
         <div id="{{ chart_id }}_div" class="chart_container">
             <canvas class="left_side_of_page chart" id="{{ chart_id }}"></canvas>

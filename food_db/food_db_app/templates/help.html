@@ -7,16 +7,11 @@
     <div class="left_side_of_page">
         <p>Take an interactive walkthrough of Food DB features. Click any step below to start the tutorial from that point:</p>
         
-        {% for section, steps in steps_by_section.items %}
-            <h3>{{ section }}</h3>
-            <ul class="tutorial_steps_list">
-                {% for step in steps %}
-                <li>
-                    <a href="#" class="tutorial_step_link" data-step-id="{{ step.step_id }}">{{ step.title }}</a>
-                </li>
-                {% endfor %}
-            </ul>
+        <ul class="tutorial_steps_list">
+        {% for section, first_step in steps_by_section.items %}
+            <li><a href="#" class="tutorial_step_link" data-step-id="{{ first_step.step_id }}"><h4 style="margin: 0;">{{ section }}</h4></a></li>
         {% endfor %}
+        </ul>
         
         {{ help_page_markdown|markdown:""|safe }}
     </div>

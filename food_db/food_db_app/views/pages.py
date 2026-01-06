@@ -842,11 +842,17 @@ def help_page(request):
     if markdown_path.exists():
         help_page_markdown = markdown_path.read_text(encoding='utf-8')
     
-    # get unique list of sections
+    # get unique list of sections in order
     sections = remove_dupes_preserve_order([step.section for step in tutorial_steps])
 
-    # group steps by section
-    steps_by_section = OrderedDict((section, [step for step in tutorial_steps if step.section == section]) for section in sections)
+    # create dictionary mapping ordered sections to their first tutorial step
+    steps_by_section = OrderedDict((section, None) for section in sections)
+    current_section = sections[0]
+    steps_by_section[current_section] = tutorial_steps[0]
+    for step in tutorial_steps:
+        if step.section != current_section:
+            current_section = step.section
+            steps_by_section[current_section] = step
 
     return_context = context(
         request=request,

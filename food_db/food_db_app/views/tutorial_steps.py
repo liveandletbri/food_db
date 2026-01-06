@@ -20,13 +20,12 @@ from django.urls import reverse
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
     
-    def __init__(self, step_id, title, section, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None):
+    def __init__(self, step_id, section, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None):
         """
         Initialize a tutorial step.
         
         Args:
             step_id (str): Unique identifier for the step
-            title (str): Display name for the step
             section (str): Section the step is under
             page_url (str): Django URL name (e.g., 'index', 'recipe_detail')
             scroll_target (str): CSS selector for the element to scroll to
@@ -35,7 +34,6 @@ class TutorialStep:
             order (int, optional): Order number (automatically assigned if None)
         """
         self.step_id = step_id
-        self.title = title
         self.section = section
         self.page_url = page_url
         self.page_kwargs = page_kwargs
@@ -48,7 +46,7 @@ class TutorialStep:
         
         Returns:
             dict: Dictionary with step data including resolved URL.
-                Includes: step_id, title, page_url, page_kwargs, scroll_target, 
+                Includes: step_id, page_url, page_kwargs, scroll_target, 
                 tooltip_content, order, url, is_last_step
         """
         url = None
@@ -64,12 +62,11 @@ class TutorialStep:
         
         return {
             'step_id': self.step_id,
-            'title': self.title,
             'section': self.section,
             'page_url': self.page_url,
             'page_kwargs': self.page_kwargs,
             'scroll_target': self.scroll_target,
-            'tooltip_content': self.tooltip_content,
+            'tooltip_content': self.tooltip_content, 
             'order': self.order,
             'url': url,
             'is_last_step': is_last_step,
@@ -79,58 +76,99 @@ class TutorialStep:
 TUTORIAL_STEPS = [
     TutorialStep(
         step_id='welcome',
-        title='Welcome to Food DB',
-        section='Getting Started',
+        section='Getting Familiar',
         page_url='index',
         page_kwargs=None,
         scroll_target='#logo_title',
-        tooltip_content='Welcome to Food DB! This is your personal recipe management system. Let\'s take a quick tour of the features.',
+        tooltip_content='''Welcome to Food DB! This is your personal recipe management system. Let's take a quick tour of the features. This tutorial will show you around. You can exit any time with the red button at the bottom of your screen, and revisit any part of the tutorial from the Help page.''',
     ),
     TutorialStep(
-        step_id='cooking_baking_switch',
-        title='Cooking vs Baking Mode',
-        section='Getting Started',
+        step_id='charts',
+        section='Getting Familiar',
         page_url='index',
+        page_kwargs=None,
+        scroll_target='h1',
+        tooltip_content='''If you record your cooked meals, this section will show dashboards with charts and statistics about your cooking patterns. The best way to get interesting data here is to record every cooked meal and to use lots of tags on your recipes!''',
+    ),
+    TutorialStep(
+        step_id='add_recipe_page',
+        section='Getting Familiar',
+        page_url='add_recipe',
+        page_kwargs=None,
+        scroll_target='h1',
+        tooltip_content='''This is where you add new recipes. We'll come back here to explore all the features later in the tutorial.''',
+    ),
+    TutorialStep(
+        step_id='cooking_baking_add',
+        section='Getting Familiar',
+        page_url='add_recipe',
         page_kwargs=None,
         scroll_target='#baking_switch_label',
-        tooltip_content='Switch between Cooking and Baking modes. This changes the color scheme and filters recipes based on your selection.',
+        tooltip_content='''You have two sides to your Food DB: Cooking and Baking. Use this toggle to determine which side each recipe is stored in.''',
     ),
     TutorialStep(
-        step_id='navigation_bar',
-        title='Navigation',
-        section='Getting Started',
-        page_url='index',
-        page_kwargs=None,
-        scroll_target='.left_side_of_page',
-        tooltip_content='Use the navigation bar to access different sections: Home, Add Recipe, Recipes (search), Food Manager, and Bulk Prep.',
-    ),
-    TutorialStep(
-        step_id='search_recipes',
-        title='Search Recipes',
-        section='Searching Recipes',
+        step_id='search_recipes_page',
+        section='Getting Familiar',
         page_url='search',
         page_kwargs=None,
         scroll_target='h1',
-        tooltip_content='Search and filter your recipes. Use tags, text search, and other filters to find exactly what you\'re looking for.',
+        tooltip_content='''Search and filter your recipes. Use tags, text search, and other filters to find exactly what you're looking for.''',
     ),
     TutorialStep(
-        step_id='add_recipe',
-        title='Add a New Recipe',
+        step_id='cooking_baking_search',
+        section='Getting Familiar',
+        page_url='search',
+        page_kwargs=None,
+        scroll_target='#baking_switch_label',
+        tooltip_content='''Like on the add recipe page, this toggle sets you into Cooking or Baking "mode". On this page, it determines which side of your database you are searching in.''',
+    ),
+    TutorialStep(
+        step_id='food_manager_page',
+        section='Getting Familiar',
+        page_url='manage_food',
+        page_kwargs=None,
+        scroll_target='h1',
+        tooltip_content='''This is where you manage the list of all the foods you use as ingredients. You can edit foods, categorize them, and merge them with each other. You only need to use this page if you really like having an organized grocery list 😛''',
+    ),
+    TutorialStep(
+        step_id='bulk_prep_page',
+        section='Getting Familiar',
+        page_url='bulk_prep',
+        page_kwargs=None,
+        scroll_target='h1',
+        tooltip_content='''This is where you can plan a feast! You can add recipes to your cart and see how they compare to each other. You can also create view configurations to customize the columns you see in the table.''',
+    ),
+    TutorialStep(
+        step_id='help_page',
+        section='Getting Familiar',
+        page_url='help',
+        page_kwargs=None,
+        scroll_target='h1',
+        tooltip_content='''The help page lets you revisit any step in this tutorial and includes detailed guides about specific features of Food DB.''',
+    ),
+    TutorialStep(
+        step_id='add_recipe_start',
         section='Adding Recipes',
         page_url='add_recipe',
         page_kwargs=None,
         scroll_target='h1',
-        tooltip_content='Create new recipes here. Add ingredients, steps, images, tags, and more to build your recipe collection.',
+        tooltip_content='''Alright, let's dig into how to add a recipe. There is a lot here!''',
     ),
-    # Add more steps here as features are developed
-    # Example template:
     # TutorialStep(
-    #     step_id='feature_name',
-    #     title='Feature Title',
-    #     page_url='url_name',
-    #     page_kwargs=None,  # or {'key': 'value'} if URL needs parameters
-    #     scroll_target='#element-id',
-    #     tooltip_content='Explanation of the feature...',
+    #     step_id='basic_recipe_info',
+    #     section='Adding Recipes',
+    #     page_url='add_recipe',
+    #     page_kwargs=None,
+    #     scroll_target='input[name=title]',
+    #     tooltip_content='''Most of the fields here are pretty self-explanatory. They're almost all optional, except the title, obviously.''',
+    # ),
+    # TutorialStep(
+    #     step_id='recipe_url',
+    #     section='Adding Recipes',
+    #     page_url='add_recipe',
+    #     page_kwargs=None,
+    #     scroll_target='input[name=url]',
+    #     tooltip_content='''I like to include the URL of the source of the recipe, in case I make a mistake in transcribing it. It's always nice to have the original to look back at! This otherwise doesn't do anything for you - it's just for reference.''',
     # ),
 ]
 
