@@ -34,7 +34,7 @@ from .utils import (
     get_is_baking_cookie,
     get_cart,
     get_tutorial_state,
-    get_current_step_data,
+    context,
 )
 
 def index(request):
@@ -42,14 +42,11 @@ def index(request):
         all_charts = AllCharts().charts
     else:
         all_charts = []
-    tutorial_state = get_tutorial_state(request)
-    context = {
-        'charts': all_charts,
-        'cart': get_cart(request),
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-    }
-    return render(request, 'index.html', context)
+    return_context = context(
+        request=request,
+        charts=all_charts,
+    )
+    return render(request, 'index.html', return_context)
 
 def recipe_detail(request, key):
     # assert isinstance(multiplier, float) and multiplier > 0, "Multiplier must be a positive number"
@@ -117,29 +114,23 @@ def recipe_detail(request, key):
         last_cooked_date = ''
 
     tutorial_state = get_tutorial_state(request)
-    context = {
-        'recipe': recipe,
-        'recipe_ingreds_and_steps': recipes,
-        'calorie_string': calorie_string,
-        'images': images,
-        'grocery_list': groceries.grocery_list_str,
-        'multiplier': multiplier,
-        'total_cooked_meal_counts': total_cooked_meal_counts,
-        'last_cooked_date': last_cooked_date,
-        'has_steps': recipe.has_steps,
-        'has_ingredients': recipe.has_ingredients,
-        'is_baking_recipe': str(recipe.is_baking_recipe),
-        'has_children': recipe.has_children,
-        'cloud_sync_enabled': S3_SYNC_ENABLED,
-        'cloud_url': S3Sync().bucket_url if S3_SYNC_ENABLED else None,
-        'cart': (cart := get_cart(request)),
-        'in_cart': str(recipe.clean_key in cart).lower(),
-        'timing_types': TIMING_TYPE_CHOICES,
-        'cookie_style_choices': COOKIE_STYLE_CHOICES,
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-    }
-    return render(request, 'recipe_detail.html', context)
+    return_context = context(
+        request=request,
+        recipe=recipe,
+        recipe_ingreds_and_steps=recipes,
+        calorie_string=calorie_string,
+        images=images,
+        grocery_list=groceries.grocery_list_str,
+        multiplier=multiplier,
+        total_cooked_meal_counts=total_cooked_meal_counts,
+        last_cooked_date=last_cooked_date,
+        has_steps=recipe.has_steps,
+        has_ingredients=recipe.has_ingredients,
+        is_baking_recipe=str(recipe.is_baking_recipe),
+        has_children=recipe.has_children,
+        in_cart=str(recipe.clean_key in get_cart(request)).lower(),
+    )
+    return render(request, 'recipe_detail.html', return_context)
 
 def search(request):
     search_params = request.GET.copy()
@@ -186,20 +177,15 @@ def search(request):
         in text_search_form.filters['tag'].extra['queryset']
     ]
 
-    tutorial_state = get_tutorial_state(request)
-    context = {
-        'text_search': text_search_form,
-        'recipe_data': recipe_data,
-        'tags': tag_data,
-        'tag_counts': tag_counts,
-        'is_baking_recipe': search_params['is_baking_recipe'],
-        'current_is_baking_mode': get_is_baking_cookie(request),
-        'cart': cart,
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-    }
-    return render(request, 'search.html', context)
-
+    return_context = context(
+        request=request,
+        text_search=text_search_form,
+        recipe_data=recipe_data,
+        tags=tag_data,
+        tag_counts=tag_counts,
+        is_baking_recipe=search_params['is_baking_recipe'],
+    )
+    return render(request, 'search.html', return_context)
 
 def edit_recipe(request, key):
     log_debug_message('edit_recipe() called', restart_timer=True)
@@ -587,30 +573,24 @@ def edit_recipe(request, key):
         # Change the cookie for is_baking_mode to match the recipe's is_baking_recipe value
         request.session['is_baking_mode'] = recipe_instance.is_baking_recipe
 
-    tutorial_state = get_tutorial_state(request)
-    context = {
-        'mode': 'edit',
-        'create_recipe_form': create_recipe_form,
-        'checked_tags': related_tags,
-        'existing_images': related_images,
-        'ingredient_list': ingredient_list,
-        'step_list': step_list,
-        'timing_list': timing_list,
-        'food_list': existing_foods,
-        'unit_list': existing_units,
-        'book_list': existing_books,
-        'tag_list': existing_tags,
-        'recipe_list': existing_recipes,
-        'child_relationships': child_relationships,
-        'current_is_baking_mode': get_is_baking_cookie(request),
-        'cart': get_cart(request),
-        'timing_types': TIMING_TYPE_CHOICES,
-        'cookie_style_choices': COOKIE_STYLE_CHOICES,
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-    }
+    return_context = context(
+        request=request,
+        mode='edit',
+        create_recipe_form=create_recipe_form,
+        checked_tags=related_tags,
+        existing_images=related_images,
+        ingredient_list=ingredient_list,
+        step_list=step_list,
+        timing_list=timing_list,
+        food_list=existing_foods,
+        unit_list=existing_units,
+        book_list=existing_books,
+        tag_list=existing_tags,
+        recipe_list=existing_recipes,
+        child_relationships=child_relationships,
+    )
 
-    return render(request, 'add_edit_recipe.html', context)
+    return render(request, 'add_edit_recipe.html', return_context)
 
 
 def manage_food(request):
@@ -635,17 +615,15 @@ def manage_food(request):
     ]
     all_categories = [cat.name for cat in FoodCategory.objects.all().order_by('name')]
     tutorial_state = get_tutorial_state(request)
-    context = {
-        'foods': foods,
-        'categories': categories,
-        'all_categories': all_categories,
-        'food_search': food_search_form,
-        'category_search': food_category_search_form,
-        'cart': get_cart(request),
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-    }
-    return render(request, 'manage_food.html', context)
+    return_context = context(
+        request=request,
+        foods=foods,
+        categories=categories,
+        all_categories=all_categories,
+        food_search=food_search_form,
+        category_search=food_category_search_form,
+    )
+    return render(request, 'manage_food.html', return_context)
 
 
 def bulk_prep(request):
@@ -836,23 +814,21 @@ def bulk_prep(request):
         if sum_times:
             friendly_attribute_names.append('Total time')
         
-        tutorial_state = get_tutorial_state(request)
-        context = {
-            'cart': cart,
-            'recipes': cart_recipes,
-            'grocery_list': groceries.grocery_list_str,
-            'recipe_tag_matrix': recipe_tag_matrix,
-            'matrix_tags': matrix_tags,
-            'recipe_attribute_matrix': recipe_attribute_matrix,
-            'matrix_attributes': friendly_attribute_names,
-            'all_attribute_tuples': all_attribute_tuples,
-            'all_tags': all_tags,
-            'all_view_configs': all_view_configs,
-            'current_view_config_key': view_config_key,
-            'tutorial_state': tutorial_state,
-            'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-        }
-        return render(request, 'bulk_prep.html', context)
+        return_context = context(
+            request=request,
+            cart=cart,
+            recipes=cart_recipes,
+            grocery_list=groceries.grocery_list_str,
+            recipe_tag_matrix=recipe_tag_matrix,
+            matrix_tags=matrix_tags,
+            recipe_attribute_matrix=recipe_attribute_matrix,
+            matrix_attributes=friendly_attribute_names,
+            all_attribute_tuples=all_attribute_tuples,
+            all_tags=all_tags,
+            all_view_configs=all_view_configs,
+            current_view_config_key=view_config_key,
+        )
+        return render(request, 'bulk_prep.html', return_context)
 
 
 def help_page(request):
@@ -872,11 +848,9 @@ def help_page(request):
     # group steps by section
     steps_by_section = OrderedDict((section, [step for step in tutorial_steps if step.section == section]) for section in sections)
 
-    context = {
-        'steps_by_section': steps_by_section,
-        'cart': get_cart(request),
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-        'help_page_markdown': help_page_markdown,
-    }
-    return render(request, 'help.html', context)
+    return_context = context(
+        request=request,
+        steps_by_section=steps_by_section,
+        help_page_markdown=help_page_markdown,
+    )
+    return render(request, 'help.html', return_context)

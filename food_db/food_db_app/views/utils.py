@@ -7,6 +7,7 @@ from django.urls import reverse
 from math import floor
 
 from food_db_app.models import *
+from food_db_app.cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 from .tutorial_steps import get_step_by_id
 
 LAST_DEBUG_LOG_START_TIME = None
@@ -341,3 +342,18 @@ def get_current_step_data(request):
     
     # Convert TutorialStep object to dictionary using the class method
     return step.to_dict_with_url()
+
+def context(request, **kwargs):
+    tutorial_state = get_tutorial_state(request)
+    context_values = {
+        'current_is_baking_mode': get_is_baking_cookie(request),
+        'cart': get_cart(request),
+        'timing_types': TIMING_TYPE_CHOICES,
+        'cookie_style_choices': COOKIE_STYLE_CHOICES,
+        'tutorial_state': tutorial_state,
+        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
+        'cloud_sync_enabled': S3_SYNC_ENABLED,
+        'cloud_url': S3Sync().bucket_url if S3_SYNC_ENABLED else None,
+    }
+    context_values.update(kwargs)
+    return context_values

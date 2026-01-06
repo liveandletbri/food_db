@@ -18,10 +18,7 @@ from .utils import (
     remove_dupes_preserve_order,
     log_debug_message,
     get_only_relevant_tags,
-    get_is_baking_cookie,
-    get_cart,
-    get_tutorial_state,
-    get_current_step_data,
+    context,
 )
 
 
@@ -67,26 +64,20 @@ def _create_form_from_post_data(post_data, files=None):
 
 def _build_form_context(request, create_recipe_form, ingredient_list, step_list, timing_list, existing_data, child_relationships=None):
     """Build context dictionary for rendering the add/edit recipe form."""
-    tutorial_state = get_tutorial_state(request)
-    return {
-        'mode': 'add',
-        'create_recipe_form': create_recipe_form,
-        'ingredient_list': ingredient_list,
-        'step_list': step_list,
-        'timing_list': timing_list,
-        'food_list': existing_data['existing_foods'],
-        'unit_list': existing_data['existing_units'],
-        'book_list': existing_data['existing_books'],
-        'tag_list': existing_data['existing_tags'],
-        'recipe_list': existing_data['existing_recipes'],
-        'current_is_baking_mode': get_is_baking_cookie(request),
-        'cart': get_cart(request),
-        'timing_types': TIMING_TYPE_CHOICES,
-        'cookie_style_choices': COOKIE_STYLE_CHOICES,
-        'child_relationships': child_relationships,
-        'tutorial_state': tutorial_state,
-        'tutorial_current_step': get_current_step_data(request) if tutorial_state['tutorial_active'] else None,
-    }
+    return context(
+        request=request,
+        mode='add',
+        create_recipe_form=create_recipe_form,
+        ingredient_list=ingredient_list,
+        step_list=step_list,
+        timing_list=timing_list,
+        food_list=existing_data['existing_foods'],
+        unit_list=existing_data['existing_units'],
+        book_list=existing_data['existing_books'],
+        tag_list=existing_data['existing_tags'],
+        recipe_list=existing_data['existing_recipes'],
+        child_relationships=child_relationships,
+    )
 
 
 def _process_recipe_creation(request, create_recipe_form):
