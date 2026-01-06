@@ -20,7 +20,7 @@ from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 from food_db_app.cloud_sync.s3 import S3_SYNC_ENABLED, S3Sync
 
-from .tutorial_steps import get_tutorial_steps, TUTORIAL_STEPS
+from .tutorial_steps import TUTORIAL_STEPS
 from .utils import (
     RecipeIngredientData,
     GroceryList,
@@ -833,8 +833,6 @@ def bulk_prep(request):
 
 def help_page(request):
     """Display the help page with tutorial steps and feature explanations."""
-    tutorial_steps = get_tutorial_steps()
-    tutorial_state = get_tutorial_state(request)
     
     # Read feature guides markdown file
     markdown_path = Path(__file__).parent.parent / 'help_page.md'
@@ -842,17 +840,11 @@ def help_page(request):
     if markdown_path.exists():
         help_page_markdown = markdown_path.read_text(encoding='utf-8')
     
-    # get unique list of sections in order
-    sections = remove_dupes_preserve_order([step.section for step in tutorial_steps])
-
-    # create dictionary mapping ordered sections to their first tutorial step
-    steps_by_section = OrderedDict((section, None) for section in sections)
-    current_section = sections[0]
-    steps_by_section[current_section] = tutorial_steps[0]
-    for step in tutorial_steps:
-        if step.section != current_section:
-            current_section = step.section
-            steps_by_section[current_section] = step
+    # Create dictionary mapping ordered sections to their first tutorial step
+    # TUTORIAL_STEPS is already an OrderedDict, so we just need to extract the first step from each section
+    steps_by_section = OrderedDict()
+    for section_title, steps in TUTORIAL_STEPS.items():
+        steps_by_section[section_title] = steps[0]
 
     return_context = context(
         request=request,

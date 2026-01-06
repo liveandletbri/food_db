@@ -143,12 +143,17 @@ def validate_tutorial_steps():
     """
     print('Validating tutorial steps...')
     if not TUTORIAL_STEPS:
-        raise ImproperlyConfigured('TUTORIAL_STEPS list is empty. At least one tutorial step is required.')
+        raise ImproperlyConfigured('TUTORIAL_STEPS OrderedDict is empty. At least one tutorial step is required.')
     
     step_ids = set()
     orders = []
+    all_steps = []
     
-    for index, step in enumerate(TUTORIAL_STEPS, start=1):
+    # Flatten all steps from all sections
+    for steps in TUTORIAL_STEPS.values():
+        all_steps.extend(steps)
+    
+    for index, step in enumerate(all_steps, start=1):
         print(f'Validating step {index}: {step.step_id}')
         # Check required fields
         if not step.step_id:
@@ -186,7 +191,7 @@ def validate_tutorial_steps():
     
     # Validate sequential order (no gaps, starts at 1)
     if orders:
-        expected_order = list(range(1, len(TUTORIAL_STEPS) + 1))
+        expected_order = list(range(1, len(all_steps) + 1))
         orders_sorted = sorted(orders)
         if orders_sorted != expected_order:
             raise ImproperlyConfigured(
@@ -195,7 +200,7 @@ def validate_tutorial_steps():
             )
     
     # Validate scroll_target exists in HTML templates
-    for step in TUTORIAL_STEPS:
+    for step in all_steps:
         template_path = _get_template_path(step.page_url)
         if not template_path:
             # Skip validation if we don't have a mapping for this page_url
