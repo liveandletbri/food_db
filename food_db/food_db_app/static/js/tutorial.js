@@ -3,6 +3,7 @@
 let currentTutorialStep = null
 let tutorialTooltipElement = null
 let tutorialExitButton = null
+let tutorialHighlightElement = null
 
 function scrollToElement(selector) {
     let targetElement = document.querySelector(selector)
@@ -53,12 +54,103 @@ function createTutorialTooltip(content, isLastStep) {
     return tooltip
 }
 
+function highlightTargetElement(targetElement) {
+    // Remove existing highlight if present
+    if (tutorialHighlightElement) {
+        tutorialHighlightElement.remove()
+        tutorialHighlightElement = null
+    }
+    
+    if (!targetElement) {
+        return
+    }
+    
+    // Create highlight element
+    let highlight = document.createElement('div')
+    highlight.classList.add('tutorial_highlight')
+    document.body.appendChild(highlight)
+    tutorialHighlightElement = highlight
+    
+    // Position and size the highlight to match the target element
+    function updateHighlightPosition() {
+        let rect = targetElement.getBoundingClientRect()
+        highlight.style.position = 'fixed'
+        highlight.style.left = `${rect.left}px`
+        highlight.style.top = `${rect.top}px`
+        highlight.style.width = `${rect.width}px`
+        highlight.style.height = `${rect.height}px`
+    }
+    
+    updateHighlightPosition()
+    
+    // Update position on scroll and resize
+    let updateHandler = function() {
+        updateHighlightPosition()
+    }
+    window.addEventListener('scroll', updateHandler, true)
+    window.addEventListener('resize', updateHandler)
+    
+    // Store handlers for cleanup
+    highlight._updateHandler = updateHandler
+    
+    // Start animation sequence
+    highlight.classList.add('tutorial_highlight_fade_in')
+    
+    setTimeout(function() {
+        highlight.classList.remove('tutorial_highlight_fade_in')
+        highlight.classList.add('tutorial_highlight_visible')
+    }, 300) // After fade in (0.3s)
+    
+    setTimeout(function() {
+        highlight.classList.remove('tutorial_highlight_visible')
+        highlight.classList.add('tutorial_highlight_blink_out')
+    }, 1000) // After fade in + stay (0.3s + 0.7s)
+    
+    setTimeout(function() {
+        highlight.classList.remove('tutorial_highlight_blink_out')
+        highlight.classList.add('tutorial_highlight_blink_in')
+    }, 1200) // After blink out (0.3s + 0.7s + 0.2s)
+    
+    setTimeout(function() {
+        highlight.classList.remove('tutorial_highlight_blink_in')
+        highlight.classList.add('tutorial_highlight_visible')
+    }, 1400) // After blink in (0.3s + 0.7s + 0.2s + 0.2s)
+    
+    setTimeout(function() {
+        highlight.classList.remove('tutorial_highlight_visible')
+        highlight.classList.add('tutorial_highlight_fade_out')
+    }, 2100) // After second stay (0.3s + 0.7s + 0.2s + 0.2s + 0.7s)
+    
+    setTimeout(function() {
+        if (tutorialHighlightElement) {
+            window.removeEventListener('scroll', updateHandler, true)
+            window.removeEventListener('resize', updateHandler)
+            tutorialHighlightElement.remove()
+            tutorialHighlightElement = null
+        }
+    }, 2400) // After fade out (0.3s + 0.7s + 0.2s + 0.2s + 0.7s + 0.3s)
+}
+
+function removeTutorialHighlight() {
+    if (tutorialHighlightElement) {
+        if (tutorialHighlightElement._updateHandler) {
+            window.removeEventListener('scroll', tutorialHighlightElement._updateHandler, true)
+            window.removeEventListener('resize', tutorialHighlightElement._updateHandler)
+        }
+        tutorialHighlightElement.remove()
+        tutorialHighlightElement = null
+    }
+}
+
 function showTutorialTooltip(stepData, targetElement) {
     // Check if this is the last step (determined on server side)
     let isLastStep = stepData.is_last_step || false
     
     let tooltip = createTutorialTooltip(stepData.tooltip_content, isLastStep)
     positionTooltip(tooltip, targetElement, true)
+    
+    // Highlight the target element
+    highlightTargetElement(targetElement)
     
     // Show tooltip with animation using function from tooltip.js
     setTimeout(function() {
@@ -132,6 +224,9 @@ async function exitTutorial() {
         }
     })
     
+    // Remove highlight
+    removeTutorialHighlight()
+    
     // Hide tooltip using function from tooltip.js
     if (tutorialTooltipElement) {
         hideToolTip(tutorialTooltipElement)
@@ -194,6 +289,9 @@ function initTutorial(stepId) {
 
 function showTutorialStep(stepData) {
     currentTutorialStep = stepData
+    
+    // Remove any existing highlight from previous step
+    removeTutorialHighlight()
     
     // Show exit button
     showTutorialExitButton()

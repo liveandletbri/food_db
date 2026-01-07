@@ -806,6 +806,63 @@ button.merge_selected {
 .tutorial_tooltip button:hover {
     background-color: #3cc382;
 }
+.tutorial_highlight {
+    position: fixed;
+    pointer-events: none;
+    border: 3px solid #3cc382;
+    border-radius: 8px;
+    background: transparent;
+    box-sizing: border-box;
+    z-index: 1400;
+    opacity: 0;
+}
+.tutorial_highlight_fade_in {
+    animation: tutorial_highlight_fade_in 0.3s ease-in forwards;
+}
+.tutorial_highlight_visible {
+    opacity: 0.8;
+}
+.tutorial_highlight_blink_out {
+    animation: tutorial_highlight_blink_out 0.2s ease-out forwards;
+}
+.tutorial_highlight_blink_in {
+    animation: tutorial_highlight_blink_in 0.2s ease-in forwards;
+}
+.tutorial_highlight_fade_out {
+    animation: tutorial_highlight_fade_out 0.3s ease-out forwards;
+}
+@keyframes tutorial_highlight_fade_in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.8;
+    }
+}
+@keyframes tutorial_highlight_blink_out {
+    from {
+        opacity: 0.8;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes tutorial_highlight_blink_in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.8;
+    }
+}
+@keyframes tutorial_highlight_fade_out {
+    from {
+        opacity: 0.8;
+    }
+    to {
+        opacity: 0;
+    }
+}
 .markdown_help_indented_text {
     margin-left: 1rem;
 }
