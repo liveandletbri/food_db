@@ -52,6 +52,11 @@ Similarly to the tag matrix, the attribute matrix will show different attributes
 ### View Config
 Choose the tags and attributes you want in your matrices here, and save the list as a new View Config. This records your preferences in the database and saves your selected config in your sessoin cookies. You can always come back to this tab to edit a View Config if you need to.
 
+## Linking Ingredients to Steps
+When you create a recipe you might notice that, in your step description, some of the ingredient names are underlined and some are not. This is Step-Ingredient Linking, and it does two things: first, when you hover over the underlined ingredient name, it shows you the quantity and any notes you had from the Ingredients table, so you don't have to keep scrolling up and down. Second, if you are in Cooking Mode, when you check off a step, it will also check off any linked inredients in the Ingredients table.
+
+So why are only _some_ of your ingredients underlined? When you first create a recipe (not when you edit it later), the Food DB scans your steps for exact name matches of ingredients, and then creates this link for you. If your Ingredient list says "shredded cheddar" and you mention "shredded cheddar" in your steps, the link will be created automatically. However, if you instead just wrote "the cheese" in your steps, the link will not automatically be created. There is a syntax you can use to manually create these links for any ingredient that the automatic links missed, and you can learn about that by hovering your mouse over the Help icon next to the Steps header.
+
 ## Searching Recipes
 
 Use the Recipes page to search and filter your recipes. You can:
