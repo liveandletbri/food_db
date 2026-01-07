@@ -1,5 +1,21 @@
 let ingredientLinks = document.querySelectorAll('.ingredient_link');
 
+function isAndroidChrome() {
+    let userAgent = navigator.userAgent.toLowerCase();
+    let isMobile = /chrome/.test(userAgent) && /android/.test(userAgent) && /mobile/.test(userAgent);
+    return (( isMobile ) ? 'mobile' : 'computer')
+}
+
+function isiPhoneSafari() {
+    let userAgent = navigator.userAgent.toLowerCase();
+    let isMobile = /iphone/.test(userAgent) && /safari/.test(userAgent) && !/chrome/.test(userAgent) && !/crios/.test(userAgent);
+    return (( isMobile ) ? 'mobile' : 'computer')
+}
+
+function isMobile() {
+    return (( isAndroidChrome() == 'mobile' || isiPhoneSafari() == 'mobile' ) ? 'mobile' : 'computer')
+}
+
 function hideToolTip(tooltip) {
     tooltip.classList.remove('visible')
 }
@@ -17,7 +33,7 @@ function showAndHideTooltip(tooltip, duration) {
     setTimeout(hideToolTip, duration, tooltip)
 }
 
-function positionTooltip(tooltip, targetElement, verticalOffset) {
+function positionTooltip(tooltip, targetElement, centerOnMobile, verticalOffset) {
     if (targetElement) {
         let rect = targetElement.getBoundingClientRect()
         let tooltipRect = tooltip.getBoundingClientRect()
@@ -27,7 +43,15 @@ function positionTooltip(tooltip, targetElement, verticalOffset) {
         let spaceBelow = window.innerHeight - rect.bottom
         
         tooltip.style.position = 'absolute'
-        tooltip.style.left = `${rect.left + window.scrollX}px`
+        
+        // If centerOnMobile is true and we're on mobile, center horizontally
+        if (centerOnMobile && isMobile() == 'mobile') {
+            tooltip.style.left = '50%'
+            tooltip.style.transform = 'translateX(-50%)'
+        } else {
+            tooltip.style.left = `${rect.left + window.scrollX}px`
+            tooltip.style.transform = ''
+        }
         
         if (spaceBelow > tooltipRect.height + 20 || spaceBelow > spaceAbove) {
             // Position below

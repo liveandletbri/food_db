@@ -4,22 +4,6 @@ let currentTutorialStep = null
 let tutorialTooltipElement = null
 let tutorialExitButton = null
 
-function isAndroidChrome() {
-    let userAgent = navigator.userAgent.toLowerCase();
-    let isMobile = /chrome/.test(userAgent) && /android/.test(userAgent) && /mobile/.test(userAgent);
-    return (( isMobile ) ? 'mobile' : 'computer')
-}
-
-function isiPhoneSafari() {
-    let userAgent = navigator.userAgent.toLowerCase();
-    let isMobile = /iphone/.test(userAgent) && /safari/.test(userAgent) && !/chrome/.test(userAgent) && !/crios/.test(userAgent);
-    return (( isMobile ) ? 'mobile' : 'computer')
-}
-
-function isMobile() {
-    return (( isAndroidChrome() == 'mobile' || isiPhoneSafari() == 'mobile' ) ? 'mobile' : 'computer')
-}
-
 function scrollToElement(selector) {
     let targetElement = document.querySelector(selector)
     if (targetElement) {
@@ -74,7 +58,7 @@ function showTutorialTooltip(stepData, targetElement) {
     let isLastStep = stepData.is_last_step || false
     
     let tooltip = createTutorialTooltip(stepData.tooltip_content, isLastStep)
-    positionTooltip(tooltip, targetElement)
+    positionTooltip(tooltip, targetElement, true)
     
     // Show tooltip with animation using function from tooltip.js
     setTimeout(function() {

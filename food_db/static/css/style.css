@@ -772,10 +772,21 @@ button.merge_selected {
     position: absolute;
     font-size: 0.9rem;
     text-align: left;
-    max-width: 400px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: opacity 0.8s, z-index 0.8s ease-in-out;
     z-index: -1;
+}
+/* When screen is at least 600 px wide */
+@media screen and (min-width: 600px) {
+    .tutorial_tooltip {
+        max-width: 400px;
+    }
+}
+/* When screen is less than 600 px wide */
+@media screen and (max-width: 599px) {
+    .tutorial_tooltip {
+        width: 90%;
+    }
 }
 .tutorial_tooltip.visible {
     opacity: 100%;
