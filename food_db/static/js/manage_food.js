@@ -12,16 +12,6 @@ let originalCategoryValue = null
 
 // Tab-dependent variables
 let activeTab
-let tooltipOffsets = {
-    'food': {
-        'computer': 800,
-        'mobile': 680,
-    },
-    'category': {
-        'computer': 610,
-        'mobile': 530,
-    },
-}
 
 // Food tab objects
 let foodCategoryTable = document.getElementById('foods_categories_table')
@@ -81,12 +71,6 @@ let categoryStatsTemplate = `<h4>Assigned to these foods:</h4>
 {statsList}
 </ul>`
 let emptyCategoryStatsTemplate = '<h4 style="margin: 0;">Not assigned to any foods</h4>'
-
-function isMobileChrome() {
-    let userAgent = navigator.userAgent.toLowerCase();
-    let isMobile = /chrome/.test(userAgent) && /android/.test(userAgent) && /mobile/.test(userAgent);
-    return (( isMobile ) ? 'mobile' : 'computer')
-}
 
 function getFoodData(document) {
     // foodDataRaw and categoryDataRaw are declared in manage_food.html, passed from views.py
@@ -374,9 +358,8 @@ async function submitEdits() {
             editButton.innerText = 'Save edits'
             editButton.removeAttribute('disabled')
             
-            tooltip.style.left = `${highlightedStatsRow.offsetLeft}px`;
-            tooltip.style.top = `${highlightedStatsRow.offsetTop + tooltipOffsets[activeTab][isMobileChrome()]}px`;
             tooltip.innerText = tooltip.innerText.replace('{this}', nameInput.value)
+            positionTooltip(tooltip, highlightedStatsRow)  // positionTooltip defined in tooltip.js
 
             showAndHideTooltip(tooltip, 5000)
             return false
@@ -784,8 +767,7 @@ function highlightMergeRow(event) {
         // Clicked the stats row, which is highlighted blue. You can't merge into yourself!
         // showAndHideTooltip is defined in tooltip.js
 
-        badMergeTooltip.style.left = `${targetElement.offsetLeft}px`;
-        badMergeTooltip.style.top = `${targetElement.offsetTop + tooltipOffsets[activeTab][isMobileChrome()]}px`;
+        positionTooltip(badMergeTooltip, targetElement)  // positionTooltip defined in tooltip.js
         showAndHideTooltip(badMergeTooltip)
     } else {
         if (highlightedMergeRow) {

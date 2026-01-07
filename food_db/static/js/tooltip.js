@@ -17,6 +17,34 @@ function showAndHideTooltip(tooltip, duration) {
     setTimeout(hideToolTip, duration, tooltip)
 }
 
+function positionTooltip(tooltip, targetElement, verticalOffset) {
+    if (targetElement) {
+        let rect = targetElement.getBoundingClientRect()
+        let tooltipRect = tooltip.getBoundingClientRect()
+        
+        // Position tooltip above or below the target element
+        let spaceAbove = rect.top
+        let spaceBelow = window.innerHeight - rect.bottom
+        
+        tooltip.style.position = 'absolute'
+        tooltip.style.left = `${rect.left + window.scrollX}px`
+        
+        if (spaceBelow > tooltipRect.height + 20 || spaceBelow > spaceAbove) {
+            // Position below
+            tooltip.style.top = `${rect.bottom + window.scrollY + (verticalOffset || 10)}px`
+        } else {
+            // Position above
+            tooltip.style.top = `${rect.top + window.scrollY - tooltipRect.height - (verticalOffset || 10)}px`
+        }
+    } else {
+        // Center on screen if element not found
+        tooltip.style.position = 'fixed'
+        tooltip.style.top = '50%'
+        tooltip.style.left = '50%'
+        tooltip.style.transform = 'translate(-50%, -50%)'
+    }
+}
+
 ingredientLinks.forEach(function(link) {
     let tooltip = null;
     

@@ -4,6 +4,22 @@ let currentTutorialStep = null
 let tutorialTooltipElement = null
 let tutorialExitButton = null
 
+function isAndroidChrome() {
+    let userAgent = navigator.userAgent.toLowerCase();
+    let isMobile = /chrome/.test(userAgent) && /android/.test(userAgent) && /mobile/.test(userAgent);
+    return (( isMobile ) ? 'mobile' : 'computer')
+}
+
+function isiPhoneSafari() {
+    let userAgent = navigator.userAgent.toLowerCase();
+    let isMobile = /iphone/.test(userAgent) && /safari/.test(userAgent) && !/chrome/.test(userAgent) && !/crios/.test(userAgent);
+    return (( isMobile ) ? 'mobile' : 'computer')
+}
+
+function isMobile() {
+    return (( isAndroidChrome() == 'mobile' || isiPhoneSafari() == 'mobile' ) ? 'mobile' : 'computer')
+}
+
 function scrollToElement(selector) {
     let targetElement = document.querySelector(selector)
     if (targetElement) {
@@ -53,41 +69,12 @@ function createTutorialTooltip(content, isLastStep) {
     return tooltip
 }
 
-function positionTutorialTooltip(tooltip, targetElement) {
-    if (targetElement) {
-        let rect = targetElement.getBoundingClientRect()
-        let tooltipRect = tooltip.getBoundingClientRect()
-        
-        // Position tooltip above or below the target element
-        let spaceAbove = rect.top
-        let spaceBelow = window.innerHeight - rect.bottom
-        
-        if (spaceBelow > tooltipRect.height + 20 || spaceBelow > spaceAbove) {
-            // Position below
-            tooltip.style.position = 'absolute'
-            tooltip.style.top = `${rect.bottom + window.scrollY + 10}px`
-            tooltip.style.left = `${rect.left + window.scrollX}px`
-        } else {
-            // Position above
-            tooltip.style.position = 'absolute'
-            tooltip.style.top = `${rect.top + window.scrollY - tooltipRect.height - 10}px`
-            tooltip.style.left = `${rect.left + window.scrollX}px`
-        }
-    } else {
-        // Center on screen if element not found
-        tooltip.style.position = 'fixed'
-        tooltip.style.top = '50%'
-        tooltip.style.left = '50%'
-        tooltip.style.transform = 'translate(-50%, -50%)'
-    }
-}
-
 function showTutorialTooltip(stepData, targetElement) {
     // Check if this is the last step (determined on server side)
     let isLastStep = stepData.is_last_step || false
     
     let tooltip = createTutorialTooltip(stepData.tooltip_content, isLastStep)
-    positionTutorialTooltip(tooltip, targetElement)
+    positionTooltip(tooltip, targetElement)
     
     // Show tooltip with animation using function from tooltip.js
     setTimeout(function() {
