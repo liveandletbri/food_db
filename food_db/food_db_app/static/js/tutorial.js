@@ -149,8 +149,10 @@ function showTutorialTooltip(stepData, targetElement) {
     let tooltip = createTutorialTooltip(stepData.tooltip_content, isLastStep)
     positionTooltip(tooltip, targetElement, true)
     
-    // Highlight the target element
-    highlightTargetElement(targetElement)
+    // Highlight the target element if highlight_scroll_target is true
+    if (stepData.highlight_scroll_target) {
+        highlightTargetElement(targetElement)
+    }
     
     // Show tooltip with animation using function from tooltip.js
     setTimeout(function() {

@@ -22,7 +22,7 @@ from django.urls import reverse
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
     
-    def __init__(self, step_id, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None, section=None, skip_css_target_validation=False):
+    def __init__(self, step_id, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None, section=None, skip_css_target_validation=False, highlight_scroll_target=False):
         """
         Initialize a tutorial step.
         
@@ -35,6 +35,7 @@ class TutorialStep:
             order (int, optional): Order number (automatically assigned if None)
             section (str, optional): Section the step is under (automatically set from TUTORIAL_STEPS if None)
             skip_css_target_validation (bool, optional): If True, skip CSS target validation for this step
+            highlight_scroll_target (bool, optional): If True, highlight the scroll target element
         """
         self.step_id = step_id
         self.page_url = page_url
@@ -44,6 +45,7 @@ class TutorialStep:
         self.order = order
         self.section = section
         self.skip_css_target_validation = skip_css_target_validation
+        self.highlight_scroll_target = highlight_scroll_target
     
     def to_dict_with_url(self):
         """Convert TutorialStep object to a dictionary with resolved URL.
@@ -76,6 +78,7 @@ class TutorialStep:
             'order': self.order,
             'url': url,
             'is_last_step': is_last_step,
+            'highlight_scroll_target': self.highlight_scroll_target,
         }
 
 
