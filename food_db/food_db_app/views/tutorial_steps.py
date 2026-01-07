@@ -22,7 +22,7 @@ from django.urls import reverse
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
     
-    def __init__(self, step_id, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None, section=None):
+    def __init__(self, step_id, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None, section=None, skip_css_target_validation=False):
         """
         Initialize a tutorial step.
         
@@ -34,6 +34,7 @@ class TutorialStep:
             page_kwargs (dict, optional): URL parameters if needed (e.g., {'key': 'recipe-key'})
             order (int, optional): Order number (automatically assigned if None)
             section (str, optional): Section the step is under (automatically set from TUTORIAL_STEPS if None)
+            skip_css_target_validation (bool, optional): If True, skip CSS target validation for this step
         """
         self.step_id = step_id
         self.page_url = page_url
@@ -42,6 +43,7 @@ class TutorialStep:
         self.tooltip_content = tooltip_content
         self.order = order
         self.section = section
+        self.skip_css_target_validation = skip_css_target_validation
     
     def to_dict_with_url(self):
         """Convert TutorialStep object to a dictionary with resolved URL.
@@ -151,20 +153,49 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='h1',
             tooltip_content='''Alright, let's dig into how to add a recipe. There is a lot here!''',
         ),
-        # TutorialStep(
-        #     step_id='basic_recipe_info',
-        #     page_url='add_recipe',
-        #     page_kwargs=None,
-        #     scroll_target='input[name=title]',
-        #     tooltip_content='''Most of the fields here are pretty self-explanatory. They're almost all optional, except the title, obviously.''',
-        # ),
-        # TutorialStep(
-        #     step_id='recipe_url',
-        #     page_url='add_recipe',
-        #     page_kwargs=None,
-        #     scroll_target='input[name=url]',
-        #     tooltip_content='''I like to include the URL of the source of the recipe, in case I make a mistake in transcribing it. It's always nice to have the original to look back at! This otherwise doesn't do anything for you - it's just for reference.''',
-        # ),
+        TutorialStep(
+            step_id='cooking_baking_recipe',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#baking_switch_label',
+            tooltip_content='''The first choice you make is: is this a Cooking or a Baking recipe? Press this toggle when adding/editing a recipe to change where it is stored in the database. Changing to Cooking or Baking also exposes the tags you've deemed relevant to either Cooking or Baking, and Baking recipes also have additional attributes available to them.''',
+        ),
+        TutorialStep(
+            step_id='basic_recipe_info',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='.recipe_summary_label',
+            tooltip_content='''Most of the fields here are pretty self-explanatory. They're almost all optional, except the title, obviously.''',
+        ),
+        TutorialStep(
+            step_id='is_component',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#id_is_component_recipe', 
+            tooltip_content='''This "reusable component" attribute is for when you've got recipes for, well, components. Sauces, doughs, icings, etc. The only functional thing this attribute does is that it allows you to filter components out (or filter to <i>only</i> components) when searching.''',
+        ),
+        TutorialStep(
+            step_id='recipe_url',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#id_url',
+            skip_css_target_validation=True,
+            tooltip_content='''I like to include the URL of the source of the recipe, in case I make a mistake in transcribing it. It's always nice to have the original to look back at! This otherwise doesn't do anything for you - it's just for reference.''',
+        ),
+        TutorialStep(
+            step_id='tags_chooser_add_recipe',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#id_tags-label', 
+            tooltip_content='''Tagging your recipes is one of the most powerful capabilities of the Food DB! I highly recommend you take the time to come up with a large handful of tags. Recipes can have multiple tags, and the search capabilties on the Recipes page allow you to include and/or exclude tags from your search. The more tags you create and use, the more accurately you can find the <i>exact</i> meal you're craving!''',
+        ),
+        TutorialStep(
+            step_id='create_tag',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='.plus_icon', 
+            tooltip_content='''This is where you can create a new tag. In addition to the tag name, you can customize the appearance of the tag. A distinct appearance might help you spot a tag quickly when your eyes scan the Recipes search results.''',
+        ),
     ]),
 ])
 

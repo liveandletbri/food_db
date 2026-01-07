@@ -92,7 +92,9 @@ def _read_template_content(template_path):
 
 def _css_selector_exists_in_html(selector, html_content):
     """
-    Check if a CSS selector exists in HTML content.
+    Check if a CSS selector exists in HTML content. This is a naive search 
+    that does not render the HTML templates or accept CSS parent/child/sibling
+    logic.
     
     Handles:
     - ID selectors (#id): checks for id="id" or id='id'
@@ -201,6 +203,10 @@ def validate_tutorial_steps():
     
     # Validate scroll_target exists in HTML templates
     for step in all_steps:
+        # Skip validation if skip_css_target_validation is True
+        if step.skip_css_target_validation:
+            continue
+        
         template_path = _get_template_path(step.page_url)
         if not template_path:
             # Skip validation if we don't have a mapping for this page_url
