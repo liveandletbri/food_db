@@ -39,15 +39,18 @@
                 </ul></label>
                 <!-- {{create_recipe_form.tags}} -->
             </td>
-            <td class="plus_icon">
-                <div>
-                    <a style="cursor: pointer;" onmouseover="" id="add_id_tags">
-                        <img class="tags_row" onclick="showTagForm()" src="{% static 'img/plus-icon.svg' %}" width="20" height="20" alt="Add Another"/>
-                    </a>
+            <!-- Making this a two column <td> with a div inside instead of simply having two tds, because I want the tutorial steps to be able to highlight them both in one rectangle -->
+            <td colspan="2" style="padding: 0; border: none;">
+                <div id="add_tag_button_div" style="display: flex; align-items: center; margin-top: 8px; gap: 0.7em;">
+                    <span class="plus_icon" style="display: flex; align-items: center;">
+                        <a style="cursor: pointer;" onmouseover="" id="add_id_tags">
+                            <img class="tags_row" onclick="showTagForm()" src="{% static 'img/plus-icon.svg' %}" width="20" height="20" alt="Add Another"/>
+                        </a>
+                    </span>
+                    <span class="tags_row" style="display: flex; align-items: center;">
+                        <p style="cursor: pointer; margin: 0;" onclick="showTagForm()">Add new tag</p>
+                    </span>
                 </div>
-            </td>
-            <td class="tags_row">
-                <p style="cursor: pointer;" onclick="showTagForm()">Add new tag</p>
             </td>
         </tr>
     </table>
@@ -90,7 +93,7 @@
                 <span id="title_tooltip" class="form_validate_tooltip tooltip">You must enter a unique title with at least 4 alphanumeric characters</span>
             </td>
         </tr>
-        <tr>
+        <tr id="is_component_recipe_row">
             <td class="recipe_summary_label">Component?</td>
             <td style="vertical-align: middle;">
                 <input type="checkbox" name="is_component_recipe" id="id_is_component_recipe" style="margin-top: 5px;" {% if create_recipe_form.is_component_recipe.value %} checked="checked"{% endif %}>
@@ -123,7 +126,7 @@
             <td class="recipe_summary_label">Cookie color</td>
             <td>{{create_recipe_form.cookie_color}}</td>
         </tr>
-        <tr>
+        <tr id="recipe_url_row">
             <td class="recipe_summary_label">{{create_recipe_form.url.label}}</td>
             <td>
                 {{create_recipe_form.url}}
