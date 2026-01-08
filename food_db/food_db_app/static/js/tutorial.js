@@ -301,6 +301,11 @@ function showTutorialStep(stepData) {
     // Scroll to target element
     let targetElement = scrollToElement(stepData.scroll_target)
     
+    // Execute JavaScript function if specified
+    if (stepData.js_function && typeof window[stepData.js_function] === 'function') {
+        window[stepData.js_function]()
+    }
+    
     // Show tooltip after scrolling animation
     setTimeout(function() {
         showTutorialTooltip(stepData, targetElement)

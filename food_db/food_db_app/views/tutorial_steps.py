@@ -22,7 +22,7 @@ from django.urls import reverse
 class TutorialStep:
     """Represents a single step in the tutorial walkthrough."""
     
-    def __init__(self, step_id, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None, section=None, skip_css_target_validation=False, highlight_scroll_target=False):
+    def __init__(self, step_id, page_url, scroll_target, tooltip_content, page_kwargs=None, order=None, section=None, skip_css_target_validation=False, highlight_scroll_target=False, js_function=None):
         """
         Initialize a tutorial step.
         
@@ -36,6 +36,7 @@ class TutorialStep:
             section (str, optional): Section the step is under (automatically set from TUTORIAL_STEPS if None)
             skip_css_target_validation (bool, optional): If True, skip CSS target validation for this step
             highlight_scroll_target (bool, optional): If True, highlight the scroll target element
+            js_function (str, optional): Name of JavaScript function to execute when this step is shown
         """
         self.step_id = step_id
         self.page_url = page_url
@@ -46,6 +47,7 @@ class TutorialStep:
         self.section = section
         self.skip_css_target_validation = skip_css_target_validation
         self.highlight_scroll_target = highlight_scroll_target
+        self.js_function = js_function
     
     def to_dict_with_url(self):
         """Convert TutorialStep object to a dictionary with resolved URL.
@@ -53,7 +55,7 @@ class TutorialStep:
         Returns:
             dict: Dictionary with step data including resolved URL.
                 Includes: step_id, page_url, page_kwargs, scroll_target, 
-                tooltip_content, order, url, is_last_step
+                tooltip_content, order, url, is_last_step, highlight_scroll_target, js_function
         """
         url = None
         try:
@@ -79,6 +81,7 @@ class TutorialStep:
             'url': url,
             'is_last_step': is_last_step,
             'highlight_scroll_target': self.highlight_scroll_target,
+            'js_function': self.js_function,
         }
 
 
@@ -259,9 +262,17 @@ TUTORIAL_STEPS = OrderedDict([
             step_id='ingred_parse',
             page_url='add_recipe',
             page_kwargs=None,
-            scroll_target='#show_ingred_parse_button', 
+            scroll_target='#show_ingred_parse_button',
             tooltip_content='''There is a faster way to add ingredients! Click this "Parse ingredients from text" button to reveal a large text box.''',
             highlight_scroll_target=True,
+        ),
+        TutorialStep(
+            step_id='ingred_parse_box',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#ingred-parser-textbox',
+            tooltip_content='''You can enter ingredients in this text box in plain English, one ingredient per line, and then click the Parse Ingredients button below. This will switch you back to the table view and populate the table's fields for you.''',
+            js_function='showIngredientParserOnClick'
         ),
     ]),
 ])
