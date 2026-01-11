@@ -9,10 +9,6 @@ Use the navigation bar to access different sections:
 - **Food Manager**: Manage food items and categorize them, allowing you to create organized grocery shopping lists
 - **Bulk Prep**: Plan a feast! If you plan to cook multiple meals for a holiday or dinner party, Bulk Prep will help you choose your meals, build a grocery list, and coordinate their timing
 
-## Tags
-
-You can create tags for your recipes that help you search for them later. Create as many or as few tags as you want. Some example tags might be "Pasta", "Weeknights", "Cold weather", "Sweet", etc. Tags are created on the "Add a new recipe" page. When creating a tag, you can choose the color scheme of your tag so it's visually easier to distinguish them in your search result.
-
 ## Cooking vs Baking Mode
 
 You basically have two Food DBs in that your cooking and baking recipes are kept separately. Some pages (adding/editing recipes, searching for recipes) have a toggle switch at the top that lets you switch between Cooking and Baking. In addition to changing the color theme, the Cooking/Baking divide does a few things:
@@ -50,7 +46,7 @@ You can configure this matrix to have a preset list of tags though, which can al
 Similarly to the tag matrix, the attribute matrix will show different attributes of your recipes. The default is to show oven temperature plus all the timing attributes, but like the tag matrix, this is configurable in the [View Config tab](#view-config).
 
 ### View Config
-Choose the tags and attributes you want in your matrices here, and save the list as a new View Config. This records your preferences in the database and saves your selected config in your sessoin cookies. You can always come back to this tab to edit a View Config if you need to.
+Choose the tags and attributes you want in your matrices here, and save the list as a new View Config. This records your preferences in the database and saves your selected config in your cookies. You can always come back to this tab to edit a View Config if you need to.
 
 ## Linking Ingredients to Steps
 When you create a recipe you might notice that, in your step description, some of the ingredient names are underlined and some are not. This is Step-Ingredient Linking, and it does two things: first, when you hover over the underlined ingredient name, it shows you the quantity and any notes you had from the Ingredients table, so you don't have to keep scrolling up and down. Second, if you are in Cooking Mode, when you check off a step, it will also check off any linked inredients in the Ingredients table.

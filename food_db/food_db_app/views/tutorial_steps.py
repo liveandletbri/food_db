@@ -212,7 +212,7 @@ TUTORIAL_STEPS = OrderedDict([
             page_url='add_recipe',
             page_kwargs=None,
             scroll_target='#linked_recipes_header', 
-            tooltip_content='''You can link recipes to each other to form two types of relationships. An example Full/Component relationship is cake: the cake is the Full recipe, and the icing and the sponge are Component recipes. An example Base/Variant relationship would be pizza: the Base recipe makes a cheese pizza, and each Variant is a pizza with some combination of toppings.''',
+            tooltip_content='''You can link recipes to each other to form two types of relationships. An example Full/Component relationship is cake: the cake is the Full recipe, and the icing and the sponge are Component recipes. An example Base/Variant relationship would be pizza: the Base recipe makes a cheese pizza, and each Variant is a pizza with some combination of toppings. Variant recipes include all the ingredients/steps of their Base recipes; similarly Full recipes include everything from their Components.''',
         ),
         TutorialStep(
             step_id='linked_recipes_help',
@@ -227,7 +227,7 @@ TUTORIAL_STEPS = OrderedDict([
             page_url='add_recipe',
             page_kwargs=None,
             scroll_target='#ingreds_header', 
-            tooltip_content='''Here's where you'll add the ingredients for your recipe, obviously. Note that recipes don't require ingredients - sometimes a recipe is just a book name and page number.''',
+            tooltip_content='''Here's where you'll add the ingredients for your recipe. Note that recipes don't require ingredients - sometimes a recipe is just a book name and page number.''',
         ),
         TutorialStep(
             step_id='ingreds_table_intro',
@@ -273,6 +273,52 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='#ingred-parser-textbox',
             tooltip_content='''You can enter ingredients in this text box in plain English, one ingredient per line, and then click the Parse Ingredients button below. This will switch you back to the table view and populate the table's fields for you.''',
             js_function='showIngredientParserOnClick'
+        ),
+        TutorialStep(
+            step_id='recipe_steps_header',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#recipe_steps_header',
+            tooltip_content='''This is where you enter the steps you must follow for your recipe. There are several neat features here!''',
+            js_function='hideIngredientParserOnClick'
+        ),
+        TutorialStep(
+            step_id='recipe_step_box',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#id_step_0_description',
+            tooltip_content='''You enter each step in a box like this, and you can use the buttons below to add and remove boxes for more steps. You can use <a href="https://www.markdownguide.org/cheat-sheet/">Markdown syntax</a> inside these boxes to add some formatting to your steps.''',
+            skip_css_target_validation=True,
+        ),
+        TutorialStep(
+            step_id='recipe_step_parse_button',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='.parse_step_button',
+            tooltip_content='''You can write or paste multiple steps in this one box. Separate steps with line breaks (you can include numbers at the front of each step or not, doesn't matter) and then press this ellipses button. The text you entered will be magically split into multiple step boxes.''',
+            highlight_scroll_target=True,
+        ),
+        TutorialStep(
+            step_id='steps_help_icon',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#markdown_help_icon',
+            tooltip_content='''You can hover over this help icon any time to learn more about the syntax used to write recipe steps. In addition to Markdown, there are special rules for linking ingredients to steps. This has several benefits which you can read about on the Help page.''',
+            highlight_scroll_target=True,
+        ),
+        TutorialStep(
+            step_id='recipe_timing_attributes',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#timing_header',
+            tooltip_content='''Many recipes, especially in baking, have stages where you wait a long time. This might be proving, baking, simmering, etc. These attributes record the times of these stages and display them at the top of the recipe. In addition to being a helpful quick reference, these times are very handy on the Bulk Prep page, where you can plan how you will cook/bake a feast with many different recipes.''',
+        ),
+        TutorialStep(
+            step_id='submit_recipe',
+            page_url='add_recipe',
+            page_kwargs=None,
+            scroll_target='#submit_recipe_button',
+            tooltip_content='''All done! Save your recipe by clicking here!''',
         ),
     ]),
 ])
