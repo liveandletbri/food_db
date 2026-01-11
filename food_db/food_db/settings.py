@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'food_db.db_middleware.DatabaseSelectionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,19 +87,17 @@ WSGI_APPLICATION = 'food_db.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     # 'NAME': 'food_db',
-    #     'USER': 'root',
-    #     'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD'),
-    #     # 'HOST': '127.0.0.1',
-    #     # 'PORT': '3306',
-    # },
-    'default': {  # renamed from default
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db_data/db.sqlite3',
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db_data/test-db.sqlite3',
     }
 }
+
+DATABASE_ROUTERS = ['food_db.db_router.DatabaseRouter']
 
 
 # Password validation
