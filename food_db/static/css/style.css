@@ -344,9 +344,6 @@ textarea.default_text {
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
     transition: opacity 0.8s;
 }
-.cooking-mode-active .tutorial_exit_button {
-    bottom: 125 px;
-}
 .ingredient_link_tooltip {
     background: #3cc382;
     color: white;
@@ -399,6 +396,11 @@ textarea.default_text {
         background: #f08989;
         color: #161616;
     }
+}
+
+/* Override tutorial exit button bottom position on recipe detail page to keep it above cooking mode button */
+body:has(#recipe_title) .tutorial_exit_button {
+    bottom: 125px;
 }
 
 textarea,
