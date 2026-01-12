@@ -198,10 +198,16 @@ async function nextTutorialStep() {
         let currentUrl = window.location.pathname
         let nextStepUrl = response.step_data.url
         
-        // Extract pathname from nextStepUrl if it's a full URL
+        // Extract pathname from nextStepUrl (handles both full URLs and relative URLs with query params)
         if (nextStepUrl.startsWith('http')) {
             let urlObj = new URL(nextStepUrl)
             nextStepUrl = urlObj.pathname
+        } else {
+            // For relative URLs, extract pathname by removing query string
+            let questionMarkIndex = nextStepUrl.indexOf('?')
+            if (questionMarkIndex !== -1) {
+                nextStepUrl = nextStepUrl.substring(0, questionMarkIndex)
+            }
         }
         
         if (currentUrl === nextStepUrl) {
@@ -329,10 +335,16 @@ function handleTutorialOnPageLoad() {
         let currentUrl = window.location.pathname
         let stepUrl = currentStepData.url
         
-        // Extract pathname from stepUrl if it's a full URL
+        // Extract pathname from stepUrl (handles both full URLs and relative URLs with query params)
         if (stepUrl.startsWith('http')) {
             let urlObj = new URL(stepUrl)
             stepUrl = urlObj.pathname
+        } else {
+            // For relative URLs, extract pathname by removing query string
+            let questionMarkIndex = stepUrl.indexOf('?')
+            if (questionMarkIndex !== -1) {
+                stepUrl = stepUrl.substring(0, questionMarkIndex)
+            }
         }
         
         if (currentUrl === stepUrl) {
