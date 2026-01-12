@@ -344,6 +344,9 @@ textarea.default_text {
     transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
     transition: opacity 0.8s;
 }
+.cooking-mode-active .tutorial_exit_button {
+    bottom: 125 px;
+}
 .ingredient_link_tooltip {
     background: #3cc382;
     color: white;

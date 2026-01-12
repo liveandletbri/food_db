@@ -314,7 +314,7 @@ TUTORIAL_STEPS = OrderedDict([
             page_url='recipe_detail',
             page_kwargs={'key': 'pesto-sauce'},
             scroll_target='h1',
-            tooltip_content='''Alright, let's dig into how to add a recipe. There is a lot here!''',
+            tooltip_content='''This is the page you'll see when viewing a recipe. I've pulled up a fake recipe for us to walk through.''',
             test_db=True,
         ),
     ]),
