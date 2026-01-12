@@ -39,7 +39,7 @@ function createTutorialTooltip(content, isLastStep) {
     nextButton.style.cursor = 'pointer'
     nextButton.addEventListener('click', function() {
         if (isLastStep) {
-            exitTutorial()
+            exitTutorialViaButton()
         } else {
             nextTutorialStep()
         }
@@ -219,11 +219,11 @@ async function nextTutorialStep() {
         }
     } else if (response.success && !response.step_data) {
         // No more steps, exit tutorial
-        exitTutorial()
+        exitTutorialViaButton()
     }
 }
 
-async function exitTutorial() {
+async function exitTutorialViaButton() {
     await fetch('/exit_tutorial/', {
         method: 'POST',
         headers: {
@@ -258,6 +258,21 @@ async function exitTutorial() {
     window.location.reload()
 }
 
+async function exitTutorialViaLink(event) {
+    let originalHref = event.currentTarget.href
+    event.preventDefault()
+
+    await fetch('/exit_tutorial/', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+
+    window.location.href = originalHref
+}
+
 function createTutorialExitButton() {
     if (tutorialExitButton) {
         return tutorialExitButton
@@ -275,7 +290,7 @@ function createTutorialExitButton() {
     button.appendChild(titleSpan)
     
     button.style.cursor = 'pointer'
-    button.addEventListener('click', exitTutorial)
+    button.addEventListener('click', exitTutorialViaButton)
     
     document.body.appendChild(button)
     tutorialExitButton = button
@@ -362,3 +377,9 @@ document.addEventListener('DOMContentLoaded', function() {
     handleTutorialOnPageLoad()
 })
 
+// Allow navbar links to exit the tutorial
+let exitTutorialViaLinkHandler = (event) => exitTutorialViaLink(event)
+let navbarLinks = document.getElementsByClassName('navbar')
+Array.from(navbarLinks).forEach(link => {
+    link.addEventListener('click', exitTutorialViaLinkHandler)
+})
