@@ -3,7 +3,9 @@ let multiplierInput = document.querySelector("#ingredient_multiplier")
 function multiplyIngredients(e) {
     let currentUrl = window.location.href
     let currentUrlNoParams = currentUrl.split("?")[0]
-    window.open(`${currentUrlNoParams}?multiplier=${multiplierInput.value}`, "_self")
+    let hasParams = currentUrl != currentUrlNoParams
+    let joiningOperator = hasParams ? "&" : "?"
+    window.open(`${currentUrl}${joiningOperator}multiplier=${multiplierInput.value}`, "_self")
     multiplierInput.focus()
 }
 

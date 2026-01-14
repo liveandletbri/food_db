@@ -13,7 +13,8 @@
         {% endfor %}
         </ul>
         
-        {{ help_page_markdown|markdown:""|safe }}
+        {% markdown help_page_markdown "" as help_html %}
+        {{ help_html | safe }}
     </div>
     
     <script src="{% static 'js/help.js' %}"></script>

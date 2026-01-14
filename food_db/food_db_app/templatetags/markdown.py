@@ -1,5 +1,4 @@
 from django import template
-from django.template.defaultfilters import stringfilter
 from django.utils.text import slugify
 import re
 
@@ -7,17 +6,16 @@ import markdown as md
 
 register = template.Library()
 
-@register.filter()
-@stringfilter
-def markdown(value, recipe_title):
+@register.simple_tag
+def markdown(value, recipe_title, multiplier=1):
     # Process custom ingredient links before passing to markdown
-    processed_value = process_ingredient_links(value, recipe_title)
+    processed_value = process_ingredient_links(value, recipe_title, multiplier)
     html = md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
     # Add IDs to headings for anchor links
     html = add_heading_ids(html)
     return html
 
-def process_ingredient_links(text, recipe_title):
+def process_ingredient_links(text, recipe_title, multiplier):
     """
     Process custom ingredient links in the format [text](!ingredient name;ingredient category)
     and replace them with HTML spans that include tooltip data.
@@ -54,7 +52,7 @@ def process_ingredient_links(text, recipe_title):
                     cat = cat.replace(';','').strip()  # if a category was specified, remove leading whitespace and the semicolon from the regular expression match
                     ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=ingredient_name, ingredient_category__name__iexact=cat)
                 
-            quantity = RecipeIngredientData.stringify_ingredient_quantity(ingredient.quantity, ingredient.unit_of_measurement.name or '', 1)  # FIXME: gotta work dynamically with the multiplier, right now it's set to 1
+            quantity = RecipeIngredientData.stringify_ingredient_quantity(ingredient.quantity, ingredient.unit_of_measurement.name or '', multiplier)
             
             tooltip_content = f'{quantity} {ingredient.food.name}'
             
@@ -73,7 +71,7 @@ def process_ingredient_links(text, recipe_title):
             elif isinstance(e, Ingredient.MultipleObjectsReturned):
                 error_message = ' <multiple linked ingredients found; try specifying category>'
             else:
-                error_message = ' <link error>'
+                error_message = f' <link error: {str(e)}>'
             return match.group(1) + error_message
     
     return re.sub(pattern, replace_ingredient_link, text, flags=re.IGNORECASE)
