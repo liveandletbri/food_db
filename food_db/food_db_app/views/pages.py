@@ -215,8 +215,11 @@ def edit_recipe(request, key):
             tag_instance = Tag(name=create_recipe_form.data['new_tag'])
             tag_instance.save()
 
-            # Refresh the page
-            return HttpResponseRedirect(reverse('add_recipe'))
+            # Refresh the page, preserving test_db
+            redirect_url = reverse('add_recipe')
+            if request.GET.get('test_db', '').lower() == 'true':
+                redirect_url += '?test_db=true'
+            return HttpResponseRedirect(redirect_url)
 
         # Check if the form is valid:
         elif create_recipe_form.is_valid():
@@ -484,7 +487,10 @@ def edit_recipe(request, key):
                 log_debug_message(f'uploaded to S3')
 
             # redirect to a new URL:
-            return redirect('recipe_detail', key=clean_key)
+            redirect_url = reverse('recipe_detail', kwargs={'key': clean_key})
+            if request.GET.get('test_db', '').lower() == 'true':
+                redirect_url += '?test_db=true'
+            return redirect(redirect_url)
 
         else:
             return HttpResponseBadRequest(create_recipe_form.errors)

@@ -1,5 +1,6 @@
 {% extends 'main.html' %}
 {% load static %}
+{% load test_db %}
 {% block content %}
 
 {{ recipe_data|json_script:"searchResultsRaw" }}
@@ -108,7 +109,7 @@
             {% for recipe, data in recipe_data.items %}
             <tr>
                 <td>
-                    <p class="search_result"><a class="left_side_of_page" href="{% url 'recipe_detail' data.clean_key %}">{{ recipe }}</a>
+                    <p class="search_result"><a class="left_side_of_page" href="{% url_with_test_db 'recipe_detail' test_db=test_db key=data.clean_key %}">{{ recipe }}</a>
                         {% for tag in data.tags %}
                             <span 
                                 class="tag_display_label small"

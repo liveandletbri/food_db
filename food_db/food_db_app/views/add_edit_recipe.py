@@ -7,6 +7,7 @@ from collections import Counter
 from django.core.files import File
 from django.http import HttpResponseBadRequest, QueryDict
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
@@ -331,7 +332,10 @@ def _process_recipe_creation(request, create_recipe_form):
         log_debug_message(f'uploaded to S3')
     
     # redirect to a new URL:
-    return redirect('recipe_detail', key=clean_key)
+    redirect_url = reverse('recipe_detail', kwargs={'key': clean_key})
+    if request.GET.get('test_db', '').lower() == 'true':
+        redirect_url += '?test_db=true'
+    return redirect(redirect_url)
 
 
 # Case 1: POST request after submitting from validate_ingredients.html

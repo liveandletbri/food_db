@@ -8,7 +8,7 @@ async function deleteRecipe() {
     
     let recipeKey = deleteRecipeButton.getAttribute('data-recipe_key')
     
-    let apiSuccess = await fetch('/delete_recipe/', {
+    let apiSuccess = await fetchWithTestDb(`/delete_recipe/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -30,8 +30,13 @@ async function deleteRecipe() {
     if (apiSuccess) {
         console.log('Recipe deleted successfully')
         
-        // Redirect to the index page after successful deletion
-        window.location.href = '/'
+        // Redirect to the index page after successful deletion, preserving test_db
+        let urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('test_db') === 'true') {
+            window.location.href = '/?test_db=true'
+        } else {
+            window.location.href = '/'
+        }
     } else {
         console.log('Failed to delete recipe')
     }

@@ -377,7 +377,10 @@ def recipe_validation(request):
         else:
             # No validation issues, redirect to add_recipe with auto_confirm flag
             # This will trigger automatic processing
-            return redirect(reverse('add_recipe') + '?auto_confirm=true')
+            redirect_url = reverse('add_recipe') + '?auto_confirm=true'
+            if request.GET.get('test_db', '').lower() == 'true':
+                redirect_url += '&test_db=true'
+            return redirect(redirect_url)
     else:
         return HttpResponseNotAllowed(permitted_methods=['POST'])
 

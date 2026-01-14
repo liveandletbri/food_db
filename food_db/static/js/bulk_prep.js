@@ -208,7 +208,7 @@ function updateEditLinksVisibility() {
 }
 
 async function updateViewConfigKeySession(viewConfigKey) {
-    let updateSuccess = await fetch(`/edit_view_config_key/`, {
+    let updateSuccess = await fetchWithTestDb(`/edit_view_config_key/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',

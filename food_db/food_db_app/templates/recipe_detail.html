@@ -1,6 +1,7 @@
 {% extends 'main.html' %}
 {% load markdown %}
 {% load static %}
+{% load test_db %}
 {% block content %}
 
 {{ has_children|json_script:"recipeHasChildrenRaw" }}
@@ -23,18 +24,18 @@
             </h1>
         </td>
         <td class="recipe_detail_header_buttons">
-            <a href="{% url 'edit_recipe' recipe.clean_key %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
+            <a href="{% url_with_test_db 'edit_recipe' test_db=test_db key=recipe.clean_key %}"><button class="header_button" id="edit_recipe_button" type="button">Edit recipe</button></a>
         </td>
         <td class="recipe_detail_header_buttons" style="padding-left: 3rem;width: 0%;">
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: fit-content; align-items: center;">
-                <a href="{% if cloud_url %}{{ cloud_url }}/recipe/{{ recipe.title }}{% else %}{% url 'recipe_detail' recipe.clean_key %}{% endif %}" title="Share this recipe" target="_blank">
+                <a href="{% if cloud_url %}{{ cloud_url }}/recipe/{{ recipe.title }}{% else %}{% url_with_test_db 'recipe_detail' test_db=test_db key=recipe.clean_key %}{% endif %}" title="Share this recipe" target="_blank">
                     <svg id="share_recipe_icon" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-share recipe_action_icon" viewBox="0 0 16 16">
                         <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
                     </svg>
                 </a>
                 <i id="recipe_detail_add_to_cart_icon" title="Add this recipe to your cart" class="fa-solid fa-xl fa-cart-shopping add_to_cart_icon {% if in_cart == "false" %}not_{% endif %}added" data-recipe_key="{{ recipe.clean_key }}" style="margin-top: 0;"></i>
                 <img id="delete_recipe_button" src="{% static 'img/x-icon.svg' %}" width="30" height="30" title="Delete this recipe" data-recipe_key="{{ recipe.clean_key }}" style="cursor: pointer;" />
-                <a href="{% url 'add_recipe' %}?base_recipe_key={{ recipe.clean_key }}" title="Create a variant of this recipe" target="_blank">
+                <a href="{% url_with_test_db 'add_recipe' test_db=test_db %}?base_recipe_key={{ recipe.clean_key }}{% if test_db %}&test_db=true{% endif %}" title="Create a variant of this recipe" target="_blank">
                     <i id="create_variant_icon" class="fa-regular fa-xl fa-clone recipe_action_icon"></i>
                 </a>
             </div>
@@ -95,7 +96,7 @@
 {% if recipe.tags.all %}
     <h4>Tags:
     {% for tag in recipe.tags.all %}
-        <a href="{% url 'search' %}?tag={{ tag.name }}" style="text-decoration: none;">
+        <a href="{% url_with_test_db 'search' test_db=test_db %}?tag={{ tag.name }}{% if test_db %}&test_db=true{% endif %}" style="text-decoration: none;">
             <span 
                 class="tag_display_label"
                 style="background-color: {{ tag.fill_color }}; color: {{ tag.text_color }}; {% if tag.has_border %}outline: 2px solid {{ tag.border_color }};{% endif %}"
@@ -186,7 +187,7 @@
     <h2>Variants</h2>
     <h4>These are the different versions of this recipe. Each variant contains all the ingredients and steps of this base recipe, plus its own unique ingredients and steps.</h4>
     <ul style="padding-left: 40px; padding-bottom: 30px;">{% for variant in recipe.variant_recipes %}
-        <p><a class="search_result" href="{% url 'recipe_detail' variant.clean_key %}" target="_blank">{{ variant.title }}</a></p>
+        <p><a class="search_result" href="{% url_with_test_db 'recipe_detail' test_db=test_db key=variant.clean_key %}" target="_blank">{{ variant.title }}</a></p>
     {% endfor %}</ul>
 {% endif %}
 {% if has_ingredients or has_steps or has_children %}

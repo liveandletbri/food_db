@@ -508,7 +508,7 @@ async function reloadDataTables(params) {
     } else {
         params = `?${params}`
     }
-    let apiResponse = await fetch(`/food/${params}`, {
+    let apiResponse = await fetchWithTestDb(`/food/${params}`, {
         method: "GET",
     })
     .then(function(response) {

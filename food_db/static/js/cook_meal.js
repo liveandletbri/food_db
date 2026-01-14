@@ -18,7 +18,7 @@ async function cookMeal() {
         let currentUrl = window.location.href
         let currentUrlDomain = currentUrl.split("/recipe/")[0]
 
-        let cookedMealResponse = await fetch(`${currentUrlDomain}/cook/`, {
+        let cookedMealResponse = await fetchWithTestDb(`${currentUrlDomain}/cook/`, {
             method: "POST",
             headers: {
               'Accept': 'application/json',

@@ -1,5 +1,6 @@
 {% extends 'main.html' %}
 {% load static %}
+{% load test_db %}
 {% block content %}
 
 {{ mode|json_script:"addOrEditModeRaw" }}
@@ -235,7 +236,7 @@
             {% for rel in child_relationships %}
                 <div name="child_recipe" data-recipe_name="{{ rel.recipe.title }}" class="attached_child_recipe_div">
                     <input type="hidden" name="child_recipe_{{ forloop.counter0 }}" value="{{ rel.recipe.clean_key }}"> <!-- This hidden input is used to submit child recipe keys in the POST request when the form is submitted -->
-                    <a href="{% url 'recipe_detail' rel.recipe.clean_key %}" target="_blank">{{ rel.recipe.title }}</a>
+                    <a href="{% url_with_test_db 'recipe_detail' test_db=test_db key=rel.recipe.clean_key %}" target="_blank">{{ rel.recipe.title }}</a>
                     <i class="fa-solid fa-arrow-up move_row_up_button move_row_button" title="Move up"></i>
                     <i class="fa-solid fa-arrow-down move_row_down_button move_row_button" title="Move down"></i>
                     <img class="delete_row_button" src="{% static 'img/x-icon.svg' %}" width="22" height="22" title="Detach sub-recipe"/>

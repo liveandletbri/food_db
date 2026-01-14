@@ -37,7 +37,7 @@ async function updateCart(event) {
 
     console.log(`Cart update: ${logVerb}ing recipe ${recipeKey}`)
     
-    let apiSuccess = await fetch(apiName, {
+    let apiSuccess = await fetchWithTestDb(apiName, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -67,7 +67,7 @@ async function updateCart(event) {
         }
 
         // Update counter in nav bar
-        let cartSize = await fetch('/get_cart_size/', {
+        let cartSize = await fetchWithTestDb(`/get_cart_size/`, {
             method: "GET",
         })
         .then(function(response) {
@@ -115,7 +115,7 @@ window.addEventListener('load', function() {
 async function emptyCart() {
     console.log('Emptying cart...')
     
-    let apiSuccess = await fetch('/empty_cart/', {
+    let apiSuccess = await fetchWithTestDb(`/empty_cart/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -138,8 +138,13 @@ async function emptyCart() {
         cartCounter.innerText = '0'
         cartCounter.style.display = 'none'
         
-        // Reload the page to reflect the empty cart
-        window.location.reload()
+        // Reload the page to reflect the empty cart, preserving test_db
+        let urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('test_db') === 'true') {
+            window.location.href = window.location.pathname + '?test_db=true'
+        } else {
+            window.location.reload()
+        }
     } else {
         console.log('Failed to empty cart')
     }

@@ -25,7 +25,7 @@ async function submitAndHideTagForm(){
     
     document.getElementById('add-tag-form').className="hide";
 
-    let addTagSuccess = await fetch(`/add_tag/`, {
+    let addTagSuccess = await fetchWithTestDb(`/add_tag/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -52,7 +52,7 @@ async function submitAndHideTagForm(){
     if ( addTagSuccess ) {
         newTagName.value = '';
         
-        let pageResponse = await fetch(`/add/`, {
+        let pageResponse = await fetchWithTestDb(`/add/`, {
             method: "GET",
         })
         .then(function(response) {

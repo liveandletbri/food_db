@@ -5,7 +5,7 @@ let currentRecipeKey = currentUrl.split("/recipe/")[1].split('?')[0]
 let multiplier = document.getElementById('ingredient_multiplier')
 
 async function getOrderNumber(recipeKey, ingredientCategory) {
-    let response = await fetch(`${currentUrlDomain}/get_ingredient_category_order_number/`, {
+    let response = await fetchWithTestDb(`${currentUrlDomain}/get_ingredient_category_order_number/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -21,7 +21,7 @@ async function getOrderNumber(recipeKey, ingredientCategory) {
 }
 
 async function swapOrderNumbers(recipeKey, ingredientCategory1, orderNumber1, ingredientCategory2, orderNumber2) {
-    await fetch(`${currentUrlDomain}/swap_ingredient_category_order_numbers/`, {
+    await fetchWithTestDb(`${currentUrlDomain}/swap_ingredient_category_order_numbers/`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -81,7 +81,8 @@ async function handleDragIngredCategoryDrop(e) {
             console.log(`swapOrderNumbers: ${sourceCategory} changed to ${newSourceOrderNumber}, ${targetCategory} changed to ${newTargetOrderNumber}`)
 
             let multiplierValue = multiplier.value
-            let response = await fetch(`/recipe/${currentRecipeKey}?multiplier=${multiplierValue}`, {
+            
+            let response = await fetchWithTestDb(`/recipe/${currentRecipeKey}?multiplier=${multiplierValue}`, {
                 method: "GET",
             })
             .then(function(response) {

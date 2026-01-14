@@ -106,7 +106,7 @@ async function stealthSubmit(e) {
 
     console.log(`Performing GET with params: ${param_string}`)
 
-    let response = await fetch(`/search?${param_string}`, {
+    let response = await fetchWithTestDb(`/search?${param_string}`, {
         method: "GET",
     })
     .then(function(response) {

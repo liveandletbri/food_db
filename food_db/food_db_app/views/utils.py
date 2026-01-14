@@ -345,6 +345,7 @@ def get_current_step_data(request):
 
 def context(request, **kwargs):
     tutorial_state = get_tutorial_state(request)
+    test_db = request.GET.get('test_db', '').lower() == 'true'
     context_values = {
         'current_is_baking_mode': get_is_baking_cookie(request),
         'cart': get_cart(request),
@@ -355,6 +356,7 @@ def context(request, **kwargs):
         'cloud_sync_enabled': S3_SYNC_ENABLED,
         'cloud_url': S3Sync().bucket_url if S3_SYNC_ENABLED else None,
         'potty_mouth': os.getenv('POTTY_MOUTH', 'false').lower() == 'true',
+        'test_db': test_db,
     }
     context_values.update(kwargs)
     return context_values

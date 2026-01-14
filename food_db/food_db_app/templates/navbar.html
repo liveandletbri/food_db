@@ -12,6 +12,7 @@
 </div>
 <br>
 <br style="clear:both" />
+<!-- Using url and not url_with_test_db because I want these navbar links to reset us out of the test DB back into the default DB -->
 <a class="navbar left_side_of_page" href="{% url 'index' %}">Home</a> | 
 <a class="navbar" href="{% url 'add_recipe' %}">Add a new recipe</a> | 
 <a class="navbar" href="{% url 'search' %}">Recipes</a> |
