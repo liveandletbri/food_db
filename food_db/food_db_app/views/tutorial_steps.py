@@ -162,7 +162,7 @@ TUTORIAL_STEPS = OrderedDict([
             tooltip_content='''The help page lets you revisit any step in this tutorial and includes detailed guides about specific features of Food DB.''',
         ),
     ]),
-    ('Adding Recipes', [
+    ('Adding Recipes: Basics', [
         TutorialStep(
             step_id='add_recipe_start',
             page_url='add_recipe',
@@ -196,6 +196,8 @@ TUTORIAL_STEPS = OrderedDict([
             tooltip_content='''I like to include the URL of the source of the recipe, in case I make a mistake in transcribing it. It's always nice to have the original to look back at! This otherwise doesn't do anything for you - it's just for reference.''',
             highlight_scroll_target=True,
         ),
+    ]),
+    ('Adding Recipes: Tags and Linked Recipes', [
         TutorialStep(
             step_id='tags_chooser_add_recipe',
             page_url='add_recipe',
@@ -222,6 +224,8 @@ TUTORIAL_STEPS = OrderedDict([
             tooltip_content='''You can hover over this help icon any time to learn more about Linked Recipes.''',
             highlight_scroll_target=True,
         ),
+    ]),
+    ('Adding Recipes: Ingredients', [
         TutorialStep(
             step_id='ingreds_intro',
             page_url='add_recipe',
@@ -267,6 +271,8 @@ TUTORIAL_STEPS = OrderedDict([
             tooltip_content='''You can enter ingredients in this text box in plain English, one ingredient per line, and then click the Parse Ingredients button below. This will switch you back to the table view and populate the table's fields for you.''',
             js_function='showIngredientParserOnClick'
         ),
+    ]),
+    ('Adding Recipes: Steps and Timing Attributes', [
         TutorialStep(
             step_id='recipe_steps_header',
             page_url='add_recipe',
