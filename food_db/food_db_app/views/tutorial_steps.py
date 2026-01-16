@@ -330,6 +330,7 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='#edit_recipe_button',
             tooltip_content='''Clicking this button will open up the recipe add/edit form, pre-populated with all the values from this recipe.''',
             test_db=True,
+            highlight_scroll_target=True,
         ),
         TutorialStep(
             step_id='share_button',
@@ -338,6 +339,7 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='#share_button_link',
             tooltip_content='''If you have cloud backups enabled, this share button is a link to your publicly accessible backup of this recipe. The publicly accessible versions of recipes are stripped down significnatly in terms of how flashy the page is, but you can share them with your friends and view them from anywhere!<br><br>If you don't have cloud backups enabled, this is just a link to the page we are currently on.''',
             test_db=True,
+            highlight_scroll_target=True,
         ),
         TutorialStep(
             step_id='recipe_detail_cart_button',
@@ -346,6 +348,7 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='#recipe_detail_add_to_cart_icon',
             tooltip_content='''Use this button to add this recipe to your cart. The cart is used to populate the Bulk Prep page. You can read more about the Bulk Prep page on the Help page.''',
             test_db=True,
+            highlight_scroll_target=True,
         ),
         TutorialStep(
             step_id='delete_recipe_button',
@@ -354,6 +357,7 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='#delete_recipe_button',
             tooltip_content='''You can delete recipes with this button. Careful, once they're gone, they're gone!''',
             test_db=True,
+            highlight_scroll_target=True,
         ),
         TutorialStep(
             step_id='create_variant_button',
@@ -362,6 +366,34 @@ TUTORIAL_STEPS = OrderedDict([
             scroll_target='#create_variant_button_link',
             tooltip_content='''Create a Variant of this recipe with this button. This will take you to the Add Recipe page for a blank recipe, except that a link to this recipe as the Base will already be set. You can read more about Bases and Variants on the Help page.''',
             test_db=True,
+            highlight_scroll_target=True,
+        ),
+        TutorialStep(
+            step_id='cook_meal_button',
+            page_url='recipe_detail',
+            page_kwargs={'key': 'pesto-sauce'},
+            scroll_target='#upvote_button_div',
+            tooltip_content='''Click this button when you cook a meal. It'll record that you cooked the recipe on today's date, which then is shown on the Recipes search page and the graphs on the Home page.''',
+            test_db=True,
+            highlight_scroll_target=True,
+        ),
+        TutorialStep(
+            step_id='multiplier',
+            page_url='recipe_detail',
+            page_kwargs={'key': 'pesto-sauce'},
+            scroll_target='#ingredient_multiplier',
+            tooltip_content='''Need to double the recipe? Or 3.5x it? Enter a value (increments of 0.5) here and the quantities of ingredients (including in your grocery list) will update accordingly.''',
+            test_db=True,
+            highlight_scroll_target=True,
+        ),
+        TutorialStep(
+            step_id='grocery_list_detail',
+            page_url='recipe_detail',
+            page_kwargs={'key': 'penne-with-pesto-and-chicken'},
+            scroll_target='summary',
+            tooltip_content='''Now we've loaded up a different recipe. This recipe has a link established: the Pesto Sauce recipe is a Component and the Penne/Chicken recipe is the Full recipe. You can see here how the steps and ingredients for linked Component recipes are displayed alongside steps/ingredients that are unique to the Full recipe.''',
+            test_db=True,
+            highlight_scroll_target=True,
         ),
     ]),
 ])
