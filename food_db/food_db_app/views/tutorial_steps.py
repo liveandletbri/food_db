@@ -84,8 +84,6 @@ class AddingRecipesBasicsStep(TutorialStep):
             tooltip_content=tooltip_content,
             section='Adding Recipes: Basics',
             **kwargs
-    """Step class for the 'Getting Familiar' section."""
-    
         )
 
 
