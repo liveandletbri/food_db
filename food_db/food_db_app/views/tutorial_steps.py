@@ -29,6 +29,7 @@ class TutorialStep:
         page_kwargs=None,
         order=None,
         section=None,
+        subsection=None,
         skip_css_target_validation=False,
         highlight_scroll_target=False,
         js_function=None,
@@ -45,6 +46,7 @@ class TutorialStep:
             page_kwargs (dict, optional): URL parameters if needed (e.g., {'key': 'recipe-key'})
             order (int, optional): Order number (automatically assigned if None)
             section (str, optional): Section the step is under (automatically set from class if None)
+            subsection (str, optional): Subsection the step is under (None if no subsection)
             skip_css_target_validation (bool, optional): If True, skip CSS target validation for this step
             highlight_scroll_target (bool, optional): If True, highlight the scroll target element
             js_function (str, optional): Name of JavaScript function to execute when this step is shown
@@ -57,85 +59,12 @@ class TutorialStep:
         self.tooltip_content = tooltip_content
         self.order = order
         self.section = section
+        self.subsection = subsection
         self.skip_css_target_validation = skip_css_target_validation
         self.highlight_scroll_target = highlight_scroll_target
         self.js_function = js_function
         self.test_db = test_db
 
-
-class GettingFamiliarStep(TutorialStep):
-    def __init__(self, step_id, scroll_target, tooltip_content, page_url=None, **kwargs):
-        super().__init__(
-            step_id=step_id,
-            page_url=page_url,
-            scroll_target=scroll_target,
-            tooltip_content=tooltip_content,
-            section='Getting Familiar',
-            **kwargs
-        )
-
-
-class AddingRecipesBasicsStep(TutorialStep):
-    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
-        super().__init__(
-            step_id=step_id,
-            page_url=page_url,
-            scroll_target=scroll_target,
-            tooltip_content=tooltip_content,
-            section='Adding Recipes: Basics',
-            **kwargs
-        )
-
-
-class AddingRecipesTagsAndLinkedRecipesStep(TutorialStep):
-    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
-        super().__init__(
-            step_id=step_id,
-            page_url=page_url,
-            scroll_target=scroll_target,
-            tooltip_content=tooltip_content,
-            section='Adding Recipes: Tags and Linked Recipes',
-            **kwargs
-        )
-
-
-class AddingRecipesIngredientsStep(TutorialStep):
-    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
-        super().__init__(
-            step_id=step_id,
-            page_url=page_url,
-            scroll_target=scroll_target,
-            tooltip_content=tooltip_content,
-            section='Adding Recipes: Ingredients',
-            **kwargs
-        )
-
-
-class AddingRecipesStepsAndTimingAttributesStep(TutorialStep):
-    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
-        super().__init__(
-            step_id=step_id,
-            page_url=page_url,
-            scroll_target=scroll_target,
-            tooltip_content=tooltip_content,
-            section='Adding Recipes: Steps and Timing Attributes',
-            **kwargs
-        )
-
-
-class RecipePageStep(TutorialStep):
-    def __init__(self, step_id, scroll_target, tooltip_content, page_url='recipe_detail', test_db=True, page_kwargs={'key': 'pesto-sauce'}, **kwargs):
-        super().__init__(
-            step_id=step_id,
-            page_url=page_url,
-            scroll_target=scroll_target,
-            tooltip_content=tooltip_content,
-            section='Recipe Page',
-            test_db=test_db,
-            page_kwargs=page_kwargs,
-            **kwargs
-        )
-    
     def to_dict_with_url(self):
         """Convert TutorialStep object to a dictionary with resolved URL.
         
@@ -163,6 +92,7 @@ class RecipePageStep(TutorialStep):
         return {
             'step_id': self.step_id,
             'section': self.section,
+            'subsection': self.subsection,
             'page_url': self.page_url,
             'page_kwargs': self.page_kwargs,
             'scroll_target': self.scroll_target,
@@ -174,6 +104,84 @@ class RecipePageStep(TutorialStep):
             'js_function': self.js_function,
             'test_db': self.test_db
         }
+
+
+class GettingFamiliarStep(TutorialStep):
+    def __init__(self, step_id, scroll_target, tooltip_content, page_url=None, **kwargs):
+        super().__init__(
+            step_id=step_id,
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Getting Familiar',
+            **kwargs
+        )
+
+
+class AddingRecipesBasicsStep(TutorialStep):
+    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
+        super().__init__(
+            step_id=step_id,
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Adding Recipes',
+            subsection='Basics',
+            **kwargs
+        )
+
+
+class AddingRecipesTagsAndLinkedRecipesStep(TutorialStep):
+    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
+        super().__init__(
+            step_id=step_id,
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Adding Recipes',
+            subsection='Tags and Linked Recipes',
+            **kwargs
+        )
+
+
+class AddingRecipesIngredientsStep(TutorialStep):
+    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
+        super().__init__(
+            step_id=step_id,
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Adding Recipes',
+            subsection='Ingredients',
+            **kwargs
+        )
+
+
+class AddingRecipesStepsAndTimingAttributesStep(TutorialStep):
+    def __init__(self, step_id, scroll_target, tooltip_content, page_url='add_recipe', **kwargs):
+        super().__init__(
+            step_id=step_id,
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Adding Recipes',
+            subsection='Steps and Timing Attributes',
+            **kwargs
+        )
+
+
+class RecipePageStep(TutorialStep):
+    def __init__(self, step_id, scroll_target, tooltip_content, page_url='recipe_detail', test_db=True, page_kwargs={'key': 'pesto-sauce'}, **kwargs):
+        super().__init__(
+            step_id=step_id,
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Recipe Page',
+            test_db=test_db,
+            page_kwargs=page_kwargs,
+            **kwargs
+        )
 
 
 TUTORIAL_STEPS = [

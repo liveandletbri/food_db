@@ -846,18 +846,34 @@ def help_page(request):
     if markdown_path.exists():
         help_page_markdown = markdown_path.read_text(encoding='utf-8')
     
-    # Create dictionary mapping ordered sections to their first tutorial step
-    # TUTORIAL_STEPS is a list, so we need to track sections and extract the first step from each
-    steps_by_section = OrderedDict()
+    # Organize sections and subsections
+    # Structure: {section_name: {'first_step': step, 'subsections': {subsection_name: first_step}}}
+    sections_data = OrderedDict()
     seen_sections = set()
+    seen_subsections = {}  # {section_name: set of seen subsections}
+    
     for step in TUTORIAL_STEPS:
-        if step.section not in seen_sections:
-            steps_by_section[step.section] = step
-            seen_sections.add(step.section)
+        section = step.section
+        subsection = step.subsection
+        
+        if section not in seen_sections:
+            # First time seeing this section
+            sections_data[section] = {
+                'first_step': step,
+                'subsections': OrderedDict()
+            }
+            seen_sections.add(section)
+            seen_subsections[section] = set()
+        
+        # If this step has a subsection, track it
+        if subsection:
+            if subsection not in seen_subsections[section]:
+                sections_data[section]['subsections'][subsection] = step
+                seen_subsections[section].add(subsection)
 
     return_context = context(
         request=request,
-        steps_by_section=steps_by_section,
+        sections_data=sections_data,
         help_page_markdown=help_page_markdown,
     )
     return render(request, 'help.html', return_context)

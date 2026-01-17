@@ -161,23 +161,31 @@ function showTutorialTooltip(stepData, targetElement) {
 }
 
 async function startTutorial(stepId) {
-    let response = await fetch('/start_tutorial/', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            step_id: stepId
+    try {
+        let response = await fetch('/start_tutorial/', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                step_id: stepId
+            })
         })
-    })
-    .then(function(response) {
-        return response.json()
-    })
-    
-    if (response.success && response.step_data) {
-        // Navigate to the step's page
-        window.location.href = response.step_data.url
+        
+        if (!response.ok) {
+            console.error('Failed to start tutorial:', response.status, response.statusText)
+            return
+        }
+        
+        let data = await response.json()
+        
+        if (data.success && data.step_data) {
+            // Navigate to the step's page
+            window.location.href = data.step_data.url
+        }
+    } catch (error) {
+        console.error('Error starting tutorial:', error)
     }
 }
 

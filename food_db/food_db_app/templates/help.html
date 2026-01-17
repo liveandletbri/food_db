@@ -8,8 +8,23 @@
         <p>Take an interactive walkthrough of Food DB features. Click any step below to start the tutorial from that point:</p>
         
         <ul class="tutorial_steps_list">
-        {% for section, first_step in steps_by_section.items %}
-            <li><a href="#" class="tutorial_step_link" data-step-id="{{ first_step.step_id }}"><h4 style="margin: 0;">{{ section }}</h4></a></li>
+        {% for section, section_info in sections_data.items %}
+            <li>
+                <a href="#" class="tutorial_step_link" data-step-id="{{ section_info.first_step.step_id }}">
+                    <h4 style="margin: 0;">{{ section }}</h4>
+                </a>
+                {% if section_info.subsections %}
+                    <ul style="list-style: none;">
+                        {% for subsection, subsection_step in section_info.subsections.items %}
+                            <li>
+                                <a href="#" class="tutorial_step_link" data-step-id="{{ subsection_step.step_id }}">
+                                    {{ subsection }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
         {% endfor %}
         </ul>
         
