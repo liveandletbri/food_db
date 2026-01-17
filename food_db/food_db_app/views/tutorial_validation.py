@@ -145,15 +145,11 @@ def validate_tutorial_steps():
     """
     print('Validating tutorial steps...')
     if not TUTORIAL_STEPS:
-        raise ImproperlyConfigured('TUTORIAL_STEPS OrderedDict is empty. At least one tutorial step is required.')
+        raise ImproperlyConfigured('TUTORIAL_STEPS list is empty. At least one tutorial step is required.')
     
     step_ids = set()
     orders = []
-    all_steps = []
-    
-    # Flatten all steps from all sections
-    for steps in TUTORIAL_STEPS.values():
-        all_steps.extend(steps)
+    all_steps = TUTORIAL_STEPS
     
     for index, step in enumerate(all_steps, start=1):
         print(f'Validating step {index}: {step.step_id}')

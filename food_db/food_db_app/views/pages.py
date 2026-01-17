@@ -847,10 +847,13 @@ def help_page(request):
         help_page_markdown = markdown_path.read_text(encoding='utf-8')
     
     # Create dictionary mapping ordered sections to their first tutorial step
-    # TUTORIAL_STEPS is already an OrderedDict, so we just need to extract the first step from each section
+    # TUTORIAL_STEPS is a list, so we need to track sections and extract the first step from each
     steps_by_section = OrderedDict()
-    for section_title, steps in TUTORIAL_STEPS.items():
-        steps_by_section[section_title] = steps[0]
+    seen_sections = set()
+    for step in TUTORIAL_STEPS:
+        if step.section not in seen_sections:
+            steps_by_section[step.section] = step
+            seen_sections.add(step.section)
 
     return_context = context(
         request=request,
