@@ -423,6 +423,27 @@ TUTORIAL_STEPS = [
         tooltip_content='''Now we've loaded up a different recipe. This recipe has a link established: the Pesto Sauce recipe is a Component and the Penne/Chicken recipe is the Full recipe. You can see here how the steps and ingredients for linked Component recipes are displayed alongside steps/ingredients that are unique to the Full recipe.''',
         highlight_scroll_target=True,
     ),
+    RecipePageStep(
+        step_id='ingredient_link',
+        page_kwargs={'key': 'penne-with-pesto-and-chicken'},
+        scroll_target='.ingredient_link',
+        tooltip_content='''See how this is underlined? Try hovering over it. You can link your steps back to your ingredients, which does two things (and you can read more about this on the Help page). The first thing is this hover ability - you can see the quantity and any notes associated with an ingredient at a glance while cooking without needing to scroll back up. The other benefit is, when you're in Cooking Mode, you can check this step off and it will check the linked ingredients off as well. What's Cooking Mode, you ask...?''',
+        highlight_scroll_target=True,
+        skip_css_target_validation=True,
+    ),
+    RecipePageStep(
+        step_id='cooking_mode_button',
+        page_kwargs={'key': 'penne-with-pesto-and-chicken'},
+        scroll_target='#cooking_mode_title',
+        tooltip_content='''You can enter Cooking Mode by clicking this button at any time.''',
+    ),
+    RecipePageStep(
+        step_id='cooking_mode_on',
+        page_kwargs={'key': 'penne-with-pesto-and-chicken'},
+        scroll_target='#cooking_mode_title',
+        tooltip_content='''Now we're in Cooking Mode. This same button will let you exit Cooking Mode. In Cooking Mode, you're not making any changes to your database or anything permanent like that - you just are given the ability to check off steps and ingredients as you cook to help you see what's done and what's left.''',
+        js_function='enterCookingMode',
+    ),
 ]
 
 # Assign order numbers based on position in list
