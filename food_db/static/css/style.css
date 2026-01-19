@@ -3,6 +3,7 @@
     --baking-color: rgb(228, 40, 156);
     --cooking-row-color: rgb(233, 239, 252);
     --cooking-color: rgb(40, 100, 228);
+    --tutorial-exit-bottom-offset: 125;
 }
 
 #logo_header {
@@ -319,7 +320,7 @@ textarea.default_text {
 }
 .tooltip.visible {
     opacity: 80%;
-    z-index: 1000;
+    z-index: 100;
 }
 .form_validate_tooltip {
     background: #d65f5f;
@@ -341,8 +342,14 @@ textarea.default_text {
     color: white;
     position: fixed;
     bottom: 30px;
-    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, color 0.2s ease-in-out;
-    transition: opacity 0.8s;
+    transition: 
+        background-color 0.2s ease-in-out, 
+        box-shadow 0.2s ease-in-out, 
+        color 0.2s ease-in-out, 
+        opacity 0.8s,
+        transform 0.8s,
+        bottom 0.8s ease-in-out;
+    will-change: transform;
 }
 .ingredient_link_tooltip {
     background: #3cc382;
@@ -373,6 +380,14 @@ textarea.default_text {
         background: #f08989;
         color: #161616;
     }
+    /* Override tutorial exit button bottom position on recipe detail page to keep it above cooking mode button */
+    body:has(#recipe_title) .tutorial_exit_button {
+        bottom: calc(var(--tutorial-exit-bottom-offset) * 1px);
+    }
+    /* Move tutorial exit button higher when cooking mode is active on recipe detail page */
+    body.cooking-mode-active:has(#recipe_title) .tutorial_exit_button {
+        bottom: calc((var(--tutorial-exit-bottom-offset) + 30 ) * 1px);
+    }
 }
 /* When screen is less than 600 px wide */
 @media screen and (max-width: 599px) {
@@ -396,11 +411,12 @@ textarea.default_text {
         background: #f08989;
         color: #161616;
     }
-}
-
-/* Override tutorial exit button bottom position on recipe detail page to keep it above cooking mode button */
-body:has(#recipe_title) .tutorial_exit_button {
-    bottom: 125px;
+    body:has(#recipe_title) .tutorial_exit_button {
+        bottom: calc((var(--tutorial-exit-bottom-offset) - 30 ) * 1px);
+    }
+    body.cooking-mode-active:has(#recipe_title) .tutorial_exit_button {
+        bottom: calc((var(--tutorial-exit-bottom-offset) - 0 ) * 1px);
+    }
 }
 
 textarea,
@@ -784,6 +800,8 @@ button.merge_selected {
 /* When screen is at least 600 px wide */
 @media screen and (min-width: 600px) {
     .tutorial_tooltip {
+        width: 400px;
+        min-width: 400px;
         max-width: 400px;
     }
 }
@@ -795,7 +813,7 @@ button.merge_selected {
 }
 .tutorial_tooltip.visible {
     opacity: 100%;
-    z-index: 1500;
+    z-index: 50;
 }
 .tutorial_tooltip button {
     background-color: #47D3E5;
