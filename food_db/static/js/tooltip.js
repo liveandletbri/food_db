@@ -33,6 +33,86 @@ function showAndHideTooltip(tooltip, duration) {
     setTimeout(hideToolTip, duration, tooltip)
 }
 
+function positionTooltipAfterMobileScroll(tooltip, targetElement, verticalOffset, buttonHeight, buttonTopInViewport, buttonPadding) {
+    // Recalculate target position after scroll (viewport coordinates have changed)
+    let rect = targetElement.getBoundingClientRect()
+    
+    // Force reflow to get accurate tooltip measurements
+    void tooltip.offsetHeight
+    let tooltipRect = tooltip.getBoundingClientRect()
+    
+    // Position tooltip centered horizontally in viewport
+    // Use viewport center in document coordinates: scrollX + viewport center
+    let viewportCenterX = window.scrollX + window.innerWidth / 2
+    tooltip.style.left = `${viewportCenterX}px`
+    tooltip.style.transform = 'translateX(-50%)'
+    
+    // Wait a moment for the browser to apply the transform, then check position
+    setTimeout(function() {
+        // Force reflow to get accurate position after setting left and transform
+        void tooltip.offsetHeight
+        let tooltipRectAfter = tooltip.getBoundingClientRect()
+        
+        // Check if tooltip extends beyond screen horizontally
+        // getBoundingClientRect() returns viewport coordinates, so compare to 0 and window.innerWidth
+        let tooltipLeft = tooltipRectAfter.left
+        let tooltipRight = tooltipRectAfter.right
+        let margin = 5 // Small margin to avoid false positives from rounding
+        
+        if (tooltipLeft < -margin) {
+            // Tooltip extends left - position against left edge
+            let tooltipHalfWidth = tooltipRectAfter.width / 2
+            tooltip.style.left = `${window.scrollX + tooltipHalfWidth}px`
+            tooltip.style.transform = 'translateX(-50%)'
+        } else if (tooltipRight > window.innerWidth + margin) {
+            // Tooltip extends right - position against right edge
+            let tooltipHalfWidth = tooltipRectAfter.width / 2
+            tooltip.style.left = `${window.scrollX + window.innerWidth - tooltipHalfWidth}px`
+            tooltip.style.transform = 'translateX(-50%)'
+        }
+    }, 50)
+    
+    // Now handle vertical positioning
+    let spaceAbove = rect.top
+    let spaceBelow = window.innerHeight - rect.bottom
+    
+    // Determine vertical position - above or below
+    let positionBelow = spaceBelow > tooltipRect.height + 20 || spaceBelow > spaceAbove
+    let tooltipTop
+    
+    if (positionBelow) {
+        tooltipTop = rect.bottom + window.scrollY + (verticalOffset || 10)
+    } else {
+        tooltipTop = rect.top + window.scrollY - tooltipRect.height - (verticalOffset || 10)
+    }
+    
+    // Check for overlap with buttons
+    if (buttonHeight > 0) {
+        let tooltipTopInViewport = tooltipTop - window.scrollY
+        let tooltipBottomInViewport = tooltipTopInViewport + tooltipRect.height
+        
+        if (tooltipBottomInViewport > buttonTopInViewport - buttonPadding) {
+            // Tooltip would overlap - try to move it above
+            let alternativeTop = rect.top + window.scrollY - tooltipRect.height - (verticalOffset || 10)
+            let alternativeTopInViewport = alternativeTop - window.scrollY
+            let alternativeBottomInViewport = alternativeTopInViewport + tooltipRect.height
+            
+            if (alternativeTop >= window.scrollY && alternativeBottomInViewport <= buttonTopInViewport - buttonPadding) {
+                tooltipTop = alternativeTop
+            } else {
+                // Not enough space above, position it just above the button area
+                tooltipTop = (buttonTopInViewport - buttonPadding - tooltipRect.height) + window.scrollY
+                let minTooltipTop = window.scrollY + 10
+                if (tooltipTop < minTooltipTop) {
+                    tooltipTop = minTooltipTop
+                }
+            }
+        }
+    }
+    
+    tooltip.style.top = `${tooltipTop}px`
+}
+
 function positionTooltip(tooltip, targetElement, centerOnMobile, verticalOffset) {
     if (targetElement) {
         let rect = targetElement.getBoundingClientRect()
@@ -69,72 +149,50 @@ function positionTooltip(tooltip, targetElement, centerOnMobile, verticalOffset)
         // Handle horizontal positioning
         if (centerOnMobile && isMobileDevice) {
             // Mobile: center tooltip and scroll viewport to accommodate it
-            // The tooltip will be centered at 50% of viewport
-            // We want to scroll so that when centered, it points to the target
+            // Also handle vertical centering in one smooth scroll
             
-            // Target's center in current viewport coordinates
+            // Calculate both horizontal and vertical scroll needed
             let targetCenterX = rect.left + rect.width / 2
+            let targetCenterY = rect.top + rect.height / 2
             let viewportCenterX = window.innerWidth / 2
+            let viewportCenterY = window.innerHeight / 2
             
-            // How much we need to scroll to align target center with viewport center
-            let scrollNeeded = targetCenterX - viewportCenterX
+            // Horizontal scroll
+            let scrollNeededX = targetCenterX - viewportCenterX
+            // Vertical scroll  
+            let scrollNeededY = targetCenterY - viewportCenterY
             
             // Get scroll limits
             let currentScrollX = window.scrollX
+            let currentScrollY = window.scrollY
             let maxScrollX = Math.max(0, document.documentElement.scrollWidth - window.innerWidth)
+            let maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
             
-            // Calculate new scroll position (scroll as far as possible toward centering)
-            let newScrollX = Math.max(0, Math.min(maxScrollX, currentScrollX + scrollNeeded))
+            // Calculate new scroll positions (scroll as far as possible toward centering)
+            let newScrollX = Math.max(0, Math.min(maxScrollX, currentScrollX + scrollNeededX))
+            let newScrollY = Math.max(0, Math.min(maxScrollY, currentScrollY + scrollNeededY))
             
-            // Apply scroll
-            if (Math.abs(newScrollX - currentScrollX) > 1) {
+            // Apply scroll for both axes in one call for smooth animation
+            let willScroll = Math.abs(newScrollX - currentScrollX) > 1 || Math.abs(newScrollY - currentScrollY) > 1
+            
+            if (willScroll) {
                 window.scrollTo({
                     left: newScrollX,
+                    top: newScrollY,
                     behavior: 'smooth'
                 })
+                
+                // Wait for scroll to complete before positioning tooltip
+                // Smooth scroll typically takes ~500ms, wait a bit longer to be safe
+                setTimeout(function() {
+                    positionTooltipAfterMobileScroll(tooltip, targetElement, verticalOffset, buttonHeight, buttonTopInViewport, buttonPadding)
+                }, 600)
+            } else {
+                // No scroll needed, position immediately
+                positionTooltipAfterMobileScroll(tooltip, targetElement, verticalOffset, buttonHeight, buttonTopInViewport, buttonPadding)
             }
-            
-            // Position tooltip centered in viewport
-            tooltip.style.left = '50%'
-            tooltip.style.transform = 'translateX(-50%)'
-            
-            // After scroll completes, check if tooltip extends beyond screen
-            // With 90% width it should fit, but handle edge case
-            setTimeout(function() {
-                let tooltipRectAfter = tooltip.getBoundingClientRect()
-                let tooltipLeft = tooltipRectAfter.left
-                let tooltipRight = tooltipRectAfter.right
-                let needsAdjustment = false
-                let adjustedLeft = null
-                
-                if (tooltipLeft < 0) {
-                    // Tooltip extends left - position against left edge
-                    let tooltipHalfWidth = tooltipRectAfter.width / 2
-                    adjustedLeft = window.scrollX + tooltipHalfWidth
-                    needsAdjustment = true
-                    // Also scroll to far left if possible
-                    window.scrollTo({
-                        left: 0,
-                        behavior: 'smooth'
-                    })
-                } else if (tooltipRight > window.innerWidth) {
-                    // Tooltip extends right - position against right edge
-                    let tooltipHalfWidth = tooltipRectAfter.width / 2
-                    adjustedLeft = window.scrollX + window.innerWidth - tooltipHalfWidth
-                    needsAdjustment = true
-                    // Also scroll to far right if possible
-                    let finalMaxScroll = Math.max(0, document.documentElement.scrollWidth - window.innerWidth)
-                    window.scrollTo({
-                        left: finalMaxScroll,
-                        behavior: 'smooth'
-                    })
-                }
-                
-                if (needsAdjustment && adjustedLeft !== null) {
-                    tooltip.style.left = `${adjustedLeft}px`
-                    tooltip.style.transform = 'translateX(-50%)'
-                }
-            }, 100)
+            // On mobile, we're done - return early to skip the desktop vertical positioning code
+            return
         } else {
             // Desktop: maintain width, clamp to screen edges
             let leftPos = rect.left + window.scrollX

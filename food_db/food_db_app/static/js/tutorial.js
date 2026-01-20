@@ -5,10 +5,13 @@ let tutorialTooltipElement = null
 let tutorialExitButton = null
 let tutorialHighlightElement = null
 
-function scrollToElement(selector) {
+function scrollToElement(selector, skipScrollOnMobile) {
     let targetElement = document.querySelector(selector)
     if (targetElement) {
-        targetElement.scrollIntoView({behavior: 'smooth', block: 'center'})
+        // On mobile, positionTooltip will handle all scrolling, so skip scrollIntoView
+        if (!skipScrollOnMobile) {
+            targetElement.scrollIntoView({behavior: 'smooth', block: 'center'})
+        }
         return targetElement
     }
     return null
@@ -147,6 +150,8 @@ function showTutorialTooltip(stepData, targetElement) {
     let isLastStep = stepData.is_last_step || false
     
     let tooltip = createTutorialTooltip(stepData.tooltip_content, isLastStep)
+    let isMobileDevice = isMobile() == 'mobile'
+    
     positionTooltip(tooltip, targetElement, true)
     
     // Highlight the target element if highlight_scroll_target is true
@@ -154,10 +159,12 @@ function showTutorialTooltip(stepData, targetElement) {
         highlightTargetElement(targetElement)
     }
     
-    // Show tooltip with animation using function from tooltip.js
+    // On mobile, wait longer for scroll and positioning to complete before showing tooltip
+    // On desktop, shorter delay is fine
+    let showDelay = isMobileDevice ? 650 : 100
     setTimeout(function() {
         showToolTip(tooltip)
-    }, 100)
+    }, showDelay)
 }
 
 async function startTutorial(stepId) {
@@ -327,18 +334,23 @@ function showTutorialStep(stepData) {
     // Show exit button
     showTutorialExitButton()
     
-    // Scroll to target element
-    let targetElement = scrollToElement(stepData.scroll_target)
+    // Check if we're on mobile - if so, positionTooltip will handle all scrolling
+    let isMobileDevice = isMobile() == 'mobile'
+    
+    // Scroll to target element (skip on mobile since positionTooltip will handle it)
+    let targetElement = scrollToElement(stepData.scroll_target, isMobileDevice)
     
     // Execute JavaScript function if specified
     if (stepData.js_function && typeof window[stepData.js_function] === 'function') {
         window[stepData.js_function]()
     }
     
-    // Show tooltip after scrolling animation
+    // On mobile, show tooltip immediately since positionTooltip handles scrolling
+    // On desktop, wait for scrollIntoView to complete
+    let delay = isMobileDevice ? 0 : 500
     setTimeout(function() {
         showTutorialTooltip(stepData, targetElement)
-    }, 500)
+    }, delay)
 }
 
 function handleTutorialOnPageLoad() {
