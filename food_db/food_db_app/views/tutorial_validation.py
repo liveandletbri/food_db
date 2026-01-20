@@ -158,17 +158,17 @@ def validate_tutorial_steps():
             raise ImproperlyConfigured(f'Tutorial step at index {index} is missing step_id.')
         
         if not step.page_url:
-            raise ImproperlyConfigured(f'Tutorial step "{step.step_id}" is missing page_url.')
+            raise ImproperlyConfigured(f'Tutorial step "{step.name}" is missing page_url.')
         
         if not step.scroll_target:
-            raise ImproperlyConfigured(f'Tutorial step "{step.step_id}" is missing scroll_target.')
+            raise ImproperlyConfigured(f'Tutorial step "{step.name}" is missing scroll_target.')
         
         if not step.tooltip_content:
-            raise ImproperlyConfigured(f'Tutorial step "{step.step_id}" is missing tooltip_content.')
+            raise ImproperlyConfigured(f'Tutorial step "{step.name}" is missing tooltip_content.')
         
         # Check for unique step_id
         if step.step_id in step_ids:
-            raise ImproperlyConfigured(f'Duplicate step_id found: "{step.step_id}". All step_id values must be unique.')
+            raise ImproperlyConfigured(f'Duplicate step_id found: "{step.name}". All step_id values must be unique.')
         step_ids.add(step.step_id)
         
         # Collect order numbers
@@ -183,7 +183,7 @@ def validate_tutorial_steps():
                 reverse(step.page_url)
         except NoReverseMatch as e:
             raise ImproperlyConfigured(
-                f'Tutorial step "{step.step_id}" has invalid page_url "{step.page_url}". '
+                f'Tutorial step "{step.name}" has invalid page_url "{step.page_url}". '
                 f'URL name not found in URL configuration. Error: {str(e)}'
             )
     
@@ -211,7 +211,7 @@ def validate_tutorial_steps():
         html_content = _read_template_content(template_path)
         if not _css_selector_exists_in_html(step.scroll_target, html_content):
             raise ImproperlyConfigured(
-                f'Tutorial step "{step.step_id}" has scroll_target "{step.scroll_target}" that does not exist '
+                f'Tutorial step "{step.name}" has scroll_target "{step.scroll_target}" that does not exist '
                 f'in the HTML template "{template_path}".'
             )
 
