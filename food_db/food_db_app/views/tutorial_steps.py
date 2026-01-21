@@ -190,6 +190,17 @@ class SearchStep(TutorialStep):
         )
 
 
+class FoodManagerStep(TutorialStep):
+    def __init__(self, scroll_target, tooltip_content, page_url='manage_food', **kwargs):
+        super().__init__(
+            page_url=page_url,
+            scroll_target=scroll_target,
+            tooltip_content=tooltip_content,
+            section='Food Manager',
+            **kwargs
+        )
+
+
 TUTORIAL_STEPS = [
     # Getting Familiar section
     GettingFamiliarStep(
@@ -410,6 +421,27 @@ TUTORIAL_STEPS = [
     SearchStep(
         scroll_target='h1',
         tooltip_content='''This page is (probably) the reason you got the Food DB! Here you can browse and search your recipe collection in a number of different ways.''',
+    ),
+    SearchStep(
+        scroll_target='#search_form',
+        tooltip_content='''These first few filters are pretty straightforward: you can search by recipe title or by the names of any ingredients (you can only search for a single ingredient name, so "all purpose flour" is fine but "flour sugar butter" won't work). Use the duration filter to remove results with long (or unspecified) duration.''',
+    ),
+    SearchStep(
+        scroll_target='#id_is_component_recipe',
+        tooltip_content='''Filter to only full recipes or only components here. Keep in mind this attribute is determined <i>not</i> by a Linked Recipe relationship, but by the checkbox at the top of the recipe add/edit form that asks if this recipe is a component.''',
+        skip_css_target_validation=True,
+    ),
+    SearchStep(
+        scroll_target='#search_tag_filter_table',
+        tooltip_content='''Here you can include and exclude tags from your search. The <b>"tagged with" search is an AND search</b>. If you select two tags, you will <b>only see recipes that have both</b>.<br><br>The <b>"not tagged with" section is an OR search</b>. If you select two tags, <b>recipes that have either tag will be exlucded</b> from results.''',
+    ),
+    SearchStep(
+        scroll_target='#search_results_table',
+        tooltip_content='''Your search reults show up here. You can click any of the column titles to sort the results by that column. Click the title again to change between Ascending/Descending. You can also add any search result to your Bulk Prep cart by clicking the cart icon on the far right (read more about Bulk Prep on the Help page).''',
+    ),
+    FoodManagerStep(
+        scroll_target='h1',
+        tooltip_content='''This is where you can categorize and edit all the foods you've ever used, or might use, for ingredients. The only purpose of doing this is so you can generate a nice clean grocery list from your recipe (or, if doing Bulk Prep, your recipe<b>s</b>). If you automatic grocery list generation doesn't interest you, you can skip right on past this page!''',
     ),
 ]
 
