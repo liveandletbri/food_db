@@ -7,15 +7,15 @@ import markdown as md
 register = template.Library()
 
 @register.simple_tag
-def markdown(value, recipe_title, multiplier=1):
+def markdown(step_id, value, recipe_title, multiplier=1):
     # Process custom ingredient links before passing to markdown
-    processed_value = process_ingredient_links(value, recipe_title, multiplier)
+    processed_value = process_ingredient_links(step_id, value, recipe_title, multiplier)
     html = md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
     # Add IDs to headings for anchor links
     html = add_heading_ids(html)
     return html
 
-def process_ingredient_links(text, recipe_title, multiplier):
+def process_ingredient_links(step_id, text, recipe_title, multiplier):
     """
     Process custom ingredient links in the format [text](!ingredient name;ingredient category)
     and replace them with HTML spans that include tooltip data.

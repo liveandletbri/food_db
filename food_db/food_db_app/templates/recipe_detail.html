@@ -270,7 +270,7 @@
                                 <input type="checkbox" class="cooking-checkbox step-checkbox" data-step-id="{{ step.order_number }}">
                             </td>
                             <td class="step_description_text">
-                                {% markdown step.description recipe.title multiplier as step_html %}
+                                {% markdown step.id step.description recipe.title multiplier as step_html %}
                                 {{ step_html | safe }}
                             </td>
                         </tr>
