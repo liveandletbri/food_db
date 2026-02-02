@@ -337,6 +337,98 @@ def create_linked_ingredients_for_step(step_instance, linked_ingredient_data):
     
     return linked_ingredients
 
+
+def update_step_text_for_food_change(old_food_name, new_food_name):
+    """
+    Update step text when a food name changes (via edit or merge).
+    
+    This finds all steps that reference the food via LinkedIngredients, updates
+    the ingredient link syntax in the step text to reflect the new food name,
+    and regenerates LinkedIngredients.
+    
+    Args:
+        old_food_name: The original food name
+        new_food_name: The new food name
+    
+    Returns:
+        int: Number of steps that were updated
+    """
+    # Find all LinkedIngredients that reference ingredients with this food
+    # We need to find by ingredient, since the food name has already been updated
+    # So we look for ingredients whose food now has the new_food_name
+    affected_linked_ingredients = LinkedIngredient.objects.filter(
+        ingredient__food__name__iexact=new_food_name
+    ).select_related('step', 'ingredient', 'ingredient__ingredient_category')
+    
+    # Group by step
+    steps_to_update = {}
+    for linked_ingredient in affected_linked_ingredients:
+        step = linked_ingredient.step
+        if step.id not in steps_to_update:
+            steps_to_update[step.id] = {
+                'step': step,
+                'linked_ingredients': [],
+            }
+        steps_to_update[step.id]['linked_ingredients'].append(linked_ingredient)
+    
+    updated_count = 0
+    
+    for step_data in steps_to_update.values():
+        step = step_data['step']
+        linked_ingredients_for_step = step_data['linked_ingredients']
+        
+        # Get the current editable description (with <!ID> replaced by raw_input)
+        editable_text = step.editable_description
+        
+        # Update the raw_input for each affected LinkedIngredient
+        # We need to replace occurrences of the old food name with new syntax
+        updated_text = editable_text
+        
+        for linked_ingredient in linked_ingredients_for_step:
+            old_raw_input = linked_ingredient.raw_input
+            link_text = linked_ingredient.link_text
+            ingredient_category = linked_ingredient.ingredient.ingredient_category
+            
+            # Determine the new raw_input based on whether link_text matches new food name
+            if link_text.lower() == new_food_name.lower():
+                # Simple case: link text matches new food name, use simple syntax
+                new_raw_input = f'[{link_text}]'
+            else:
+                # Link text differs from new food name, need extended syntax
+                if ingredient_category and ingredient_category.name:
+                    # Include category for disambiguation
+                    new_raw_input = f'[{link_text}](!{new_food_name};{ingredient_category.name})'
+                else:
+                    new_raw_input = f'[{link_text}](!{new_food_name})'
+            
+            # Replace in the text
+            updated_text = updated_text.replace(old_raw_input, new_raw_input, 1)
+        
+        # Delete old LinkedIngredients for this step
+        LinkedIngredient.objects.filter(step=step).delete()
+        
+        # Re-process the step text to create new LinkedIngredients
+        try:
+            processed_description, linked_ingredient_data = process_ingredient_links(
+                updated_text,
+                step.recipe.title
+            )
+        except ReservedSyntaxError:
+            # This shouldn't happen with auto-generated syntax, but just in case
+            continue
+        
+        # Update the step's description
+        step.description = processed_description
+        step.save()
+        
+        # Create new LinkedIngredients
+        if linked_ingredient_data:
+            create_linked_ingredients_for_step(step, linked_ingredient_data)
+        
+        updated_count += 1
+    
+    return updated_count
+
 def capitalize_title(raw_title: str):
     raw_parts = raw_title.split(' ')
     capital_parts = []

@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from food_db_app.forms import CreateRecipeForm
 from food_db_app.models import *
 
-from .utils import get_cart, sanitize_string, set_tutorial_state, clear_tutorial_state, get_tutorial_state
+from .utils import get_cart, sanitize_string, set_tutorial_state, clear_tutorial_state, get_tutorial_state, update_step_text_for_food_change
 from .tutorial_steps import get_step_by_id, get_next_step, get_tutorial_steps
 from .validate_ingredients import validate_ingredient_name
 
@@ -131,6 +131,9 @@ def merge_foods(request):
         data = json.loads(request.body)
         food_to_merge = Food.objects.get(name=data['food_to_merge'])
         food_to_keep = Food.objects.get(name=data['food_to_keep'])
+        old_food_name = food_to_merge.name
+        new_food_name = food_to_keep.name
+        
         ingreds_to_update = Ingredient.objects.filter(food__name=food_to_merge.name)
         for ingred in ingreds_to_update:
             assert ingred.food == food_to_merge
@@ -138,6 +141,9 @@ def merge_foods(request):
             ingred.save()
         
         food_to_merge.delete()
+        
+        # Update step text for any steps that referenced the merged food
+        update_step_text_for_food_change(old_food_name, new_food_name)
         
         return HttpResponse(status=200)
     else:
@@ -191,8 +197,11 @@ def edit_food_category(request):
 def edit_food(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        food = Food.objects.get(name=data['original_food_name'])
-        food.name = data['new_food_name']
+        old_food_name = data['original_food_name']
+        new_food_name = data['new_food_name']
+        
+        food = Food.objects.get(name=old_food_name)
+        food.name = new_food_name
         category_name = data['category_name']
         if category_name != '':
             category = FoodCategory.objects.get(name=category_name)
@@ -201,6 +210,11 @@ def edit_food(request):
             food.food_category = None
         try:
             food.save()
+            
+            # Update step text if the food name changed
+            if old_food_name.lower() != new_food_name.lower():
+                update_step_text_for_food_change(old_food_name, new_food_name)
+            
             return HttpResponse(status=200)
         except IntegrityError:
             return HttpResponse(status=406)
