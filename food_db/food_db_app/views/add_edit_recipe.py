@@ -19,7 +19,9 @@ from .utils import (
     remove_dupes_preserve_order,
     log_debug_message,
     get_only_relevant_tags,
-    identify_ingredient_links,
+    process_ingredient_links,
+    create_linked_ingredients_for_step,
+    ReservedSyntaxError,
     context,
 )
 
@@ -265,6 +267,10 @@ def _process_recipe_creation(request, create_recipe_form):
     if create_recipe_form.cleaned_data['step_0_description'] != '':  # steps were entered for this recipe
         # Now, for each step
         step_ids = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}
+        
+        # Store linked ingredient data for each step (keyed by order number)
+        step_linked_ingredient_data = {}
+        
         for i, step_id_prefix in enumerate(sorted(step_ids)):
             step_description = create_recipe_form.cleaned_data[f'{step_id_prefix}_description']
             # Attempt to automatically find ingredient links. This involves searching the step description for ingredient names, then wrapping the names with [square brackets].
@@ -272,20 +278,31 @@ def _process_recipe_creation(request, create_recipe_form):
             def wrap_food_with_brackets(match):
                 return '[' + match.group(0) + ']'
             step_description_with_links = re.sub(food_name_regex, wrap_food_with_brackets, step_description, flags=re.IGNORECASE)
+            
+            # Process ingredient links and get placeholder text
+            try:
+                processed_description, linked_ingredient_data = process_ingredient_links(
+                    step_description_with_links, 
+                    recipe_instance.title
+                )
+            except ReservedSyntaxError as e:
+                return HttpResponseBadRequest(str(e))
+            
+            step_linked_ingredient_data[i + 1] = linked_ingredient_data
+            
             step_instance = RecipeStep(
                 recipe=recipe_instance,
                 order_number=i + 1,
-                description=step_description_with_links,
+                description=processed_description,
             )
             step_instances.append(step_instance)
         
-        RecipeStep.objects.bulk_create(step_instances)
-        
-        # Fetch the created steps back from the database to get their IDs
-        # (bulk_create doesn't return IDs on SQLite)
-        created_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
-        for step in created_steps:
-            identify_ingredient_links(step)
+        # Save steps one at a time so we can create LinkedIngredients with correct IDs
+        for step_instance in step_instances:
+            step_instance.save()
+            linked_data = step_linked_ingredient_data.get(step_instance.order_number, [])
+            if linked_data:
+                create_linked_ingredients_for_step(step_instance, linked_data)
         
     log_debug_message(f'finished steps')
     

@@ -148,7 +148,8 @@ class DerivedTagRule:
     def _check_steps(self, recipe):
         for step in RecipeStep.objects.filter(recipe=recipe):
             for pattern in self.ingredient_regex_patterns:
-                if re.search(pattern, step.description, re.IGNORECASE):
+                # Use editable_description to search original text (not the <!ID> placeholders)
+                if re.search(pattern, step.editable_description, re.IGNORECASE):
                     return True
         return False
 

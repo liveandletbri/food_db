@@ -34,7 +34,9 @@ from .utils import (
     get_is_baking_cookie,
     get_cart,
     get_tutorial_state,
-    identify_ingredient_links,
+    process_ingredient_links,
+    create_linked_ingredients_for_step,
+    ReservedSyntaxError,
     context,
 )
 
@@ -380,33 +382,45 @@ def edit_recipe(request, key):
                 Ingredient.objects.bulk_create(ingredient_instances)
                 log_debug_message('bulk-saved ingredients')
 
-            # Remove any existing steps from the recipe
+            # Remove any existing steps from the recipe (CASCADE also deletes LinkedIngredients)
             existing_steps = RecipeStep.objects.filter(recipe=recipe_instance)
             existing_steps.delete()
 
             # Now, for each step in the form
             step_id_prefixes = {re.search(r'step_(\d+)', input_name).group() for input_name in create_recipe_form.cleaned_data.keys() if input_name.startswith('step_')}  # Creates a distinct set of step ID prefixes, e.g. {step_0, step_1}
-            step_ids = [int(id.replace('step_','')) for id in step_id_prefixes]  # pulls just the numbers from teh step ID prefix
+            step_ids = [int(id.replace('step_','')) for id in step_id_prefixes]  # pulls just the numbers from the step ID prefix
             step_instances = []
+            step_linked_ingredient_data = {}  # Store linked ingredient data for each step (keyed by order number)
+            
             # in JavaScript, all step rows are updated on form submission to be sequential integers (start at 0, increment by 1), so we can assume a predictable set of step_ids
             for step_id in sorted(step_ids):
                 step_description = create_recipe_form.cleaned_data[f'step_{step_id}_description']
+                
+                # Process ingredient links and get placeholder text
+                try:
+                    processed_description, linked_ingredient_data = process_ingredient_links(
+                        step_description,
+                        recipe_instance.title
+                    )
+                except ReservedSyntaxError as e:
+                    return HttpResponseBadRequest(str(e))
+                
+                step_linked_ingredient_data[step_id + 1] = linked_ingredient_data
+                
                 step_instance = RecipeStep(
                     recipe=recipe_instance,
                     order_number=step_id + 1,
-                    description=step_description,
+                    description=processed_description,
                 )
                 step_instances.append(step_instance)
 
             if len(step_instances) > 0:
-                # Save all steps in a single transaction
-                RecipeStep.objects.bulk_create(step_instances)
-                
-                # Fetch the created steps back from the database to get their IDs
-                # (bulk_create doesn't return IDs on SQLite), then create LinkedIngredients
-                created_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
-                for step in created_steps:
-                    identify_ingredient_links(step)
+                # Save steps one at a time so we can create LinkedIngredients with correct IDs
+                for step_instance in step_instances:
+                    step_instance.save()
+                    linked_data = step_linked_ingredient_data.get(step_instance.order_number, [])
+                    if linked_data:
+                        create_linked_ingredients_for_step(step_instance, linked_data)
 
             log_debug_message(f'finished steps')
 
@@ -558,17 +572,14 @@ def edit_recipe(request, key):
             ingredient_list = [{key: '' for key in ingredient_fields}]
 
         step_list = []
-        step_fields = ['description']
         for step in related_steps:
-            step_data = {}
-            for field in step_fields:
-                # create_recipe_form.fields[f'step_{i}_{field}'].initial = getattr(step, field)
-                step_data[field] = getattr(step, field)
+            # Use editable_description to get original user input (with <!ID> replaced by raw_input)
+            step_data = {'description': step.editable_description}
             step_list.append(step_data)
         
         # If the recipe is from a recipe book, it may have no steps. Populate a blank one for the form.
         if len(step_list) == 0:
-            step_list = [{key: '' for key in step_fields}]
+            step_list = [{'description': ''}]
 
         # Prepping timing attributes as dictionaries
         timing_list = []

@@ -7,7 +7,7 @@ import markdown as md
 register = template.Library()
 
 @register.simple_tag
-def markdown(step_id, value, recipe_title, multiplier=1):
+def markdown(step_id, multiplier=1):
     """
     Template tag to render step description with ingredient links and markdown formatting.
     
@@ -15,9 +15,6 @@ def markdown(step_id, value, recipe_title, multiplier=1):
     1. Look up the RecipeStep and render ingredient links (<!ID> → HTML spans)
     2. Apply markdown formatting to the result
     3. Add IDs to headings for anchor links
-    
-    Note: value and recipe_title parameters are kept for backward compatibility but
-    the step is looked up by step_id to get the processed description.
     """
     from food_db_app.models import RecipeStep
     
