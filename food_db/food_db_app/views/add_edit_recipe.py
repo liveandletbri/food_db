@@ -19,6 +19,7 @@ from .utils import (
     remove_dupes_preserve_order,
     log_debug_message,
     get_only_relevant_tags,
+    identify_ingredient_links,
     context,
 )
 
@@ -279,6 +280,13 @@ def _process_recipe_creation(request, create_recipe_form):
             step_instances.append(step_instance)
         
         RecipeStep.objects.bulk_create(step_instances)
+        
+        # Fetch the created steps back from the database to get their IDs
+        # (bulk_create doesn't return IDs on SQLite)
+        created_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
+        for step in created_steps:
+            identify_ingredient_links(step)
+        
     log_debug_message(f'finished steps')
     
     number_of_child_recipes = request.POST.get('number_of_linked_recipes') or 0
