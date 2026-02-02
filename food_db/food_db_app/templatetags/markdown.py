@@ -8,94 +8,30 @@ register = template.Library()
 
 @register.simple_tag
 def markdown(step_id, value, recipe_title, multiplier=1):
-    # Process custom ingredient links before passing to markdown
-    processed_value = render_ingredient_links(step_id, value, multiplier)
-    html = md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
+    """
+    Template tag to render step description with ingredient links and markdown formatting.
+    
+    Flow:
+    1. Look up the RecipeStep and render ingredient links (<!ID> → HTML spans)
+    2. Apply markdown formatting to the result
+    3. Add IDs to headings for anchor links
+    
+    Note: value and recipe_title parameters are kept for backward compatibility but
+    the step is looked up by step_id to get the processed description.
+    """
+    from food_db_app.models import RecipeStep
+    
+    # Get the step and render ingredient links
+    step = RecipeStep.objects.get(id=step_id)
+    text_with_rendered_links = step._render_ingredient_links(multiplier)
+    
+    # Apply markdown formatting
+    html = md.markdown(text_with_rendered_links, extensions=['markdown.extensions.fenced_code'])
+    
     # Add IDs to headings for anchor links
     html = add_heading_ids(html)
+    
     return html
-
-def render_ingredient_links(step_id, text, multiplier):
-    """
-    Render custom ingredient links by looking up pre-created LinkedIngredient records.
-    
-    LinkedIngredient records are created at recipe add/edit time by identify_ingredient_links().
-    This function matches regex patterns to LinkedIngredients by order of appearance, verifies
-    the ingredient name matches, and renders HTML spans with tooltip data.
-    
-    Args:
-        step_id: The ID of the RecipeStep
-        text: The step description text containing ingredient link syntax
-        multiplier: The quantity multiplier for ingredient amounts
-    
-    Returns:
-        str: The text with ingredient links replaced by HTML spans
-    """
-    # Import here to avoid circular imports
-    from food_db_app.models import LinkedIngredient
-    from food_db_app.views import RecipeIngredientData
-    from food_db_app.views.utils import INGREDIENT_LINK_PATTERN
-    
-    # Fetch all LinkedIngredients for this step, ordered by appearance
-    linked_ingredients = list(
-        LinkedIngredient.objects.filter(step_id=step_id)
-        .select_related('ingredient', 'ingredient__food', 'ingredient__unit_of_measurement')
-        .order_by('order_in_step')
-    )
-    
-    # Track which LinkedIngredient we're on
-    link_index = 0
-    
-    def replace_ingredient_link(match):
-        nonlocal link_index
-        
-        link_text = match.group(1)
-        parentheses_clause = match.group(2)
-        parsed_ingredient_name = match.group(3)
-        
-        # Determine the expected ingredient name from the syntax
-        if not parentheses_clause:
-            expected_food_name = link_text
-        else:
-            expected_food_name = parsed_ingredient_name.strip()
-        
-        # Check if we have a LinkedIngredient for this position
-        if link_index >= len(linked_ingredients):
-            # No LinkedIngredient found for this match - ingredient lookup failed at save time
-            link_index += 1
-            return link_text + ' <linked ingredient not found>'
-        
-        linked_ingredient = linked_ingredients[link_index]
-        ingredient = linked_ingredient.ingredient
-        
-        # Verify the ingredient name matches what we expect
-        if ingredient.food.name.lower() != expected_food_name.lower():
-            # Mismatch - the step text may have been modified or LinkedIngredients are stale
-            link_index += 1
-            return link_text + ' <ingredient link mismatch>'
-        
-        # Build the tooltip content
-        quantity = RecipeIngredientData.stringify_ingredient_quantity(
-            ingredient.quantity,
-            ingredient.unit_of_measurement.name if ingredient.unit_of_measurement else '',
-            multiplier
-        )
-        ingredient_name = ingredient.food.name
-        
-        tooltip_content = f'{quantity} {ingredient_name}'
-        
-        if ingredient.quantity != 1 and not ingredient.unit_of_measurement and not ingredient_name.endswith('s'):
-            tooltip_content += 's'
-        
-        if ingredient.notes:
-            tooltip_content += f' - {ingredient.notes}'
-        
-        link_index += 1
-        
-        # Return HTML span with tooltip attributes
-        return f'<span class="ingredient_link" data-ingredient_id="{ingredient.id}" data-tooltip="{tooltip_content}">{link_text}</span>'
-    
-    return re.sub(INGREDIENT_LINK_PATTERN, replace_ingredient_link, text, flags=re.IGNORECASE)
 
 def add_heading_ids(html):
     """

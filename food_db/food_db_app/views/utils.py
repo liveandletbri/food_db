@@ -201,28 +201,50 @@ def sanitize_string(raw_string: str):
 
     return clean_string
 
-def identify_ingredient_links(step_instance):
+class ReservedSyntaxError(Exception):
+    """Raised when user input contains reserved <!...> syntax."""
+    pass
+
+# Pattern to detect reserved <!...> syntax that users should not enter
+RESERVED_SYNTAX_PATTERN = r'<!\s*\d+\s*>'
+
+def process_ingredient_links(text, recipe_title):
     """
-    Parse a recipe step's description to identify ingredient links and create
-    LinkedIngredient records for each match.
+    Process step description text to identify ingredient links, create LinkedIngredient
+    records, and return processed text with <!ID> placeholders.
     
-    This function should be called when a recipe is added or edited, after the
-    RecipeStep records have been created.
+    This function should be called when a recipe is added or edited, BEFORE the
+    RecipeStep is created. The returned processed text should be saved as the step's
+    description.
     
     Args:
-        step_instance: A RecipeStep instance (must be saved with an ID)
+        text: The step description text containing ingredient link syntax
         recipe_title: The title of the recipe (used to look up ingredients)
     
     Returns:
-        list: List of LinkedIngredient instances that were created
+        tuple: (processed_text, linked_ingredient_data)
+            - processed_text: Text with ingredient links replaced by <!ID> placeholders
+            - linked_ingredient_data: List of dicts with data needed to create LinkedIngredients
+              after the step is saved. Each dict has: ingredient, order_in_step, raw_input, link_text
+    
+    Raises:
+        ReservedSyntaxError: If the text contains reserved <!...> syntax
     """
-    text = step_instance.description
-    recipe_title = step_instance.recipe.title
-    linked_ingredients = []
+    # Validate that user hasn't entered reserved syntax
+    if re.search(RESERVED_SYNTAX_PATTERN, text):
+        raise ReservedSyntaxError(
+            "Step text contains reserved syntax '<! ... >'. "
+            "This format is used internally for ingredient links and cannot be entered directly."
+        )
+    
+    linked_ingredient_data = []
     order_counter = 0
     
-    for match in re.finditer(INGREDIENT_LINK_PATTERN, text, flags=re.IGNORECASE):
-        link_text = match.group(1)
+    def replace_with_placeholder(match):
+        nonlocal order_counter
+        
+        raw_input = match.group(0)  # The entire matched text
+        link_text = match.group(1)  # The visible text in brackets
         # The following may be None
         parentheses_clause = match.group(2)
         parsed_ingredient_name = match.group(3)
@@ -238,7 +260,7 @@ def identify_ingredient_links(step_instance):
                 # We don't want to require the specification of ingredient_category, even if the ingredient does have a category.
                 # So try to find it first without filtering on category.
                 try:
-                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=parsed_ingredient_name)
+                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=parsed_ingredient_name.strip())
                 except Ingredient.MultipleObjectsReturned:
                     # The same food was used for multiple ingredients in this recipe, so an ingredient category is required.
                     # The full syntax for specifying this is [visible text](!ingredient name;category name)
@@ -246,28 +268,71 @@ def identify_ingredient_links(step_instance):
                     ingredient_category = ingredient_category.replace(';', '').strip()  # remove semicolon and whitespace from the regex match
                     ingredient = Ingredient.objects.get(
                         recipe__title=recipe_title,
-                        food__name__iexact=parsed_ingredient_name,
+                        food__name__iexact=parsed_ingredient_name.strip(),
                         ingredient_category__name__iexact=ingredient_category
                     )
             
-            linked_ingredient = LinkedIngredient(
-                step=step_instance,
-                ingredient=ingredient,
-                order_in_step=order_counter,
-            )
-            linked_ingredients.append(linked_ingredient)
-            order_counter += 1
+            # Store data for creating LinkedIngredient after step is saved
+            linked_ingredient_data.append({
+                'ingredient': ingredient,
+                'order_in_step': order_counter,
+                'raw_input': raw_input,
+                'link_text': link_text,
+            })
             
-        except (Ingredient.DoesNotExist, Ingredient.MultipleObjectsReturned):
-            # If we can't find the ingredient, skip creating a LinkedIngredient for this match.
-            # The render function will handle displaying an error message.
-            # We still increment order_counter so the ordering stays consistent with regex matches.
+            # Use a temporary placeholder that will be replaced with actual ID after step is saved
+            placeholder = f'<!TEMP_{order_counter}>'
             order_counter += 1
-            continue
+            return placeholder
+            
+        except Ingredient.DoesNotExist:
+            # Ingredient not found - return original text with error message
+            order_counter += 1
+            return link_text + ' <linked ingredient not found>'
+        except Ingredient.MultipleObjectsReturned:
+            # Multiple ingredients found - return original text with error message
+            order_counter += 1
+            return link_text + ' <multiple linked ingredients found; try specifying category>'
     
-    # Bulk create all LinkedIngredient records
-    if linked_ingredients:
-        LinkedIngredient.objects.bulk_create(linked_ingredients)
+    processed_text = re.sub(INGREDIENT_LINK_PATTERN, replace_with_placeholder, text, flags=re.IGNORECASE)
+    
+    return processed_text, linked_ingredient_data
+
+
+def create_linked_ingredients_for_step(step_instance, linked_ingredient_data):
+    """
+    Create LinkedIngredient records for a step and update the step's description
+    with the actual LinkedIngredient IDs.
+    
+    This should be called after the RecipeStep has been saved and has an ID.
+    
+    Args:
+        step_instance: A saved RecipeStep instance (must have an ID)
+        linked_ingredient_data: List of dicts from process_ingredient_links()
+    
+    Returns:
+        list: List of created LinkedIngredient instances
+    """
+    linked_ingredients = []
+    
+    # Create LinkedIngredients one at a time so we get IDs immediately
+    for data in linked_ingredient_data:
+        linked_ingredient = LinkedIngredient.objects.create(
+            step=step_instance,
+            ingredient=data['ingredient'],
+            order_in_step=data['order_in_step'],
+            raw_input=data['raw_input'],
+            link_text=data['link_text'],
+        )
+        linked_ingredients.append(linked_ingredient)
+    
+    # Now update the step's description to replace TEMP placeholders with actual IDs
+    description = step_instance.description
+    for i, linked_ingredient in enumerate(linked_ingredients):
+        description = description.replace(f'<!TEMP_{i}>', f'<!{linked_ingredient.id}>')
+    
+    step_instance.description = description
+    step_instance.save()
     
     return linked_ingredients
 
