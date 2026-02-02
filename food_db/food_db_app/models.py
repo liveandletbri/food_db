@@ -275,6 +275,34 @@ class RecipeStep(models.Model):
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
 
+class LinkedIngredient(models.Model):
+    """
+    Represents a link between a recipe step and an ingredient, created when the
+    custom ingredient link syntax is used in step descriptions (e.g., [ingredient name]
+    or [text](!ingredient name;category)).
+    
+    Each instance represents one occurrence of the link syntax in a step. Multiple
+    links to the same ingredient in a step will create multiple LinkedIngredient records,
+    each with a different order_in_step value.
+    """
+    def __str__(self):
+        return f'{self.step.recipe.title} Step {self.step.order_number}: {self.ingredient.food.name} (#{self.order_in_step})'
+    
+    step = models.ForeignKey(
+        RecipeStep,
+        on_delete=models.CASCADE,
+        related_name='linked_ingredients',
+    )
+    ingredient = models.ForeignKey(
+        'Ingredient',
+        on_delete=models.CASCADE,
+        related_name='step_links',
+    )
+    order_in_step = models.PositiveSmallIntegerField(
+        help_text="The order this link appears in the step text (0-indexed). Used to match regex matches to LinkedIngredient records during rendering.",
+    )
+    _date_created = models.DateTimeField(default=timezone.now)
+
 class Ingredient(models.Model):
     def __str__(self):
         return f'{self.recipe.title}: {self.ingredient_category.name + " - " if self.ingredient_category else ""}{self.food.name}'
