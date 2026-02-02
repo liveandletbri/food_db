@@ -284,6 +284,10 @@ class LinkedIngredient(models.Model):
     Each instance represents one occurrence of the link syntax in a step. Multiple
     links to the same ingredient in a step will create multiple LinkedIngredient records,
     each with a different order_in_step value.
+    
+    The step's description field stores processed text with <!ID> placeholders that
+    reference LinkedIngredient IDs. The raw_input field stores the original user syntax
+    so it can be reconstructed for editing.
     """
     def __str__(self):
         return f'{self.step.recipe.title} Step {self.step.order_number}: {self.ingredient.food.name} (#{self.order_in_step})'
@@ -299,7 +303,14 @@ class LinkedIngredient(models.Model):
         related_name='step_links',
     )
     order_in_step = models.PositiveSmallIntegerField(
-        help_text="The order this link appears in the step text (0-indexed). Used to match regex matches to LinkedIngredient records during rendering.",
+        help_text="The order this link appears in the step text (0-indexed).",
+    )
+    raw_input = models.TextField(
+        help_text="The original text the user entered (e.g., '[butter]' or '[butter](!salted butter;dairy)').",
+    )
+    link_text = models.CharField(
+        max_length=255,
+        help_text="The visible text in the rendered link (e.g., 'butter').",
     )
     _date_created = models.DateTimeField(default=timezone.now)
 
