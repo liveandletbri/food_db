@@ -34,6 +34,7 @@ from .utils import (
     get_is_baking_cookie,
     get_cart,
     get_tutorial_state,
+    identify_ingredient_links,
     context,
 )
 
@@ -284,7 +285,7 @@ def edit_recipe(request, key):
 
             log_debug_message('saved pics')
 
-            # Remove any existing ingredients from the recipe
+            # Remove any existing ingredients from the recipe (because of CASCADE this also deletes LinkedIngredients)
             existing_ingreds = Ingredient.objects.filter(recipe=recipe_instance).delete()
             existing_ingred_categories = IngredientCategory.objects.filter(recipe=recipe_instance)
             # Before deleting the ingredient categories, preserve their orders
@@ -400,6 +401,12 @@ def edit_recipe(request, key):
             if len(step_instances) > 0:
                 # Save all steps in a single transaction
                 RecipeStep.objects.bulk_create(step_instances)
+                
+                # Fetch the created steps back from the database to get their IDs
+                # (bulk_create doesn't return IDs on SQLite), then create LinkedIngredients
+                created_steps = RecipeStep.objects.filter(recipe=recipe_instance).order_by('order_number')
+                for step in created_steps:
+                    identify_ingredient_links(step)
 
             log_debug_message(f'finished steps')
 
