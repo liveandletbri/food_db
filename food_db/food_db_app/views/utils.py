@@ -13,6 +13,13 @@ from .tutorial_steps import get_step_by_id
 LAST_DEBUG_LOG_START_TIME = None
 LAST_DEBUG_LOG_TIME = None
 
+# Pattern to match ingredient link syntax in step descriptions:
+# - [ingredient name] - simple form, ingredient name is the link text
+# - [text](!ingredient name) - custom text with explicit ingredient name
+# - [text](!ingredient name;category) - custom text with ingredient name and category
+# Uses negative lookahead to avoid matching regular markdown links like [text](url)
+INGREDIENT_LINK_PATTERN = r"\[([^\]]+)\](?:(\(!([\w '\-%]+)(;[\w ]+)?\))|(?!\([^!]))"
+
 class RecipeIngredientData:
     """Assembles lists and dicts needed to display ingredients in the recipe detail view."""
     def __init__(self, recipe, multiplier):
@@ -193,6 +200,76 @@ def sanitize_string(raw_string: str):
     clean_string = re.sub(r'[^a-z0-9]', '-', remove_common_chars)
 
     return clean_string
+
+def identify_ingredient_links(step_instance):
+    """
+    Parse a recipe step's description to identify ingredient links and create
+    LinkedIngredient records for each match.
+    
+    This function should be called when a recipe is added or edited, after the
+    RecipeStep records have been created.
+    
+    Args:
+        step_instance: A RecipeStep instance (must be saved with an ID)
+        recipe_title: The title of the recipe (used to look up ingredients)
+    
+    Returns:
+        list: List of LinkedIngredient instances that were created
+    """
+    text = step_instance.description
+    recipe_title = step_instance.recipe.title
+    linked_ingredients = []
+    order_counter = 0
+    
+    for match in re.finditer(INGREDIENT_LINK_PATTERN, text, flags=re.IGNORECASE):
+        link_text = match.group(1)
+        # The following may be None
+        parentheses_clause = match.group(2)
+        parsed_ingredient_name = match.group(3)
+        parsed_ingredient_category = match.group(4)
+        
+        try:
+            # First case is the ingredient name written just in brackets, like [ingredient name]
+            if not parentheses_clause:
+                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=link_text)
+            else:
+                # In this case, both brackets and parentheses were used
+                # Checking the second case: [visible text](!ingredient name)
+                # We don't want to require the specification of ingredient_category, even if the ingredient does have a category.
+                # So try to find it first without filtering on category.
+                try:
+                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=parsed_ingredient_name)
+                except Ingredient.MultipleObjectsReturned:
+                    # The same food was used for multiple ingredients in this recipe, so an ingredient category is required.
+                    # The full syntax for specifying this is [visible text](!ingredient name;category name)
+                    ingredient_category = parsed_ingredient_category or ''  # if no category was specified, try searching with a blank string
+                    ingredient_category = ingredient_category.replace(';', '').strip()  # remove semicolon and whitespace from the regex match
+                    ingredient = Ingredient.objects.get(
+                        recipe__title=recipe_title,
+                        food__name__iexact=parsed_ingredient_name,
+                        ingredient_category__name__iexact=ingredient_category
+                    )
+            
+            linked_ingredient = LinkedIngredient(
+                step=step_instance,
+                ingredient=ingredient,
+                order_in_step=order_counter,
+            )
+            linked_ingredients.append(linked_ingredient)
+            order_counter += 1
+            
+        except (Ingredient.DoesNotExist, Ingredient.MultipleObjectsReturned):
+            # If we can't find the ingredient, skip creating a LinkedIngredient for this match.
+            # The render function will handle displaying an error message.
+            # We still increment order_counter so the ordering stays consistent with regex matches.
+            order_counter += 1
+            continue
+    
+    # Bulk create all LinkedIngredient records
+    if linked_ingredients:
+        LinkedIngredient.objects.bulk_create(linked_ingredients)
+    
+    return linked_ingredients
 
 def capitalize_title(raw_title: str):
     raw_parts = raw_title.split(' ')
