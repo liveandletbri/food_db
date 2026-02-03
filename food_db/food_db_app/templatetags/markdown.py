@@ -7,7 +7,20 @@ import markdown as md
 register = template.Library()
 
 @register.simple_tag
-def markdown(step_id, multiplier=1):
+def markdown(text):
+    """
+    Template tag to render general text with markdown formatting.
+    """
+    # Apply markdown formatting
+    html = md.markdown(text, extensions=['markdown.extensions.fenced_code'])
+    
+    # Add IDs to headings for anchor links
+    html = add_heading_ids(html)
+    
+    return html
+
+@register.simple_tag
+def step_description_markdown(step_id, multiplier=1):
     """
     Template tag to render step description with ingredient links and markdown formatting.
     
@@ -24,9 +37,6 @@ def markdown(step_id, multiplier=1):
     
     # Apply markdown formatting
     html = md.markdown(text_with_rendered_links, extensions=['markdown.extensions.fenced_code'])
-    
-    # Add IDs to headings for anchor links
-    html = add_heading_ids(html)
     
     return html
 
