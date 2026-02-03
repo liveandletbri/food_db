@@ -274,6 +274,121 @@ class RecipeStep(models.Model):
     description = models.TextField()
     _date_created = models.DateTimeField(default=timezone.now)
     _date_modified = models.DateTimeField(default=timezone.now)
+    
+    # Pattern to match <!ID> placeholders in step descriptions
+    _LINKED_INGREDIENT_PLACEHOLDER_PATTERN = re.compile(r'<!(\d+)>')
+    
+    @property
+    def editable_description(self):
+        """
+        Returns the step description with <!ID> placeholders replaced by the original
+        user input (raw_input from LinkedIngredient). Used when loading a recipe for editing.
+        """
+        def replace_with_raw_input(match):
+            linked_ingredient_id = int(match.group(1))
+            try:
+                linked_ingredient = LinkedIngredient.objects.get(id=linked_ingredient_id)
+                return linked_ingredient.raw_input
+            except LinkedIngredient.DoesNotExist:
+                return match.group(0)  # Return original placeholder if not found
+        
+        return self._LINKED_INGREDIENT_PLACEHOLDER_PATTERN.sub(replace_with_raw_input, self.description)
+    
+    def _render_ingredient_links(self, multiplier=1):
+        """
+        Render ingredient link placeholders (<!ID>) as HTML spans with tooltip data.
+        
+        The step description contains <!ID> placeholders that reference LinkedIngredient IDs.
+        This method looks up each LinkedIngredient and renders it as an HTML span.
+        
+        Args:
+            multiplier: The quantity multiplier for ingredient amounts
+        
+        Returns:
+            str: The description text with <!ID> placeholders replaced by HTML spans
+        """
+        from food_db_app.views.utils import RecipeIngredientData
+        
+        def replace_placeholder(match):
+            linked_ingredient_id = int(match.group(1))
+            
+            try:
+                linked_ingredient = LinkedIngredient.objects.select_related(
+                    'ingredient', 'ingredient__food', 'ingredient__unit_of_measurement'
+                ).get(id=linked_ingredient_id)
+            except LinkedIngredient.DoesNotExist:
+                return f'<span class="ingredient_link_error">[ingredient link #{linked_ingredient_id} not found]</span>'
+            
+            ingredient = linked_ingredient.ingredient
+            link_text = linked_ingredient.link_text
+            
+            # Build the tooltip content
+            quantity = RecipeIngredientData.stringify_ingredient_quantity(
+                ingredient.quantity,
+                ingredient.unit_of_measurement.name if ingredient.unit_of_measurement else '',
+                multiplier
+            )
+            ingredient_name = ingredient.food.name
+            
+            tooltip_content = f'{quantity} {ingredient_name}'
+            
+            if ingredient.quantity != 1 and not ingredient.unit_of_measurement and not ingredient_name.endswith('s'):
+                tooltip_content += 's'
+            
+            if ingredient.notes:
+                tooltip_content += f' - {ingredient.notes}'
+            
+            # Return HTML span with tooltip attributes
+            return f'<span class="ingredient_link" data-ingredient_id="{ingredient.id}" data-tooltip="{tooltip_content}">{link_text}</span>'
+        
+        return self._LINKED_INGREDIENT_PLACEHOLDER_PATTERN.sub(replace_placeholder, self.description)
+    
+    @property
+    def rendered_description(self):
+        """
+        Returns the step description with <!ID> placeholders replaced by rendered HTML spans.
+        Used when displaying a recipe. Applies markdown processing after ingredient link rendering.
+        """
+        return self._render_ingredient_links(multiplier=1)
+
+class LinkedIngredient(models.Model):
+    """
+    Represents a link between a recipe step and an ingredient, created when the
+    custom ingredient link syntax is used in step descriptions (e.g., [ingredient name]
+    or [text](!ingredient name;category)).
+    
+    Each instance represents one occurrence of the link syntax in a step. Multiple
+    links to the same ingredient in a step will create multiple LinkedIngredient records,
+    each with a different order_in_step value.
+    
+    The step's description field stores processed text with <!ID> placeholders that
+    reference LinkedIngredient IDs. The raw_input field stores the original user syntax
+    so it can be reconstructed for editing.
+    """
+    def __str__(self):
+        return f'{self.step.recipe.title} Step {self.step.order_number}: {self.ingredient.food.name} (#{self.order_in_step})'
+    
+    step = models.ForeignKey(
+        RecipeStep,
+        on_delete=models.CASCADE,
+        related_name='linked_ingredients',
+    )
+    ingredient = models.ForeignKey(
+        'Ingredient',
+        on_delete=models.CASCADE,
+        related_name='step_links',
+    )
+    order_in_step = models.PositiveSmallIntegerField(
+        help_text="The order this link appears in the step text (0-indexed).",
+    )
+    raw_input = models.TextField(
+        help_text="The original text the user entered (e.g., '[butter]' or '[butter](!salted butter;dairy)').",
+    )
+    link_text = models.CharField(
+        max_length=255,
+        help_text="The visible text in the rendered link (e.g., 'butter').",
+    )
+    _date_created = models.DateTimeField(default=timezone.now)
 
 class Ingredient(models.Model):
     def __str__(self):

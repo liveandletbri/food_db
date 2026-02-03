@@ -13,6 +13,13 @@ from .tutorial_steps import get_step_by_id
 LAST_DEBUG_LOG_START_TIME = None
 LAST_DEBUG_LOG_TIME = None
 
+# Pattern to match ingredient link syntax in step descriptions:
+# - [ingredient name] - simple form, ingredient name is the link text
+# - [text](!ingredient name) - custom text with explicit ingredient name
+# - [text](!ingredient name;category) - custom text with ingredient name and category
+# Uses negative lookahead to avoid matching regular markdown links like [text](url)
+INGREDIENT_LINK_PATTERN = r"\[([^\]]+)\](?:(\(!([\w '\-%]+)(;[\w ]+)?\))|(?!\([^!]))"
+
 class RecipeIngredientData:
     """Assembles lists and dicts needed to display ingredients in the recipe detail view."""
     def __init__(self, recipe, multiplier):
@@ -141,7 +148,8 @@ class DerivedTagRule:
     def _check_steps(self, recipe):
         for step in RecipeStep.objects.filter(recipe=recipe):
             for pattern in self.ingredient_regex_patterns:
-                if re.search(pattern, step.description, re.IGNORECASE):
+                # Use editable_description to search original text (not the <!ID> placeholders)
+                if re.search(pattern, step.editable_description, re.IGNORECASE):
                     return True
         return False
 
@@ -193,6 +201,233 @@ def sanitize_string(raw_string: str):
     clean_string = re.sub(r'[^a-z0-9]', '-', remove_common_chars)
 
     return clean_string
+
+class ReservedSyntaxError(Exception):
+    """Raised when user input contains reserved <!...> syntax."""
+    pass
+
+# Pattern to detect reserved <!...> syntax that users should not enter
+RESERVED_SYNTAX_PATTERN = r'<!\s*\d+\s*>'
+
+def process_ingredient_links(text, recipe_title):
+    """
+    Process step description text to identify ingredient links, create LinkedIngredient
+    records, and return processed text with <!ID> placeholders.
+    
+    This function should be called when a recipe is added or edited, BEFORE the
+    RecipeStep is created. The returned processed text should be saved as the step's
+    description.
+    
+    Args:
+        text: The step description text containing ingredient link syntax
+        recipe_title: The title of the recipe (used to look up ingredients)
+    
+    Returns:
+        tuple: (processed_text, linked_ingredient_data)
+            - processed_text: Text with ingredient links replaced by <!ID> placeholders
+            - linked_ingredient_data: List of dicts with data needed to create LinkedIngredients
+              after the step is saved. Each dict has: ingredient, order_in_step, raw_input, link_text
+    
+    Raises:
+        ReservedSyntaxError: If the text contains reserved <!...> syntax
+    """
+    # Validate that user hasn't entered reserved syntax
+    if re.search(RESERVED_SYNTAX_PATTERN, text):
+        raise ReservedSyntaxError(
+            "Step text contains reserved syntax '<! ... >'. "
+            "This format is used internally for ingredient links and cannot be entered directly."
+        )
+    
+    linked_ingredient_data = []
+    order_counter = 0
+    
+    def replace_with_placeholder(match):
+        nonlocal order_counter
+        
+        raw_input = match.group(0)  # The entire matched text
+        link_text = match.group(1)  # The visible text in brackets
+        # The following may be None
+        parentheses_clause = match.group(2)
+        parsed_ingredient_name = match.group(3)
+        parsed_ingredient_category = match.group(4)
+        
+        try:
+            # First case is the ingredient name written just in brackets, like [ingredient name]
+            if not parentheses_clause:
+                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=link_text)
+            else:
+                # In this case, both brackets and parentheses were used
+                # Checking the second case: [visible text](!ingredient name)
+                # We don't want to require the specification of ingredient_category, even if the ingredient does have a category.
+                # So try to find it first without filtering on category.
+                try:
+                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=parsed_ingredient_name.strip())
+                except Ingredient.MultipleObjectsReturned:
+                    # The same food was used for multiple ingredients in this recipe, so an ingredient category is required.
+                    # The full syntax for specifying this is [visible text](!ingredient name;category name)
+                    ingredient_category = parsed_ingredient_category or ''  # if no category was specified, try searching with a blank string
+                    ingredient_category = ingredient_category.replace(';', '').strip()  # remove semicolon and whitespace from the regex match
+                    ingredient = Ingredient.objects.get(
+                        recipe__title=recipe_title,
+                        food__name__iexact=parsed_ingredient_name.strip(),
+                        ingredient_category__name__iexact=ingredient_category
+                    )
+            
+            # Store data for creating LinkedIngredient after step is saved
+            linked_ingredient_data.append({
+                'ingredient': ingredient,
+                'order_in_step': order_counter,
+                'raw_input': raw_input,
+                'link_text': link_text,
+            })
+            
+            # Use a temporary placeholder that will be replaced with actual ID after step is saved
+            placeholder = f'<!TEMP_{order_counter}>'
+            order_counter += 1
+            return placeholder
+            
+        except Ingredient.DoesNotExist:
+            # Ingredient not found - return original text with error message
+            order_counter += 1
+            return link_text + ' <linked ingredient not found>'
+        except Ingredient.MultipleObjectsReturned:
+            # Multiple ingredients found - return original text with error message
+            order_counter += 1
+            return link_text + ' <multiple linked ingredients found; try specifying category>'
+    
+    processed_text = re.sub(INGREDIENT_LINK_PATTERN, replace_with_placeholder, text, flags=re.IGNORECASE)
+    
+    return processed_text, linked_ingredient_data
+
+
+def create_linked_ingredients_for_step(step_instance, linked_ingredient_data):
+    """
+    Create LinkedIngredient records for a step and update the step's description
+    with the actual LinkedIngredient IDs.
+    
+    This should be called after the RecipeStep has been saved and has an ID.
+    
+    Args:
+        step_instance: A saved RecipeStep instance (must have an ID)
+        linked_ingredient_data: List of dicts from process_ingredient_links()
+    
+    Returns:
+        list: List of created LinkedIngredient instances
+    """
+    linked_ingredients = []
+    
+    # Create LinkedIngredients one at a time so we get IDs immediately
+    for data in linked_ingredient_data:
+        linked_ingredient = LinkedIngredient.objects.create(
+            step=step_instance,
+            ingredient=data['ingredient'],
+            order_in_step=data['order_in_step'],
+            raw_input=data['raw_input'],
+            link_text=data['link_text'],
+        )
+        linked_ingredients.append(linked_ingredient)
+    
+    # Now update the step's description to replace TEMP placeholders with actual IDs
+    description = step_instance.description
+    for i, linked_ingredient in enumerate(linked_ingredients):
+        description = description.replace(f'<!TEMP_{i}>', f'<!{linked_ingredient.id}>')
+    
+    step_instance.description = description
+    step_instance.save()
+    
+    return linked_ingredients
+
+
+def update_step_text_for_food_change(old_food_name, new_food_name):
+    """
+    Update step text when a food name changes (via edit or merge).
+    
+    This finds all steps that reference the food via LinkedIngredients, updates
+    the ingredient link syntax in the step text to reflect the new food name,
+    and regenerates LinkedIngredients.
+    
+    Args:
+        old_food_name: The original food name
+        new_food_name: The new food name
+    
+    Returns:
+        int: Number of steps that were updated
+    """
+    # Find all LinkedIngredients that reference ingredients with this food
+    # We need to find by ingredient, since the food name has already been updated
+    # So we look for ingredients whose food now has the new_food_name
+    affected_linked_ingredients = LinkedIngredient.objects.filter(
+        ingredient__food__name__iexact=new_food_name
+    ).select_related('step', 'ingredient', 'ingredient__ingredient_category')
+    
+    # Group by step
+    steps_to_update = {}
+    for linked_ingredient in affected_linked_ingredients:
+        step = linked_ingredient.step
+        if step.id not in steps_to_update:
+            steps_to_update[step.id] = {
+                'step': step,
+                'linked_ingredients': [],
+            }
+        steps_to_update[step.id]['linked_ingredients'].append(linked_ingredient)
+    
+    updated_count = 0
+    
+    for step_data in steps_to_update.values():
+        step = step_data['step']
+        linked_ingredients_for_step = step_data['linked_ingredients']
+        
+        # Get the current editable description (with <!ID> replaced by raw_input)
+        editable_text = step.editable_description
+        
+        # Update the raw_input for each affected LinkedIngredient
+        # We need to replace occurrences of the old food name with new syntax
+        updated_text = editable_text
+        
+        for linked_ingredient in linked_ingredients_for_step:
+            old_raw_input = linked_ingredient.raw_input
+            link_text = linked_ingredient.link_text
+            ingredient_category = linked_ingredient.ingredient.ingredient_category
+            
+            # Determine the new raw_input based on whether link_text matches new food name
+            if link_text.lower() == new_food_name.lower():
+                # Simple case: link text matches new food name, use simple syntax
+                new_raw_input = f'[{link_text}]'
+            else:
+                # Link text differs from new food name, need extended syntax
+                if ingredient_category and ingredient_category.name:
+                    # Include category for disambiguation
+                    new_raw_input = f'[{link_text}](!{new_food_name};{ingredient_category.name})'
+                else:
+                    new_raw_input = f'[{link_text}](!{new_food_name})'
+            
+            # Replace in the text
+            updated_text = updated_text.replace(old_raw_input, new_raw_input, 1)
+        
+        # Delete old LinkedIngredients for this step
+        LinkedIngredient.objects.filter(step=step).delete()
+        
+        # Re-process the step text to create new LinkedIngredients
+        try:
+            processed_description, linked_ingredient_data = process_ingredient_links(
+                updated_text,
+                step.recipe.title
+            )
+        except ReservedSyntaxError:
+            # This shouldn't happen with auto-generated syntax, but just in case
+            continue
+        
+        # Update the step's description
+        step.description = processed_description
+        step.save()
+        
+        # Create new LinkedIngredients
+        if linked_ingredient_data:
+            create_linked_ingredients_for_step(step, linked_ingredient_data)
+        
+        updated_count += 1
+    
+    return updated_count
 
 def capitalize_title(raw_title: str):
     raw_parts = raw_title.split(' ')

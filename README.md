@@ -89,6 +89,8 @@ You can open an interactive shell with access to your FoodDB by running `docker 
 from food_db_app.models import *
 from food_db_app.views import capitalize_title
 
+USE_TEST_DB = True  # Can be set to operate against the test database rather than the default
+
 all_recipes = Recipe.objects.all()
 for recipe in all_recipes:
     recipe.title = capitalize_title(recipe.title)

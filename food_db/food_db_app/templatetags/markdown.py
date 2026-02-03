@@ -7,76 +7,38 @@ import markdown as md
 register = template.Library()
 
 @register.simple_tag
-def markdown(step_id, value, recipe_title, multiplier=1):
-    # Process custom ingredient links before passing to markdown
-    processed_value = process_ingredient_links(step_id, value, recipe_title, multiplier)
-    html = md.markdown(processed_value, extensions=['markdown.extensions.fenced_code'])
+def markdown(text):
+    """
+    Template tag to render general text with markdown formatting.
+    """
+    # Apply markdown formatting
+    html = md.markdown(text, extensions=['markdown.extensions.fenced_code'])
+    
     # Add IDs to headings for anchor links
     html = add_heading_ids(html)
+    
     return html
 
-def process_ingredient_links(step_id, text, recipe_title, multiplier):
+@register.simple_tag
+def step_description_markdown(step_id, multiplier=1):
     """
-    Process custom ingredient links in the format [text](!ingredient name;ingredient category)
-    and replace them with HTML spans that include tooltip data.
+    Template tag to render step description with ingredient links and markdown formatting.
+    
+    Flow:
+    1. Look up the RecipeStep and render ingredient links (<!ID> → HTML spans)
+    2. Apply markdown formatting to the result
+    3. Add IDs to headings for anchor links
     """
-    # Pattern to match [ingredient name] or [text](!ingredient name) or 
-    # [text](!ingredient name;ingredient category). But use negative
-    # lookahead to avoid matching regular markdown links like [text](url)
-    pattern = r"\[([^\]]+)\](?:(\(!([\w '\-%]+)(;[\w ]+)?\))|(?!\([^!]))"
+    from food_db_app.models import RecipeStep
     
-    def replace_ingredient_link(match):
-        link_text = match.group(1)
-        # The following may be None
-        parentheses_clause = match.group(2)
-        parsed_ingredient_name = match.group(3)
-        parsed_ingredient_category = match.group(4)
-        
-        try:
-            # Import here to avoid circular imports
-            from food_db_app.models import Ingredient
-            from food_db_app.views import RecipeIngredientData
-
-            # First case is the ingredient name written just in brackets, like [ingredient name]
-            if not parentheses_clause:
-                ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=link_text)
-                ingredient_category = ingredient.ingredient_category or ''
-            else:
-                # In this case, both brackets and parenetheses were used
-                # Checking the second case: [visible text](!ingredient name)
-                # We don't want to require the specification of ingredient_category, even if the ingredient does have a category. So try to find it first without filtering on category.
-                try:
-                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=parsed_ingredient_name)
-                except Ingredient.MultipleObjectsReturned:
-                    # The same food was used for multiple ingredients in this recipe, so an ingredient category is required. The full syntax for specifying this is [visible text](!ingredient name;category name)
-                    ingredient_category = parsed_ingredient_category or ''  # if no category was specified, try searching with a blank string (which is what happens when no category is attached to the ingredient)
-                    ingredient_category = ingredient_category.replace(';','').strip()  # if a category was specified, remove leading whitespace and the semicolon from the regular expression match
-                    ingredient = Ingredient.objects.get(recipe__title=recipe_title, food__name__iexact=parsed_ingredient_name, ingredient_category__name__iexact=ingredient_category)
-                
-            quantity = RecipeIngredientData.stringify_ingredient_quantity(ingredient.quantity, ingredient.unit_of_measurement.name or '', multiplier)
-            ingredient_name = ingredient.food.name
-
-            tooltip_content = f'{quantity} {ingredient_name}'
-            
-            if ingredient.quantity != 1 and not ingredient.unit_of_measurement and not ingredient_name.endswith('s'):
-                tooltip_content += 's'
-            
-            if ingredient.notes:
-                tooltip_content += f' - {ingredient.notes}'
-            
-            # Return HTML span with tooltip attributes
-            return f'<span class="ingredient_link" data-ingredient_id="{ingredient.id}" data-tooltip="{tooltip_content}">{link_text}</span>'
-            
-        except Exception as e:
-            if isinstance(e, Ingredient.DoesNotExist):
-                error_message = ' <linked ingredient not found>'
-            elif isinstance(e, Ingredient.MultipleObjectsReturned):
-                error_message = ' <multiple linked ingredients found; try specifying category>'
-            else:
-                error_message = f' <link error: {str(e)}>'
-            return match.group(1) + error_message
+    # Get the step and render ingredient links
+    step = RecipeStep.objects.get(id=step_id)
+    text_with_rendered_links = step._render_ingredient_links(multiplier)
     
-    return re.sub(pattern, replace_ingredient_link, text, flags=re.IGNORECASE)
+    # Apply markdown formatting
+    html = md.markdown(text_with_rendered_links, extensions=['markdown.extensions.fenced_code'])
+    
+    return html
 
 def add_heading_ids(html):
     """
