@@ -75,7 +75,7 @@ def convert_recipe_to_html(recipe_instance, bucket_url):
             <ol style="width:750;">'''
             
             for step in related_steps:
-                step_description = step.get_rendered_description(multiplier=1)
+                step_description = step.rendered_description
                 recipe_html += f'<li style="padding:7;">{step_description}</li>'
 
             recipe_html += '</ol>'
