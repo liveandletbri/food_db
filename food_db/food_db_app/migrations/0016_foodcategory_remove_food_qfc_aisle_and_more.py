@@ -52,6 +52,7 @@ def write_food_categories(apps, schema_editor):
         'Cheese',
         'Sliced Deli Meat',
         'Fresh Baked Good',
+        'Coffee/Tea'
     ]
 
     for cat in cats:
